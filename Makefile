@@ -26,6 +26,7 @@ $(DIRS): force_look
 
 clean:
 	$(ECHO) Cleaning up ...
+	$(ECHO) $(RM) -f $(BIN) $(OBJS)
 	-$(RM) -f $(BIN) $(OBJS)
 	-for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
 

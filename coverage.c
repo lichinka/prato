@@ -388,6 +388,7 @@ static void coverage_init (const char *ini_file,
  */
 int main (int argc, char *argv [])
 {
+    int i;
     struct GModule *module;
     struct Option *ini_file, *tx_ini_section, *output;
 
@@ -439,14 +440,17 @@ int main (int argc, char *argv [])
     //
     // ... and execute it
     //
-    double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1}; 
+    double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
+
+#ifdef _PERFORMANCE_METRICS_
+    for (i = 0; i < 3; i ++)
+#endif
     coverage_serial (ericsson_params,
                      4,
                      output->answer);
     //
     // deallocate memory before exiting
     //
-    int i;
     for (i = 0; i < params->nrows; i ++)
     {
         free (m_loss[i]);
