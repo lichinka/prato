@@ -59,6 +59,14 @@ static Parameters* coverage_init (const char *ini_file,
     int errno = G_get_cellhd (params->dem_map,
                               mapset,
                               metadata);
+    //
+    // check the size of a map cell in bytes, so that later casts won't fail
+    //
+    if (metadata->format != sizeof (params->null_value) - 1)
+        G_fatal_error ("The number of bytes per map-cell is castable to Float");
+    else
+        G_set_f_null_value ((FCELL *) &(params->null_value), 1);
+
     if (errno == 0)
     {
         params->map_east = metadata->east;
@@ -74,6 +82,7 @@ static Parameters* coverage_init (const char *ini_file,
     errno = G_get_cellhd (params->clutter_map,
                           mapset2,
                           metadata);
+
     if (errno == 0)
     {
         if (params->map_east != metadata->east ||
@@ -269,8 +278,41 @@ int main (int argc, char *argv [])
     else
         coverage_serial (params,
                          ericsson_params,
-                         4,
-                         output->answer);
+                         4);
+    //
+    // do we have to write the raster output?
+    //
+    if (output->answer != NULL)
+    {
+        int outfd, row, col;
+        void *outrast = G_allocate_raster_buf (FCELL_TYPE);    // output buffer
+        double path_loss_num;
+        FCELL  null_f_out;
+        G_set_f_null_value (&null_f_out, 1);   
+
+        // controlling, if we can write the raster 
+        if ((outfd = G_open_raster_new (output->answer, FCELL_TYPE)) < 0)
+            G_fatal_error(_("Unable to create raster map <%s>"), output->answer);
+
+        for (row = 0; row < params->nrows; row++)
+        {
+            G_percent(row, params->nrows, 2);
+            for (col = 0; col < params->ncols; col++) 
+            {
+                path_loss_num = params->m_loss[row][col];
+                if (path_loss_num == 0)
+                    ((FCELL *) outrast)[col] = null_f_out;
+                else
+                    ((FCELL *) outrast)[col] = (FCELL)path_loss_num;
+            }
+            // write raster row to output raster map
+            if (G_put_raster_row (outfd, outrast, FCELL_TYPE) < 0)
+                G_fatal_error (_("Failed writing raster map <%s>"), output->answer);
+        }
+        G_close_cell (outfd);
+        G_free (outrast);
+    }
+
     //
     // deallocate memory before exiting
     //

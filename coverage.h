@@ -50,6 +50,10 @@ struct Parameters
     double  map_ns_res;
     double  total_tx_height;
     //
+    // NULL value used in maps
+    //
+    float null_value;
+    //
     // 2D matrix containing the digital-elevation-model raster
     //
     double **m_rast;
@@ -146,8 +150,7 @@ static int params_handler (void *user_struct,
 extern void
 coverage_serial (const Parameters *params,
                  const double *eric_params, 
-                 const unsigned int eric_params_len,
-                 const char *output_raster);
+                 const unsigned int eric_params_len);
 
 /**
  * Calculate coverage over the received subarea.

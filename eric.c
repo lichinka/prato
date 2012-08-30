@@ -460,7 +460,7 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 	
 	ZoBS = Raster[(int)BSxIndex][(int)BSyIndex];	// BS height above the sea level calculated from raster DEM file
 	ZoTransBS = ZoBS + AntHeightBS;			// BS transmitter height above the sea level
-		//G_message(_("BS antenna above sea level: %f \n"), ZoBS);
+
 	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
 									/*POPRAVJNEO (4.2.2010)*/	
 	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightMS),2);
@@ -473,19 +473,19 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
     if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
     {
         // Obstacle height
-        Obst_high = (double **) G_calloc (xN, sizeof(double *));
+        Obst_high = (double **) calloc (xN, sizeof(double *));
         for (i = 0; i < xN; i ++)
-            Obst_high[i] = (double *) G_calloc (yN, sizeof (double));
+            Obst_high[i] = (double *) calloc (yN, sizeof (double));
 
         // Obstacle distance 
-        Obst_dist = (double **) G_calloc (xN, sizeof(double *));
+        Obst_dist = (double **) calloc (xN, sizeof(double *));
         for (i = 0; i < xN; i ++)
-            Obst_dist[i] = (double *) G_calloc (yN, sizeof (double));
+            Obst_dist[i] = (double *) calloc (yN, sizeof (double));
     
         // do_profile offset 
-        Offset = (double **) G_calloc (xN, sizeof(double *));
+        Offset = (double **) calloc (xN, sizeof(double *));
         for (i = 0; i < xN; i ++)
-            Offset[i] = (double *) G_calloc (yN, sizeof (double));
+            Offset[i] = (double *) calloc (yN, sizeof (double));
 
         // calculate the terrain profile
         DoProfile (Obst_high,Obst_dist,Offset,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,xN,yN,tiltBS2MS,scale, radi);

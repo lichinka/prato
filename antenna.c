@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <grass/gis.h>
-#include <grass/glocale.h>
 
 #include "performance/metric.h"
 
@@ -46,7 +44,10 @@ static double read_antenna_diagram (const char *file_name,
     // try to open the antenna file for reading
     //
 	if ( (in = fopen (file_name, "r")) == NULL )
-	    G_fatal_error(_("Unable to open antenna diagram from file <%s>"), file_name);
+    {
+        fprintf (stderr, "Unable to open antenna diagram from file <%s>", file_name);
+        exit (1);
+    }
 
 	//
     // read the gain and find the beginning of horizontal diagram
@@ -56,8 +57,8 @@ static double read_antenna_diagram (const char *file_name,
 	{
 		if (!fgets (buffer, 250, in)) 
 		{	
-			G_fatal_error (_("Empty or corrupted antenna diagram file <%s>"), file_name); 
-			break;
+			fprintf (stderr, "Empty or corrupted antenna diagram file <%s>", file_name); 
+			exit (1);
 		}
 		sscanf (buffer, "%s %lf", text, &temp_gain);
 		if (strcmp (text, "GAIN") == 0)		  
@@ -80,8 +81,8 @@ static double read_antenna_diagram (const char *file_name,
 		sscanf (buffer, "%lf %lf", &angle, &loss);
 		if (j != (int)angle)
 		{
-			G_fatal_error (_("Bad antenna diagram format.")); 
-			break; 
+			fprintf (stderr, "Bad antenna diagram format."); 
+			exit (1);
 		}
 		horiz_diag[j] = loss;
 	}
@@ -99,8 +100,8 @@ static double read_antenna_diagram (const char *file_name,
 		sscanf (buffer, "%lf %lf", &angle, &loss);
 		if (j != (int)angle)
 		{
-			G_fatal_error(_("Bad antenna diagram format.")); 
-			break; 
+			fprintf (stderr, "Bad antenna diagram format."); 
+			exit (1);
 		}
 		vert_diag[j] = loss;
 	}
@@ -129,15 +130,15 @@ static double read_antenna_diagram (const char *file_name,
  * path_loss    path-loss value at the current point.-
  *
  */
-static FCELL antenna_influence_on_point (const double d_east,
+static float antenna_influence_on_point (const double d_east,
                                          const double d_north,
                                          const double total_height,
                                          const int beam_dir,
                                          const int mech_tilt,
-                                         const FCELL dem_height,
+                                         const float dem_height,
                                          const double rec_height,
                                          const double dist_Tx_Rx,
-                                         const FCELL path_loss)
+                                         const float path_loss)
 {
     //
     // local variables
@@ -213,7 +214,10 @@ static FCELL antenna_influence_on_point (const double d_east,
     else if (hor_diag_angle > 180 && hor_diag_angle <= 360)
         mechanicalAntennaTilt_Corrected = (double)mech_tilt * ((hor_diag_angle / 90) - 3);
     else
-        G_fatal_error(_("Horizontal angle is not between 0 and 360 degrees.")); 
+    {
+        fprintf (stderr, "Horizontal angle is not between 0 and 360 degrees."); 
+	    exit (1);
+    }
 
     // -->|		
 
@@ -235,7 +239,7 @@ static FCELL antenna_influence_on_point (const double d_east,
     vertical_loss += ((vertical[(int)temp_angle] - vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
   
     /* finally take into account pathloss for determined diagram angles and antenna gain */
-    return (FCELL)((double)path_loss + horizontal_loss + vertical_loss - gain);
+    return (float)((double)path_loss + horizontal_loss + vertical_loss - gain);
 }
 
 
@@ -243,7 +247,10 @@ static FCELL antenna_influence_on_point (const double d_east,
 /**
  * Standard CPU version of the antenna influence algorithm.
  * For a description of the parameters used, see the function
- * 'calculate_antenna_influence'.-
+ * 'calculate_antenna_influence'.
+ *
+ * null_value   The value representing NULL on the output map.-
+ *
  */
 static inline void 
 antenna_influence_standard (const double east,
@@ -259,6 +266,7 @@ antenna_influence_standard (const double east,
                             const double north_ext,
                             const double ew_res,
                             const double ns_res,
+                            const float  null_value,
                             double **dem,
                             double **path_loss)
 {
@@ -269,7 +277,7 @@ antenna_influence_standard (const double east,
     // 
     for (r = 0; r < nrows; r++) 
     {
-        FCELL f_in, f_out, f_in_dem; 
+        float f_in, f_out, f_in_dem; 
 
         // calculate receiver coordinates
         double rec_north = north_ext - (r * ns_res);
@@ -285,8 +293,8 @@ antenna_influence_standard (const double east,
 #ifdef _PERFORMANCE_METRICS_
             memory_access (2, 8);
 #endif
-            f_in = (FCELL) path_loss[r][c];
-            f_in_dem = (FCELL) dem[r][c];
+            f_in = (float) path_loss[r][c];
+            f_in_dem = (float) dem[r][c];
 
             // calculate receiver coordinates
             double rec_east = west_ext + (c * ew_res);
@@ -300,14 +308,9 @@ antenna_influence_standard (const double east,
             dist_Tx_Rx = dist_Tx_Rx / 1000;
            
             // If distance between Rx and Tx exceeds given radius, continue with other cells 
-            FCELL null_f_out;
             if (dist_Tx_Rx > radius)
-            {
-                G_set_f_null_value (&null_f_out, 1);   
-                f_out = null_f_out;
-            }
+                f_out = null_value;
             else
-            {    
                 f_out = antenna_influence_on_point (d_east,
                                                     d_north,
                                                     total_height,
@@ -317,11 +320,10 @@ antenna_influence_standard (const double east,
                                                     rec_height,
                                                     dist_Tx_Rx,
                                                     f_in);
-            }
             // 
             // save the result in the output matrix
             //
-            path_loss[r][c] = f_out;
+            path_loss[r][c] = (double) f_out;
         }
     }
 }
@@ -331,7 +333,10 @@ antenna_influence_standard (const double east,
 /**
  * Unrolled-loop CPU version of the antenna influence algorithm.
  * For a description of the parameters used, see the function
- * 'calculate_antenna_influence'.-
+ * 'calculate_antenna_influence'.
+ *
+ * null_value   The value representing NULL on the output map.-
+ *
  */
 static inline void 
 antenna_influence_unrolled (const double east,
@@ -347,6 +352,7 @@ antenna_influence_unrolled (const double east,
                             const double north_ext,
                             const double ew_res,
                             const double ns_res,
+                            const float null_value,
                             double **dem,
                             double **path_loss)
 {
@@ -382,25 +388,28 @@ antenna_influence_unrolled (const double east,
         for (c = 0; c < (ncols - 1) / 2; c ++)
         {
             int i;
-            FCELL f_in [4];
-            FCELL f_in_dem [4]; 
-            FCELL f_out [4];
+            float f_in [4];
+            float f_in_dem [4]; 
+            float f_out [4];
 
 #ifdef _PERFORMANCE_METRICS_
             memory_access (8, 8);
 #endif
 
-            f_in[0] = (FCELL) path_loss[2*r][2*c];
-            f_in[1] = (FCELL) path_loss[2*r][2*c + 1];
-            f_in[2] = (FCELL) path_loss[2*r + 1][2*c];
-            f_in[3] = (FCELL) path_loss[2*r + 1][2*c + 1];
+            f_in[0] = (float) path_loss[2*r][2*c];
+            f_in[1] = (float) path_loss[2*r][2*c + 1];
+            f_in[2] = (float) path_loss[2*r + 1][2*c];
+            f_in[3] = (float) path_loss[2*r + 1][2*c + 1];
 
-            f_in_dem[0] = (FCELL) dem[2*r][2*c];
-            f_in_dem[1] = (FCELL) dem[2*r][2*c + 1];
-            f_in_dem[2] = (FCELL) dem[2*r + 1][2*c];
-            f_in_dem[3] = (FCELL) dem[2*r + 1][2*c + 1];
+            f_in_dem[0] = (float) dem[2*r][2*c];
+            f_in_dem[1] = (float) dem[2*r][2*c + 1];
+            f_in_dem[2] = (float) dem[2*r + 1][2*c];
+            f_in_dem[3] = (float) dem[2*r + 1][2*c + 1];
 
-            G_set_f_null_value (f_out, 4);
+            f_out[0] = null_value;
+            f_out[1] = null_value;
+            f_out[2] = null_value;
+            f_out[3] = null_value;
 
             // calculate receiver coordinates
             double rec_east [4];
@@ -458,19 +467,19 @@ antenna_influence_unrolled (const double east,
 
     for (c = 0; c < ncols; c ++)
     {
-        FCELL f_in;
-        FCELL f_in_dem; 
-        FCELL f_out;
+        float f_in;
+        float f_in_dem; 
+        float f_out;
 
 #ifdef _PERFORMANCE_METRICS_
         memory_access (2, 8);
 #endif
 
-        f_in = (FCELL) path_loss[r][c];
+        f_in = (float) path_loss[r][c];
 
-        f_in_dem = (FCELL) dem[r][c];
+        f_in_dem = (float) dem[r][c];
 
-        G_set_f_null_value (&f_out, 1);
+        f_out = null_value;
 
         // calculate receiver coordinates
         double rec_east = west_ext + (c * ew_res);
@@ -516,18 +525,18 @@ antenna_influence_unrolled (const double east,
         double d_north = rec_north - north;
         double d_north_square = d_north * d_north;
 
-        FCELL f_in;
-        FCELL f_in_dem; 
-        FCELL f_out;
+        float f_in;
+        float f_in_dem; 
+        float f_out;
 
 #ifdef _PERFORMANCE_METRICS_
         memory_access (2, 8);
 #endif
-        f_in = (FCELL) path_loss[r][c];
+        f_in = (float) path_loss[r][c];
 
-        f_in_dem = (FCELL) dem[r][c];
+        f_in_dem = (float) dem[r][c];
 
-        G_set_f_null_value (&f_out, 1);
+        f_out = null_value;
 
         // calculate receiver coordinates
         double rec_east = west_ext + (c * ew_res);
@@ -582,12 +591,11 @@ antenna_influence_unrolled (const double east,
  * north_ext    northern raster extent;
  * ew_res       east/west raster resolution;
  * ns_res       north/south raster resolution;
- * dem          a 2D-matrix containing the digital elevation model 
- *              data;
- * path_loss    a 2D-matrix containing the path-loss values for the
- *              isotrophic antenna
- *              WARNING: the output of this function overwrites this
- *              2D-matrix!
+ * null_value   the value representing NULL on the output map;
+ * dem          a 2D-matrix containing the digital elevation model data;
+ * path_loss    a 2D-matrix containing the path-loss values for the isotrophic
+ *              antenna;
+ *              WARNING: the output of this function overwrites this 2D-matrix!
  *
  */
 void calculate_antenna_influence (const char *ant_dir,
@@ -605,6 +613,7 @@ void calculate_antenna_influence (const char *ant_dir,
                                   const double north_ext,
                                   const double ew_res,
                                   const double ns_res,
+                                  const float null_value,
                                   double **dem,
                                   double **path_loss)
 {
@@ -626,8 +635,8 @@ void calculate_antenna_influence (const char *ant_dir,
                                      horizontal,
                                      vertical);
     }
-    //antenna_influence_unrolled (east,
-    antenna_influence_standard (east,
+    antenna_influence_unrolled (east,
+    //antenna_influence_standard (east,
                                 north,
                                 total_height,
                                 beam_dir,
@@ -640,6 +649,7 @@ void calculate_antenna_influence (const char *ant_dir,
                                 north_ext,
                                 ew_res,
                                 ns_res,
+                                null_value,
                                 dem,
                                 path_loss);
 }
