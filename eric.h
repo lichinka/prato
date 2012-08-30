@@ -1,6 +1,11 @@
 #ifndef _COVERAGE_ERICSSON9999_H_
 #define _COVERAGE_ERICSSON9999_H_
 
+#include <math.h>
+#include <stdlib.h>
+#include <grass/gis.h>
+#include <grass/glocale.h>
+
 
 //
 // Parameters of the Ericsson 9999 radio propagation model

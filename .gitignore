@@ -1,5 +1,6 @@
 __pycache__/
 r.coverage
 *.o
+*.so
 *.pyc
 .*.swp

@@ -2,6 +2,7 @@
 #define _PERFORMANCE_MEASURE_H_
 
 #include <stdlib.h>
+#include <unistd.h>
 
 
 
@@ -15,5 +16,9 @@ void measure_flops (const char *func_name, const char start_measuring);
  */
 void memory_access (const unsigned int access_count, const size_t access_size);
 
+/**
+ * A helper function to debug MPI processes.-
+ */
+void debug_mpi ( );
 
 #endif

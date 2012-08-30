@@ -1,6 +1,9 @@
 #ifndef _COVERAGE_CALCULATION_IN_GRASS_H_
 #define _COVERAGE_CALCULATION_IN_GRASS_H_
 
+#define _COVERAGE_MASTER_RANK_  0
+
+#include <mpi.h>
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
@@ -16,8 +19,8 @@
 
 
 //
-// A structure to hold all the configuration 
-// parameters coverage-calculation process
+// A structure to hold all the configuration parameters and
+// in-run data for the coverage-calculation process
 //
 struct Parameters
 {
@@ -46,11 +49,25 @@ struct Parameters
     double  map_ew_res;
     double  map_ns_res;
     double  total_tx_height;
+    //
+    // 2D matrix containing the digital-elevation-model raster
+    //
+    double **m_rast;
+    //
+    // 2D matrix containing the clutter information of the area
+    //
+    double **m_clut;
+    //
+    // 2D area matrix where the path-loss predictions are saved
+    //
+    double **m_loss;
+    //
+    // 2D area matrix where the field measurements are saved
+    //
+    double **m_field_meas;
 } __attribute__((__packed__));
 
 typedef struct Parameters Parameters;
-
-static Parameters *params = NULL;
 
 /**
  * Handles name=value pairs read from the INI file.
@@ -112,26 +129,50 @@ static int params_handler (void *user_struct,
     return 1;
 }
 
-//
-// 2D matrix containing the digital-elevation-model raster
-//
-static double **m_rast = NULL;
-
-//
-// 2D matrix containing the clutter information of the area
-//
-static double **m_clut = NULL;
-
-//
-// 2D area matrix where the path-loss predictions are saved
-//
-static double **m_loss = NULL;
-
-//
-// 2D area matrix where the field measurements are saved
-//
-//static double **m_field_meas = NULL;
 
 
+/**
+ * Calculates the area coverage in a serial fashion.
+ *
+ * eric_params      Contains the four tunning parameters for the 
+ *                  Ericsson 9999 model, set by the optimization 
+ *                  algorithm;
+ * eric_params_len  the number of parameters within the received vector,
+ *                  four in this case (A0, A1, A2 and A3);
+ * output_raster    the name of the output raster created;
+ *                  no output is generated if this parameter is NULL.-
+ *
+ */
+extern void
+coverage_serial (const Parameters *params,
+                 const double *eric_params, 
+                 const unsigned int eric_params_len,
+                 const char *output_raster);
+
+/**
+ * Calculate coverage over the received subarea.
+ *
+ * params   A structure holding all parameters needed for 
+ *          calculation;
+ * rank     this processes' rank;
+ * nrows    number of rows inside the subarea this process has to work on;
+ * ncols    number of columns in each of the rows of the subarea.-
+ *
+ */
+extern void process_subarea (const Parameters *params,
+                             const int rank,
+                             MPI_Comm *comm,
+                             const int nrows,
+                             const int ncols);
+
+/**
+ * Starts a worker process.
+ *
+ * rank The rank of this worker process.-
+ *
+ */
+extern void 
+worker (const int rank,
+        MPI_Comm *comm);
 
 #endif
