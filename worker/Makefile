@@ -3,7 +3,7 @@ include ../Makefile.inc
 CFLAGS  = $(PRJCFLAGS) -fPIC
 INCS    = $(PRJINCS) -I..
 LIBS    = $(PRJLIBS)
-OBJS    = coverage.o
+OBJS    = ini.o eric.o antenna.o coverage.o worker.o
 BIN		= worker
 DIR		= worker
 OBJLIBS = lib$(DIR).so

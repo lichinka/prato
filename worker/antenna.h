@@ -1,6 +1,39 @@
 #ifndef _COVERAGE_ANTENNA_H_
 #define _COVERAGE_ANTENNA_H_
 
+#define _PI_            3.14159265358979
+#define _DIAGRAM_SIZE_  360
+
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+
+//
+// A structure to hold all the configuration parameters and
+// in-run data for the coverage-calculation process
+//
+struct Diagram
+{
+    //
+    // Horizontal antenna diagram
+    //
+    double *horizontal;
+    //
+    // Vertical antenna diagram
+    //
+    double *vertical;
+    //
+    // Antenna gain
+    //
+    double  gain;
+} __attribute__((__packed__));
+
+typedef struct Diagram Diagram;
+
+static Diagram *diagram = NULL;
+
 /**
  * Calculates additional gain/pathloss according to the antenna's
  * 3-dimensional diagram.

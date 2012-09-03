@@ -73,6 +73,7 @@ int ini_parse_file(FILE* file,
     char* value;
     int lineno = 0;
     int error = 0;
+    int ret_value = -1;
 
     /* Scan through file line by line */
     while (fgets(line, sizeof(line), file) != NULL) {
@@ -128,9 +129,10 @@ int ini_parse_file(FILE* file,
                 error = lineno;
             }
         }
+        ret_value = error;
     }
 
-    return error;
+    return ret_value;
 }
 
 /* See documentation in header file. */

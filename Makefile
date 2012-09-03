@@ -1,11 +1,11 @@
 include Makefile.inc
 
-DIRS 	= worker performance
+DIRS 	= master worker performance
 BIN		= r.coverage
 CFLAGS 	= $(PRJCFLAGS) 
 INCS 	= $(PRJINCS)
 LIBS 	= $(PRJLIBS) -L. -lworker -lperformance
-SRCS    = $(wildcard *.c)
+SRCS    = $(wildcard *.c) $(wildcard master/*.c)
 OBJS    = $(SRCS:.c=.o)
 OBJLIBS = libworker.so libperformance.so
 

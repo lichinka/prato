@@ -1,24 +1,6 @@
-#define _ANTENNA_PI_    3.14159265358979
-
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
+#include "worker/antenna.h"
 #include "performance/metric.h"
 
-
-
-//
-// the horizontal and vertical antenna diagram are saved here
-// 
-static double *horizontal = NULL;
-static double *vertical = NULL;
-
-//
-// the antenna gain
-//
-static double gain = -1.0;
 
 
 
@@ -75,7 +57,7 @@ static double read_antenna_diagram (const char *file_name,
     // read horizontal data - one angle degree per step
     //
 	double angle, loss;
-	for (j = 0; j < 360; j++)
+	for (j = 0; j < _DIAGRAM_SIZE_; j++)
 	{
 		fgets (buffer, 250, in); 
 		sscanf (buffer, "%lf %lf", &angle, &loss);
@@ -94,7 +76,7 @@ static double read_antenna_diagram (const char *file_name,
 	//
     // read vertical data - one angle degree per step 
     //
-	for (j = 0; j < 360; j++)
+	for (j = 0; j < _DIAGRAM_SIZE_; j++)
 	{
 		fgets (buffer, 250, in); 
 		sscanf (buffer, "%lf %lf", &angle, &loss);
@@ -127,7 +109,8 @@ static double read_antenna_diagram (const char *file_name,
  * dem_height   height above sea level from the DEM;
  * rec_height   Rx antenna height above ground level;
  * dist_Tx_Rx   distance between receiver and transmitter;
- * path_loss    path-loss value at the current point.-
+ * path_loss    path-loss value at the current point;
+ * diagram      the antenna diagram and gain.-
  *
  */
 static float antenna_influence_on_point (const double d_east,
@@ -138,7 +121,8 @@ static float antenna_influence_on_point (const double d_east,
                                          const float dem_height,
                                          const double rec_height,
                                          const double dist_Tx_Rx,
-                                         const float path_loss)
+                                         const float path_loss,
+                                         const Diagram *diagram)
 {
     //
     // local variables
@@ -160,16 +144,16 @@ static float antenna_influence_on_point (const double d_east,
     if (d_north >= 0 && d_east >= 0)
       hor_coor_angle = temp_angle;
     else if (d_north >= 0 && d_east < 0)
-      hor_coor_angle = 2*_ANTENNA_PI_ - temp_angle;
+      hor_coor_angle = 2*_PI_ - temp_angle;
     else if (d_north < 0 && d_east < 0)
-      hor_coor_angle = _ANTENNA_PI_ + temp_angle;
+      hor_coor_angle = _PI_ + temp_angle;
     else /* (d_north < 0 && d_east >= 0) */
-      hor_coor_angle = _ANTENNA_PI_ - temp_angle;
+      hor_coor_angle = _PI_ - temp_angle;
 
     //
     // convert from radians to degrees
     //
-    hor_coor_angle = hor_coor_angle * 180 / _ANTENNA_PI_;  
+    hor_coor_angle = hor_coor_angle * 180 / _PI_;  
      
     hor_diag_angle = hor_coor_angle - (double) beam_dir;
 
@@ -187,14 +171,14 @@ static float antenna_influence_on_point (const double d_east,
 #endif
 
     int index = (int) floor (hor_diag_angle);
-    horizontal_loss  = horizontal[index];
-    horizontal_loss += ((horizontal[(int)temp_angle] - horizontal[index])*(hor_diag_angle - floor(hor_diag_angle)));
+    horizontal_loss  = diagram->horizontal[index];
+    horizontal_loss += ((diagram->horizontal[(int)temp_angle] - diagram->horizontal[index])*(hor_diag_angle - floor(hor_diag_angle)));
     
     /* determine vertical angle and loss */
     height_diff_Tx_Rx = total_height - (double)dem_height - rec_height;
 
     vert_coor_angle = atan (height_diff_Tx_Rx / (dist_Tx_Rx * 1000));
-    vert_coor_angle = vert_coor_angle * 180 / _ANTENNA_PI_;	
+    vert_coor_angle = vert_coor_angle * 180 / _PI_;	
   
     if (vert_coor_angle < 0)
         vert_coor_angle = 360 + vert_coor_angle;
@@ -235,11 +219,11 @@ static float antenna_influence_on_point (const double d_east,
 #ifdef _PERFORMANCE_METRICS_
     memory_access (3, 4);
 #endif
-    vertical_loss  = vertical[(int)floor(vert_diag_angle)];
-    vertical_loss += ((vertical[(int)temp_angle] - vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
+    vertical_loss  = diagram->vertical[(int)floor(vert_diag_angle)];
+    vertical_loss += ((diagram->vertical[(int)temp_angle] - diagram->vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
   
     /* finally take into account pathloss for determined diagram angles and antenna gain */
-    return (float)((double)path_loss + horizontal_loss + vertical_loss - gain);
+    return (float)((double)path_loss + horizontal_loss + vertical_loss - diagram->gain);
 }
 
 
@@ -319,7 +303,8 @@ antenna_influence_standard (const double east,
                                                     f_in_dem,
                                                     rec_height,
                                                     dist_Tx_Rx,
-                                                    f_in);
+                                                    f_in,
+                                                    diagram);
             // 
             // save the result in the output matrix
             //
@@ -441,7 +426,8 @@ antenna_influence_unrolled (const double east,
                                                            f_in_dem[i],
                                                            rec_height,
                                                            dist_Tx_Rx,
-                                                           f_in[i]);
+                                                           f_in[i],
+                                                           diagram);
                 }
             }
             // 
@@ -504,7 +490,8 @@ antenna_influence_unrolled (const double east,
                                                 f_in_dem,
                                                 rec_height,
                                                 dist_Tx_Rx,
-                                                f_in);
+                                                f_in,
+                                                diagram);
         }
         // 
         // save the result in the output matrix
@@ -561,7 +548,8 @@ antenna_influence_unrolled (const double east,
                                                 f_in_dem,
                                                 rec_height,
                                                 dist_Tx_Rx,
-                                                f_in);
+                                                f_in,
+                                                diagram);
         }
         // 
         // save the result in the output matrix
@@ -620,23 +608,38 @@ void calculate_antenna_influence (const char *ant_dir,
     //
     // do we have to load the antenna diagram?
     //
-    if ((horizontal == NULL) && (vertical == NULL))
+    if (diagram == NULL)
     {
         // allocate memory for the horizontal and vertical diagrams
-        horizontal = (double *) calloc (360, sizeof (double));
-        vertical = (double *) calloc (360, sizeof (double));
+        diagram = (Diagram *) malloc (sizeof (Diagram));
+        diagram->horizontal = (double *) calloc (_DIAGRAM_SIZE_, 
+                                                 sizeof (double));
+        diagram->vertical = (double *) calloc (_DIAGRAM_SIZE_, 
+                                               sizeof (double));
 
         // get antenna's gain and directional diagrams
         char fileName [1000];
+        if (strlen (ant_dir) == 0)
+        {
+            fprintf (stderr, "ERROR Directory containing antenna files is empty\n");
+            exit (1);
+        }
         strcpy (fileName, ant_dir);
         strcat (fileName, "/");
+        if (strlen (ant_file) == 0)
+        {
+            fprintf (stderr, "ERROR File name of antenna diagram is empty\n");
+            exit (1);
+        }
         strcat (fileName, ant_file);
-        gain = read_antenna_diagram (fileName,
-                                     horizontal,
-                                     vertical);
+
+        diagram->gain = read_antenna_diagram (fileName,
+                                              diagram->horizontal,
+                                              diagram->vertical);
     }
-    antenna_influence_unrolled (east,
-    //antenna_influence_standard (east,
+
+    //antenna_influence_unrolled (east,
+    antenna_influence_standard (east,
                                 north,
                                 total_height,
                                 beam_dir,

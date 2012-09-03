@@ -26,9 +26,8 @@
  *
  *****************************************************************************/
 
-#include "eric.h"
-
-#define PI 3.14159265358979
+#include "worker/eric.h"
+#include "worker/antenna.h"
 
 
 
@@ -158,7 +157,7 @@ static void calc_profile (double** Obst_high,
 			EL = atan(temp_dist * scale / (ZoTransBS - interp_high));
 			
 			if (EL < 0){
-				EL_temp = PI + EL;
+				EL_temp = _PI_ + EL;
 			}
 			else{
 				EL_temp = EL;
@@ -206,7 +205,7 @@ static void calc_profile (double** Obst_high,
 				EL_nlos = atan((temp_dist - cand_dist) * scale / (cand_high + 50 - interp_high));
 				
 				if (EL_nlos < 0){
-					EL_nlos_temp = PI + EL_nlos;
+					EL_nlos_temp = _PI_ + EL_nlos;
 				}
 				else{
 					EL_nlos_temp = EL_nlos;
