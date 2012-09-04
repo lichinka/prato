@@ -86,14 +86,15 @@ void worker (const int rank,
     //
     // start processing coverage prediction for this transmitter
     //
-    printf ("%d: Starting coverage calculation ...\n", rank);
+    fprintf (stderr, "%d: Starting coverage calculation ...\n", rank);
 
     double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
     coverage (params,
               params->tx_params,
               ericsson_params,
               4);
-    printf ("%d: Finished!\n", rank);
+    output_to_stdout (params);
+    fprintf (stderr, "%d: Finished!\n", rank);
     //
     // deallocate memory before exiting
     //

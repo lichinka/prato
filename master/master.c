@@ -15,7 +15,6 @@ static void master (Parameters *params,
                     MPI_Comm *comm)
 {
     int worker_rank;
-    MPI_Request request;
 
     /*
      * distribute_coverage_calculation_by_tx (params,
@@ -57,9 +56,6 @@ static void master (Parameters *params,
                    worker_rank,
                    1,
                    *comm);
-        printf ("Master: sent to %d\n", worker_rank);
-        //           &request);
-        //MPI_Request_free (&request);
     }
 }
 
@@ -87,7 +83,6 @@ void coverage_mpi (int argc,
     int i;
     int rank, world_size, universe_size, flag;
     int *universe_size_ptr;
-    char worker_program [] = "worker/worker";
 
     MPI_Comm everyone;
     MPI_Init  (&argc, &argv); 
@@ -113,7 +108,10 @@ void coverage_mpi (int argc,
                        &flag);
     universe_size = *universe_size_ptr;
     if (universe_size == 1)
-        printf ("WARNING Allocate more slots so that the master may start some workers\n");
+    {
+        fprintf (stderr, "ERROR Allocate more slots so that the master may start some workers\n");
+        exit (1);
+    }
 
     //
     // spawn the workers. Note that there is a run-time determination 
@@ -124,45 +122,73 @@ void coverage_mpi (int argc,
     // in a single MPI_COMM_WORLD.  
     //
     int nworkers = universe_size - 1;
-    int worker_errcodes [nworkers];
 
     if (nworkers < params->ntx)
     {
-        printf ("WARNING There are not enough slots to process all transmitters in parallel\n");
+        fprintf (stderr, "WARNING There are not enough slots to process all transmitters in parallel\n");
         params->ntx = nworkers;
     }
     else if (nworkers > params->ntx)
     {
         nworkers = params->ntx;
-        printf ("WARNING Spawning %d processes only\n", nworkers);
+        fprintf (stderr, "WARNING Spawning %d processes only\n", nworkers);
     }
-
-    printf ("About to spawn %d worker processes ...\n", nworkers);
-    MPI_Comm_spawn (worker_program, 
-                    MPI_ARGV_NULL, 
-                    nworkers,
-                    MPI_INFO_NULL, 
-                    _COVERAGE_MASTER_RANK_,
-                    MPI_COMM_SELF, 
-                    &everyone,  
-                    worker_errcodes); 
+    //
+    // prepare workers' commands and arguments
+    //
+    int buff_size = 128;
+    char    *worker_command = "run_worker.sh";
+    char    *worker_program  [nworkers];
+    char    *worker_arg      [nworkers];
+    char    *worker_args     [nworkers][2];
+    char   **worker_argv     [nworkers];
+    int      worker_maxproc  [nworkers];
+    MPI_Info worker_info     [nworkers];
+    int      worker_errcodes [nworkers];
 
     for (i = 0; i < nworkers; i ++)
     {
-        if (worker_errcodes[i] != 0)
-        {
-            fprintf (stderr, "ERROR Worker %d exited with code %d\n", i, 
-                                                                      worker_errcodes[i]);
-            exit (1);
-        }
+        // worker's arguments 
+        worker_arg[i] = (char *) malloc (buff_size);
+        snprintf (worker_arg[i], buff_size, "%d", i);
+        worker_args[i][0] = worker_arg[i];
+        worker_args[i][1] = NULL;
+        worker_argv[i]    = &(worker_args[i][0]);
+
+        // worker's command
+        worker_program[i] = (char *) malloc (buff_size);
+        snprintf (worker_program[i], buff_size, worker_command);
+
+        worker_maxproc[i] = 1;
+        worker_info[i] = MPI_INFO_NULL;
     }
+    //
+    // spawn worker processes
+    //
+    printf ("Spawning %d. worker processes ...\n", nworkers);
+    MPI_Comm_spawn_multiple (nworkers,
+                             worker_program,
+                             &(worker_argv[0]),
+                             worker_maxproc,
+                             worker_info,
+                             _COVERAGE_MASTER_RANK_,
+                             MPI_COMM_SELF,
+                             &everyone,
+                             worker_errcodes);
     //
     // start the master process
     //
     master (params, 
             nworkers, 
             &everyone);
-
-    MPI_Finalize ( ); 
+    //
+    // deallocate memory
+    //
+    for (i = 0; i < nworkers; i ++)
+    {
+        free (worker_arg[i]);
+        free (worker_program[i]);
+    }
+    MPI_Finalize ( );
 } 
 

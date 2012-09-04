@@ -489,3 +489,29 @@ void coverage (const Parameters     *params,
     */
 }
 
+
+/**
+ * Displays the calculation result in the standard output.-
+ */
+void output_to_stdout (const Parameters *params)
+{
+    int r, c;
+
+    for (r = 0; r < params->nrows; r ++)
+    {
+        for (c = 0; c < params->ncols; c ++)
+        {
+            float rscp = (float) params->m_loss[r][c];
+            if ((!isnan (rscp)) && (rscp != params->null_value))
+            {
+                float east_coord  = params->map_west + c * params->map_ew_res;
+                float north_coord = params->map_north - r * params->map_ns_res;
+
+                fprintf (stdout, "%.f;%.f;%.5f\n", east_coord,
+                                                   north_coord,
+                                                   rscp);
+            }
+        }
+    }
+}
+

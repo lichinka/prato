@@ -10,7 +10,7 @@ if [ -n "${TX}" ]; then
     if [ -n "${OUT}" ]; then
         CMD="${CMD} output_raster=${OUT}"
     fi
-    echo ${CMD} && ${CMD}
+    echo ${CMD} >&2 && ${CMD} 
 else
     echo "Usage"
     echo "  $0 [transmitter's section name in the INI file] [output raster name]"

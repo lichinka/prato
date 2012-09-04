@@ -267,4 +267,12 @@ extern void
 worker (const int rank,
         MPI_Comm *comm);
 
+
+/**
+ * Displays the calculation result in the standard output.-
+ */
+extern void 
+output_to_stdout (const Parameters *params);
+
+
 #endif
