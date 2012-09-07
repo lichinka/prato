@@ -23,6 +23,16 @@ void measure_flops (const char *func_name, const char start_measuring);
 void memory_access (const unsigned int access_count, const size_t access_size);
 
 /**
+ * Measures the time passed between calls.
+ *
+ * message          A message to be printed when the measurement starts;
+ *                  passing NULL to this parameter makes the measurement
+ *                  stop and display the results.-
+ *
+ */
+void measure_time (const char *message);
+
+/**
  * A helper function to debug MPI processes.-
  */
 static void debug_mpi ( )
