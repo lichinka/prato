@@ -191,6 +191,11 @@ void coverage_mpi (int argc,
                              MPI_COMM_SELF,
                              &everyone,
                              worker_errcodes);
+    for (i = 0; i < nworkers; i ++)
+        if (worker_errcodes[i] != 0)
+            fprintf (stderr, "WARNING Worker %d. returned with exit code %d\n", i,
+                                                                                worker_errcodes[i]);
+
     measure_time (NULL);
     //
     // start the master process
