@@ -152,7 +152,7 @@ void coverage_mpi (int argc,
     //
     // prepare workers' commands and arguments
     //
-    int buff_size = 128;
+    int buff_size = 4096;
     char    *worker_command = "run_worker.sh";
     char    *worker_program  [nworkers];
     char    *worker_arg      [nworkers];
