@@ -96,15 +96,12 @@ void worker (const int rank,
     //
     // start processing coverage prediction for this transmitter
     //
-    fprintf (stderr, "%d: Starting coverage calculation ...\n", rank);
-
     double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
     coverage (params,
               params->tx_params,
               ericsson_params,
               4);
     output_to_stdout (params);
-    fprintf (stderr, "%d: Finished!\n", rank);
 
     //
     // sync point: coverage finished
