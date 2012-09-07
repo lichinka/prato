@@ -16,11 +16,12 @@ static void master (Parameters *params,
 {
     int worker_rank;
 
-    /*
-     * distribute_coverage_calculation_by_tx (params,
-     *                                        nworkers,
-     *                                        comm);
-     */
+    //
+    // synch point: pass the input data to all workers
+    //
+    MPI_Barrier (*comm);
+    measure_time ("Data distribution");
+
     //
     // broadcast the common parameters structure
     //
@@ -57,6 +58,19 @@ static void master (Parameters *params,
                    1,
                    *comm);
     }
+    //
+    // sync point: data distribution finished, 
+    // starting coverage processing
+    //
+    MPI_Barrier (*comm);
+    measure_time (NULL);
+    measure_time ("Coverage calculation");
+    
+    //
+    // sync point: coverage finished
+    //
+    MPI_Barrier (*comm);
+    measure_time (NULL);
 }
 
 
@@ -121,6 +135,8 @@ void coverage_mpi (int argc,
     // first started, it is generally better to start them all at once 
     // in a single MPI_COMM_WORLD.  
     //
+    measure_time ("Dynamic process spawning");
+
     int nworkers = universe_size - 1;
 
     if (nworkers < params->ntx)
@@ -165,7 +181,7 @@ void coverage_mpi (int argc,
     //
     // spawn worker processes
     //
-    printf ("Spawning %d. worker processes ...\n", nworkers);
+    printf ("Spawning %d worker processes ...\n", nworkers);
     MPI_Comm_spawn_multiple (nworkers,
                              worker_program,
                              &(worker_argv[0]),
@@ -175,6 +191,7 @@ void coverage_mpi (int argc,
                              MPI_COMM_SELF,
                              &everyone,
                              worker_errcodes);
+    measure_time (NULL);
     //
     // start the master process
     //

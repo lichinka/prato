@@ -17,6 +17,11 @@ void worker (const int rank,
     MPI_Status status;
 
     //
+    // synch point: input data to all workers
+    //
+    MPI_Barrier (*comm);
+
+    //
     // receive the broadcasted common parameters structure
     //
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
@@ -84,6 +89,11 @@ void worker (const int rank,
               *comm,
               &status);
     //
+    // sync point: data passing finished, starting coverage processing
+    //
+    MPI_Barrier (*comm);
+
+    //
     // start processing coverage prediction for this transmitter
     //
     fprintf (stderr, "%d: Starting coverage calculation ...\n", rank);
@@ -95,6 +105,12 @@ void worker (const int rank,
               4);
     output_to_stdout (params);
     fprintf (stderr, "%d: Finished!\n", rank);
+
+    //
+    // sync point: coverage finished
+    //
+    MPI_Barrier (*comm);
+
     //
     // deallocate memory before exiting
     //
@@ -106,5 +122,6 @@ void worker (const int rank,
     free (&(params->m_loss[0][0]));
     free (params->m_loss);
     free (params);
+
 }
 

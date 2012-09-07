@@ -1,9 +1,13 @@
 #ifndef _PERFORMANCE_MEASURE_H_
 #define _PERFORMANCE_MEASURE_H_
 
+#define _METRIC_CHAR_BUFF_SIZE_    2048
+
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <papi.h>
 

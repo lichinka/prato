@@ -1,4 +1,4 @@
-#include "metric.h"
+#include "performance/metric.h"
 
 
 
@@ -12,6 +12,12 @@ static unsigned int mem_access_count = 0;
 // 
 static float last_real_time, last_proc_time;
 static long long last_flpins;
+
+//
+// variables to measure time
+//
+static char time_message [_METRIC_CHAR_BUFF_SIZE_];
+static clock_t last_clock;
 
 
 
@@ -44,16 +50,16 @@ static void test_fail (char *file, int line, char *call, int ret_value)
  */
 void measure_flops (const char *func_name, const char start_measuring)
 {
-    int ret_value;
+    int errno;
     float real_time, proc_time, mflops;
     long long flpins;
 
     //
     // collect data from the performance counters
     //
-    if ((ret_value = PAPI_flops (&real_time, &proc_time, &flpins, &mflops)) < PAPI_OK)
+    if ((errno = PAPI_flops (&real_time, &proc_time, &flpins, &mflops)) < PAPI_OK)
     {
-        test_fail (__FILE__, __LINE__, "measure_flops", ret_value);
+        test_fail (__FILE__, __LINE__, "measure_flops", errno);
     }
     else
     {
@@ -79,4 +85,29 @@ void measure_flops (const char *func_name, const char start_measuring)
     }
 }
 
+
+
+/**
+ * Measures the time passed between calls.
+ *
+ * message          A message to be printed when the measurement starts;
+ *                  passing NULL to this parameter makes the measurement
+ *                  stop and display the results.-
+ *
+ */
+void measure_time (const char *message)
+{
+    if (message != NULL)
+    {
+        strncpy (time_message, message, _METRIC_CHAR_BUFF_SIZE_);
+        last_clock = clock ( );
+    }
+    else
+    {
+        double elapsed_time = (double) (clock ( ) - last_clock);
+        elapsed_time /= CLOCKS_PER_SEC;
+        fprintf (stdout, "TIME:\t%s\t%.5f sec\n", time_message,
+                                                  elapsed_time);
+    }
+}
 
