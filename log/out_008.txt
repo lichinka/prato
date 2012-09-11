@@ -4,7 +4,7 @@ TIME:	Coverage calculation	1.81000 sec
 TIME:	Dynamic process spawning	1.39000 sec
 TIME:	Data distribution	2.41000 sec
 TIME:	Coverage calculation	1.81000 sec
-TIME:	Dynamic process spawning	0.20000 sec
+TIME:	Dynamic process spawning	1.20000 sec
 TIME:	Data distribution	2.40000 sec
 TIME:	Coverage calculation	1.81000 sec
 TIME:	Dynamic process spawning	1.20000 sec
