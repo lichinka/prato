@@ -147,7 +147,6 @@ void coverage_mpi (int argc,
     else if (nworkers > params->ntx)
     {
         nworkers = params->ntx;
-        fprintf (stderr, "WARNING Spawning %d processes only\n", nworkers);
     }
     //
     // prepare workers' commands and arguments
