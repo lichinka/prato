@@ -1,90 +1,90 @@
-TIME:	Dynamic process spawning	1.42000 sec
-TIME:	Data distribution	5.34000 sec
+TIME:	Dynamic process spawning	7.12000 sec
+TIME:	Data distribution	5.17000 sec
+TIME:	Coverage calculation	1.75000 sec
+TIME:	Dynamic process spawning	1.60000 sec
+TIME:	Data distribution	2.88000 sec
+TIME:	Coverage calculation	1.90000 sec
+TIME:	Dynamic process spawning	1.40000 sec
+TIME:	Data distribution	4.81000 sec
+TIME:	Coverage calculation	1.70000 sec
+TIME:	Dynamic process spawning	4.39000 sec
+TIME:	Data distribution	2.88000 sec
+TIME:	Coverage calculation	1.65000 sec
+TIME:	Dynamic process spawning	1.31000 sec
+TIME:	Data distribution	2.98000 sec
 TIME:	Coverage calculation	1.81000 sec
-TIME:	Dynamic process spawning	1.42000 sec
-TIME:	Data distribution	2.93000 sec
-TIME:	Coverage calculation	1.84000 sec
-TIME:	Dynamic process spawning	1.42000 sec
-TIME:	Data distribution	2.93000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.33000 sec
-TIME:	Data distribution	2.89000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.34000 sec
+TIME:	Dynamic process spawning	1.59000 sec
 TIME:	Data distribution	2.88000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.35000 sec
-TIME:	Data distribution	2.87000 sec
-TIME:	Coverage calculation	1.79000 sec
-TIME:	Dynamic process spawning	1.35000 sec
-TIME:	Data distribution	2.88000 sec
-TIME:	Coverage calculation	1.78000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	3.11000 sec
-TIME:	Coverage calculation	1.82000 sec
-TIME:	Dynamic process spawning	1.39000 sec
-TIME:	Data distribution	2.89000 sec
-TIME:	Coverage calculation	1.83000 sec
-TIME:	Dynamic process spawning	1.33000 sec
-TIME:	Data distribution	2.93000 sec
-TIME:	Coverage calculation	1.78000 sec
-TIME:	Dynamic process spawning	1.36000 sec
-TIME:	Data distribution	2.93000 sec
-TIME:	Coverage calculation	1.79000 sec
-TIME:	Dynamic process spawning	1.34000 sec
-TIME:	Data distribution	3.39000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.36000 sec
-TIME:	Data distribution	3.29000 sec
-TIME:	Coverage calculation	1.83000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	2.93000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.33000 sec
-TIME:	Data distribution	2.96000 sec
 TIME:	Coverage calculation	1.81000 sec
-TIME:	Dynamic process spawning	1.36000 sec
-TIME:	Data distribution	2.87000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.36000 sec
-TIME:	Data distribution	2.88000 sec
-TIME:	Coverage calculation	1.76000 sec
-TIME:	Dynamic process spawning	1.42000 sec
-TIME:	Data distribution	2.90000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.77000 sec
-TIME:	Data distribution	2.87000 sec
-TIME:	Coverage calculation	1.89000 sec
-TIME:	Dynamic process spawning	2.05000 sec
-TIME:	Data distribution	2.96000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	2.92000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.40000 sec
+TIME:	Dynamic process spawning	1.49000 sec
+TIME:	Data distribution	2.97000 sec
+TIME:	Coverage calculation	1.69000 sec
+TIME:	Dynamic process spawning	1.46000 sec
 TIME:	Data distribution	3.04000 sec
-TIME:	Coverage calculation	1.80000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	2.83000 sec
-TIME:	Coverage calculation	1.81000 sec
-TIME:	Dynamic process spawning	1.32000 sec
-TIME:	Data distribution	2.87000 sec
-TIME:	Coverage calculation	1.78000 sec
-TIME:	Dynamic process spawning	1.41000 sec
-TIME:	Data distribution	2.82000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	2.92000 sec
-TIME:	Coverage calculation	1.78000 sec
-TIME:	Dynamic process spawning	1.40000 sec
-TIME:	Data distribution	2.90000 sec
-TIME:	Coverage calculation	1.82000 sec
+TIME:	Coverage calculation	1.70000 sec
+TIME:	Dynamic process spawning	1.80000 sec
+TIME:	Data distribution	2.80000 sec
+TIME:	Coverage calculation	1.65000 sec
+TIME:	Dynamic process spawning	1.56000 sec
+TIME:	Data distribution	2.80000 sec
+TIME:	Coverage calculation	1.68000 sec
 TIME:	Dynamic process spawning	1.39000 sec
-TIME:	Data distribution	3.46000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.34000 sec
-TIME:	Data distribution	3.13000 sec
-TIME:	Coverage calculation	1.77000 sec
-TIME:	Dynamic process spawning	1.35000 sec
+TIME:	Data distribution	4.86000 sec
+TIME:	Coverage calculation	1.84000 sec
+TIME:	Dynamic process spawning	1.22000 sec
+TIME:	Data distribution	2.82000 sec
+TIME:	Coverage calculation	1.81000 sec
+TIME:	Dynamic process spawning	4.22000 sec
+TIME:	Data distribution	2.97000 sec
+TIME:	Coverage calculation	1.83000 sec
+TIME:	Dynamic process spawning	4.04000 sec
+TIME:	Data distribution	2.94000 sec
+TIME:	Coverage calculation	1.65000 sec
+TIME:	Dynamic process spawning	1.39000 sec
+TIME:	Data distribution	2.87000 sec
+TIME:	Coverage calculation	1.72000 sec
+TIME:	Dynamic process spawning	1.74000 sec
+TIME:	Data distribution	2.92000 sec
+TIME:	Coverage calculation	1.63000 sec
+TIME:	Dynamic process spawning	1.95000 sec
+TIME:	Data distribution	2.83000 sec
+TIME:	Coverage calculation	1.68000 sec
+TIME:	Dynamic process spawning	1.39000 sec
 TIME:	Data distribution	2.91000 sec
-TIME:	Coverage calculation	1.77000 sec
+TIME:	Coverage calculation	1.64000 sec
+TIME:	Dynamic process spawning	1.23000 sec
+TIME:	Data distribution	4.95000 sec
+TIME:	Coverage calculation	1.81000 sec
+TIME:	Dynamic process spawning	1.29000 sec
+TIME:	Data distribution	4.92000 sec
+TIME:	Coverage calculation	1.81000 sec
+TIME:	Dynamic process spawning	1.41000 sec
+TIME:	Data distribution	2.85000 sec
+TIME:	Coverage calculation	1.73000 sec
+TIME:	Dynamic process spawning	1.36000 sec
+TIME:	Data distribution	3.26000 sec
+TIME:	Coverage calculation	1.81000 sec
+TIME:	Dynamic process spawning	1.40000 sec
+TIME:	Data distribution	2.84000 sec
+TIME:	Coverage calculation	1.68000 sec
+TIME:	Dynamic process spawning	1.37000 sec
+TIME:	Data distribution	2.88000 sec
+TIME:	Coverage calculation	1.68000 sec
+TIME:	Dynamic process spawning	1.40000 sec
+TIME:	Data distribution	4.97000 sec
+TIME:	Coverage calculation	1.91000 sec
+TIME:	Dynamic process spawning	1.41000 sec
+TIME:	Data distribution	2.99000 sec
+TIME:	Coverage calculation	1.74000 sec
+TIME:	Dynamic process spawning	1.40000 sec
+TIME:	Data distribution	2.82000 sec
+TIME:	Coverage calculation	1.81000 sec
+TIME:	Dynamic process spawning	1.36000 sec
+TIME:	Data distribution	3.06000 sec
+TIME:	Coverage calculation	1.72000 sec
+TIME:	Dynamic process spawning	1.42000 sec
+TIME:	Data distribution	2.78000 sec
+TIME:	Coverage calculation	1.82000 sec
+TIME:	Dynamic process spawning	1.58000 sec
+TIME:	Data distribution	2.81000 sec
+TIME:	Coverage calculation	1.71000 sec
