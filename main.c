@@ -1,4 +1,5 @@
 #include "worker/coverage.h"
+#include "master/master.h"
 
 
 
@@ -120,9 +121,7 @@ int main (int argc, char *argv [])
     {
         coverage_mpi (argc,
                       argv,
-                      params,
-                      ericsson_params,
-                      4);
+                      params);
     }
     else
     {

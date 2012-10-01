@@ -2,7 +2,6 @@
 
 
 
-
 /**
  * Calculates the area coverage using MPI to achieve parallelization.
  * This is the worker part of the algorithm. The worker processes are 
@@ -19,7 +18,7 @@ int main (int argc, char *argv[])
     MPI_Comm_get_parent (&parent);
     if (parent == MPI_COMM_NULL)
     {
-        fprintf (stderr, "ERROR No master process!\n");
+        fprintf (stderr, "ERROR No master process\n");
         return -1;
     }
  

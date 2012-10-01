@@ -165,10 +165,10 @@ void init_coverage (FILE       *ini_file,
     //
     // initialize some pointers inside the Parameters structure
     //
-    params->m_dem               = NULL;
-    params->m_clut              = NULL;
-    params->m_loss              = NULL;
-    params->m_field_meas        = NULL;
+    params->m_dem        = NULL;
+    params->m_clut       = NULL;
+    params->m_loss       = NULL;
+    params->m_field_meas = NULL;
 
     //
     // parse the INI file containing the common configuration values
@@ -210,6 +210,7 @@ void init_coverage (FILE       *ini_file,
     // read metadata of each map, making sure they match
     //
     struct Cell_head *metadata = (struct Cell_head *) malloc (sizeof (struct Cell_head));
+    struct Cell_head *window   = (struct Cell_head *) malloc (sizeof (struct Cell_head));
     errno = G_get_cellhd (params->dem_map,
                           mapset,
                           metadata);
@@ -248,6 +249,17 @@ void init_coverage (FILE       *ini_file,
     }
     else
         G_fatal_error (_("Unable to open raster map <%s>"), params->clutter_map);
+    //
+    // check that the current active window matches the loaded data
+    //
+	G_get_window (window);
+    if (params->map_east != window->east ||
+        params->map_west != window->west ||
+        params->map_north != window->north ||
+        params->map_south != window->south ||
+        params->map_ew_res != window->ew_res ||
+        params->map_ns_res != window->ns_res)
+        G_fatal_error (_("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings."));
 
     //
     // number of rows and columns within the maps
@@ -336,8 +348,9 @@ void init_coverage (FILE       *ini_file,
                               &(params->tx_params[i]));
     }
     //
-    // free the allocated map metadata
+    // free the allocated metadata
     //
+    free (window);
     free (metadata);
     //
     // free the read buffers for DEM and clutter data

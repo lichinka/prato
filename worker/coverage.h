@@ -1,8 +1,10 @@
 #ifndef _COVERAGE_CALCULATION_IN_GRASS_H_
 #define _COVERAGE_CALCULATION_IN_GRASS_H_
 
-#define _CHAR_BUFFER_SIZE_      2048
+#define _CHAR_BUFFER_SIZE_      1024
 #define _COVERAGE_MASTER_RANK_  0
+#define _WORKER_IS_IDLE_TAG_    100
+#define _WORKER_SHUTDOWN_TAG_   110
 
 #include <mpi.h>
 #include <time.h>
@@ -234,27 +236,6 @@ coverage (const Parameters     *params,
           const Tx_parameters  *tx_params,
           const double         *eric_params, 
           const unsigned int   eric_params_len);
-
-
-/**
- * Calculates the area coverage using MPI to achieve parallelization.
- *
- * argc             Number of command line parameters;
- * argv             array containing command line parameters;
- * params           a structure holding all parameters needed for calculation;
- * eric_params      contains the four tunning parameters for the 
- *                  Ericsson 9999 model, set by the optimization 
- *                  algorithm;
- * eric_params_len  the number of parameters within the received vector,
- *                  four in this case (A0, A1, A2 and A3);
- *
- */
-extern void 
-coverage_mpi (int argc, 
-              char *argv [],
-              Parameters *params,
-              const double *eric_params,
-              const int eric_params_len);
 
 
 /**

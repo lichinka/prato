@@ -1,27 +1,18 @@
 #include "worker/coverage.h"
 #include "performance/metric.h"
 
+
+
 /**
- * The master process takes care of sending the input data to the workers 
- * and gathering the results from them.
+ * Distribute common input data among all workers.
  *
- * params           A structure holding all parameters needed for calculation;
- * nworkers         the number of workers this master has available;
- * comm             the communicator used to communicate with the workers.-
+ * params       A structure holding all parameters needed for calculation;
+ * comm         the communicator used to communicate with the workers.-
  *
  */
-static void master (Parameters *params,
-                    const int nworkers,
-                    MPI_Comm *comm)
+static void distribute_common_data (Parameters *params,
+                                    MPI_Comm *comm)
 {
-    int worker_rank;
-
-    //
-    // synch point: pass the input data to all workers
-    //
-    MPI_Barrier (*comm);
-    measure_time ("Data distribution");
-
     //
     // broadcast the common parameters structure
     //
@@ -46,60 +37,52 @@ static void master (Parameters *params,
                MPI_DOUBLE,
                MPI_ROOT,
                *comm);
-    //
-    // send the transmitter-specific parameters to each of the workers
-    //
-    for (worker_rank = 0; worker_rank < params->ntx; worker_rank ++)
-    {
-        MPI_Send (&(params->tx_params[worker_rank]),
-                   sizeof (Tx_parameters),
-                   MPI_BYTE,
-                   worker_rank,
-                   1,
-                   *comm);
-    }
-    //
-    // sync point: data distribution finished, 
-    // starting coverage processing
-    //
-    MPI_Barrier (*comm);
-    measure_time (NULL);
-    measure_time ("Coverage calculation");
-    
-    //
-    // sync point: coverage finished
-    //
-    MPI_Barrier (*comm);
-    measure_time (NULL);
 }
 
 
 
 /**
- * Calculates the area coverage using MPI to achieve parallelization.
+ * Sends transmitter input data to the specified worker.
  *
- * argc             Number of command line parameters;
- * argv             array containing command line parameters;
- * params           a structure holding all parameters needed for calculation;
- * eric_params      contains the four tunning parameters for the 
- *                  Ericsson 9999 model, set by the optimization 
- *                  algorithm;
- * eric_params_len  the number of parameters within the received vector,
- *                  four in this case (A0, A1, A2 and A3);
+ * tx_params    A structure holding transmitter-specific parameters;
+ * comm         the communicator used to communicate with the worker;
+ * worker_rank  the target worker.-
  *
  */
-void coverage_mpi (int argc, 
-                   char *argv [],
-                   Parameters *params,
-                   const double *eric_params,
-                   const int eric_params_len)
+static void send_tx_data (Tx_parameters *tx_params,
+                          MPI_Comm *comm,
+                          int worker_rank)
+{
+    //
+    // send the transmitter-specific parameters to each of the workers
+    //
+    MPI_Send (tx_params,
+              sizeof (Tx_parameters),
+              MPI_BYTE,
+              worker_rank,
+              1,
+              *comm);
+}
+
+
+
+/**
+ * Dynamically spawns worker processes to calculate the area coverage using MPI.
+ * It returns the number of spawned workers, and a reference to the communicator
+ * used to talk to them in the 'worker_comm' parameter.
+ *
+ * params           a structure holding all parameters needed for calculation;
+ * worker_comm      output parameter: the communicator used to talk to the 
+ *                  spawned workers.-
+ *
+ */
+static int spawn_workers (Parameters *params,
+                          MPI_Comm *worker_comm)
 {
     int i;
     int rank, world_size, universe_size, flag;
     int *universe_size_ptr;
 
-    MPI_Comm everyone;
-    MPI_Init  (&argc, &argv); 
     MPI_Comm_size (MPI_COMM_WORLD, &world_size); 
     MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 
@@ -135,14 +118,11 @@ void coverage_mpi (int argc,
     // first started, it is generally better to start them all at once 
     // in a single MPI_COMM_WORLD.  
     //
-    measure_time ("Dynamic process spawning");
-
     int nworkers = universe_size - 1;
 
     if (nworkers < params->ntx)
     {
         fprintf (stderr, "WARNING There are not enough slots to process all transmitters in parallel\n");
-        params->ntx = nworkers;
     }
     else if (nworkers > params->ntx)
     {
@@ -180,7 +160,8 @@ void coverage_mpi (int argc,
     //
     // spawn worker processes
     //
-    printf ("Spawning %d worker processes ...\n", nworkers);
+    printf ("Spawning %d workers to process %d transmitters ...\n", nworkers,
+                                                                    params->ntx);
     MPI_Comm_spawn_multiple (nworkers,
                              worker_program,
                              &(worker_argv[0]),
@@ -188,20 +169,13 @@ void coverage_mpi (int argc,
                              worker_info,
                              _COVERAGE_MASTER_RANK_,
                              MPI_COMM_SELF,
-                             &everyone,
+                             worker_comm,
                              worker_errcodes);
     for (i = 0; i < nworkers; i ++)
         if (worker_errcodes[i] != 0)
             fprintf (stderr, "WARNING Worker %d. returned with exit code %d\n", i,
                                                                                 worker_errcodes[i]);
 
-    measure_time (NULL);
-    //
-    // start the master process
-    //
-    master (params, 
-            nworkers, 
-            &everyone);
     //
     // deallocate memory
     //
@@ -210,6 +184,103 @@ void coverage_mpi (int argc,
         free (worker_arg[i]);
         free (worker_program[i]);
     }
-    MPI_Finalize ( );
+
+    return nworkers;
 } 
+
+
+
+/**
+ * Starts coverage calculation over MPI.
+ *
+ * argc             Number of command line parameters;
+ * argv             array containing command line parameters;
+ * params           a structure holding all parameters needed for calculation.-
+ *
+ */
+void coverage_mpi (int argc, 
+                   char *argv [],
+                   Parameters *params)
+{
+    int nworkers = -1;
+    char buff [_CHAR_BUFFER_SIZE_];
+    MPI_Status status;
+
+    measure_time ("Dynamic process spawning");
+    MPI_Init  (&argc, &argv); 
+    MPI_Comm worker_comm;
+
+    nworkers = spawn_workers (params, &worker_comm);
+    if (nworkers < 1)
+    {
+        fprintf (stderr, "ERROR Could not start any worker processes\n");
+        exit (1);
+    }
+    measure_time (NULL);
+    //
+    // sync point: pass common input data to all workers
+    //
+    MPI_Barrier (worker_comm);
+    measure_time ("Common data distribution");
+    distribute_common_data (params,
+                            &worker_comm);
+    //
+    // sync point: common data distribution finished
+    //
+    MPI_Barrier (worker_comm);
+    measure_time (NULL);
+
+    //
+    // start processing loop
+    //
+    int worker_rank;
+    int tx_count = params->ntx;
+    while (tx_count > 0)
+    {   
+        MPI_Recv (&buff, 
+                  0,
+                  MPI_BYTE,
+                  MPI_ANY_SOURCE,
+                  MPI_ANY_TAG,
+                  worker_comm,
+                  &status);
+        worker_rank = status.MPI_SOURCE;
+
+        switch (status.MPI_TAG)
+        {   
+            case (_WORKER_IS_IDLE_TAG_):
+                //
+                // starting transmitter-data send
+                // 
+                measure_time ("Transmitter data send");
+                send_tx_data (&(params->tx_params[-- tx_count]),
+                              &worker_comm,
+                              worker_rank);
+                //
+                // transmitter-data send finished
+                // 
+                measure_time (NULL);
+                break;
+
+            default:
+                fprintf (stderr, 
+                         "WARNING Unknown message from %d. worker\n", 
+                         worker_rank);
+        }   
+    }
+    //
+    // shutdown all workers
+    //
+    for (worker_rank = 0; worker_rank < nworkers; worker_rank ++)
+    {
+        MPI_Send (NULL,
+                  0,
+                  MPI_BYTE,
+                  worker_rank,
+                  _WORKER_SHUTDOWN_TAG_,
+                  worker_comm);
+    }
+
+    MPI_Finalize ( );
+}
 

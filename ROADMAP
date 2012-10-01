@@ -1,0 +1,13 @@
+- Separate the steps of 'r.coverage'
+    - initialization and data distribution (5);
+    - calculation (3);
+    - result gathering (2).
+- Implement GPU kernels for each of the steps in the coverage prediction
+    - divide input data in radius-sized chunks with offsets (2);
+    - path-loss calculation, using an empirical mathematical model
+        - line-of-sight calculation (output is a bit matrix) (4);
+        - terrain height (2);
+        - terrain type (2).
+    - apply antenna gain, based on its diagram (2)
+    - apply Tx power (1)
+
