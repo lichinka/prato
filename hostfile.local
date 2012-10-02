@@ -1,7 +1,7 @@
 #
 # All processes run locally
 #
-localhost           slots=2
+localhost           slots=4
 
 #192.168.1.143       slots=4
 

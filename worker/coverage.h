@@ -1,10 +1,11 @@
 #ifndef _COVERAGE_CALCULATION_IN_GRASS_H_
 #define _COVERAGE_CALCULATION_IN_GRASS_H_
 
-#define _CHAR_BUFFER_SIZE_      1024
-#define _COVERAGE_MASTER_RANK_  0
-#define _WORKER_IS_IDLE_TAG_    100
-#define _WORKER_SHUTDOWN_TAG_   110
+#define _CHAR_BUFFER_SIZE_          1024
+#define _COVERAGE_MASTER_RANK_      0
+#define _WORKER_IS_IDLE_TAG_        100
+#define _WORKER_KEEP_WORKING_TAG_   105
+#define _WORKER_SHUTDOWN_TAG_       110
 
 #include <mpi.h>
 #include <time.h>
