@@ -235,7 +235,8 @@ void coverage_mpi (int argc,
     //
     int worker_rank;
     int tx_count = params->ntx;
-    while (tx_count > 0)
+    int running_workers = nworkers;
+    while (running_workers > 0)
     {   
         MPI_Recv (&buff, 
                   0,
@@ -245,21 +246,61 @@ void coverage_mpi (int argc,
                   worker_comm,
                   &status);
         worker_rank = status.MPI_SOURCE;
+        //
+        // coverage calculation and result dump finished
+        //
+        measure_time_id (NULL, worker_rank);
 
         switch (status.MPI_TAG)
         {   
             case (_WORKER_IS_IDLE_TAG_):
                 //
-                // starting transmitter-data send
-                // 
-                measure_time ("Transmitter data send");
-                send_tx_data (&(params->tx_params[-- tx_count]),
-                              &worker_comm,
-                              worker_rank);
+                // send calculation data, if we still have transmitters
                 //
-                // transmitter-data send finished
-                // 
-                measure_time (NULL);
+                if (tx_count > 0)
+                {
+                    //
+                    // tell the worker to keep working
+                    //
+                    MPI_Send (NULL,
+                              0,
+                              MPI_BYTE,
+                              worker_rank,
+                              _WORKER_KEEP_WORKING_TAG_,
+                              worker_comm);
+                    //
+                    // starting transmitter-data send
+                    //
+                    measure_time_id ("Transmitter data send", 
+                                     worker_rank);
+                    send_tx_data (&(params->tx_params[-- tx_count]),
+                                  &worker_comm,
+                                  worker_rank);
+                    //
+                    // transmitter-data send finished,
+                    // start coverage calculation
+                    // 
+                    measure_time_id (NULL, worker_rank);
+                    measure_time_id ("Calculation and result dump",
+                                     worker_rank);
+                }
+                else
+                {
+                    //
+                    // send the shutdown order to this worker
+                    //
+                    MPI_Send (NULL,
+                              0,
+                              MPI_BYTE,
+                              worker_rank,
+                              _WORKER_SHUTDOWN_TAG_,
+                              worker_comm);
+                    //
+                    // coverage calculation and result dump finished
+                    //
+                    measure_time_id (NULL, worker_rank);
+                    running_workers --;
+                }
                 break;
 
             default:
@@ -267,18 +308,6 @@ void coverage_mpi (int argc,
                          "WARNING Unknown message from %d. worker\n", 
                          worker_rank);
         }   
-    }
-    //
-    // shutdown all workers
-    //
-    for (worker_rank = 0; worker_rank < nworkers; worker_rank ++)
-    {
-        MPI_Send (NULL,
-                  0,
-                  MPI_BYTE,
-                  worker_rank,
-                  _WORKER_SHUTDOWN_TAG_,
-                  worker_comm);
     }
 
     MPI_Finalize ( );

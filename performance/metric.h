@@ -33,6 +33,18 @@ void memory_access (const unsigned int access_count, const size_t access_size);
 void measure_time (const char *message);
 
 /**
+ * Measures the time passed between calls.
+ *
+ * message          A message to be printed when the measurement starts;
+ *                  passing NULL to this parameter marks the end of the 
+ *                  measurement stop and displays the elapsed time;
+ * clock_id         an ID to uniquely identify this clock, so that different
+ *                  things can be measured at the same time.-
+ *
+ */
+void measure_time_id (const char *message, const unsigned int clock_id);
+
+/**
  * A helper function to debug MPI processes.-
  */
 static void debug_mpi ( )

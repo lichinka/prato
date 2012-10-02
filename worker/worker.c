@@ -116,8 +116,8 @@ static void receive_tx_data (Parameters *params,
 void worker (const int rank,
              MPI_Comm *comm)
 {
-    int has_finished = 0;
-    MPI_Request request;
+    int has_finished;
+    MPI_Status status;
     double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
 
@@ -134,22 +134,13 @@ void worker (const int rank,
     MPI_Barrier (*comm);
 
     //
-    // this worker will receive the 'shutdown' order with this message tag
-    //
-    MPI_Irecv (NULL,
-               0,
-               MPI_BYTE,
-               _COVERAGE_MASTER_RANK_,
-               _WORKER_SHUTDOWN_TAG_,
-               *comm,
-               &request);
-    //
     // start processing loop
     //
+    has_finished = 0;
     while (!has_finished)
     {
         //
-        // inform master this worker is ready to receive work
+        // inform master we are ready to receive work
         //
         MPI_Send (NULL,
                   0,
@@ -158,26 +149,36 @@ void worker (const int rank,
                   _WORKER_IS_IDLE_TAG_,
                   *comm);
         //
-        // receive data for processing the next transmitter
-        //
-        receive_tx_data (params, comm);
-        //
-        // calculate coverage for the received transmitter
-        //
-        coverage (params,
-                  params->tx_params,
-                  ericsson_params,
-                  4);
-        //
-        // starting result dump
-        //
-        output_to_stdout (params);
-        //
         // check if this worker should shutdown
+        // or continue working
         //
-        MPI_Test (&request, 
-                  &has_finished,
-                  MPI_STATUS_IGNORE);
+        MPI_Recv (NULL,
+                  0,
+                  MPI_BYTE,
+                  _COVERAGE_MASTER_RANK_,
+                  MPI_ANY_TAG,
+                  *comm,
+                  &status);
+        if (status.MPI_TAG == _WORKER_SHUTDOWN_TAG_)
+            has_finished = 1;
+        else
+        {
+            //
+            // receive data for processing the next transmitter
+            //
+            receive_tx_data (params, comm);
+            //
+            // calculate coverage for the received transmitter
+            //
+            coverage (params,
+                      params->tx_params,
+                      ericsson_params,
+                      4);
+            //
+            // starting result dump
+            //
+            output_to_stdout (params);
+        }
     }
 
     //

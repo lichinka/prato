@@ -1,5 +1,6 @@
 #include "performance/metric.h"
 
+#define _NUMBER_OF_MULTIPLE_CLOCKS_ 128
 
 
 //
@@ -16,8 +17,8 @@ static long long last_flpins;
 //
 // variables to measure time
 //
-static char time_message [_METRIC_CHAR_BUFF_SIZE_];
-static clock_t last_clock;
+static char time_message  [_NUMBER_OF_MULTIPLE_CLOCKS_ + 1][_METRIC_CHAR_BUFF_SIZE_];
+static clock_t last_clock [_NUMBER_OF_MULTIPLE_CLOCKS_ + 1];
 
 
 
@@ -91,23 +92,68 @@ void measure_flops (const char *func_name, const char start_measuring)
  * Measures the time passed between calls.
  *
  * message          A message to be printed when the measurement starts;
- *                  passing NULL to this parameter makes the measurement
- *                  stop and display the results.-
+ *                  passing NULL to this parameter marks the end of the 
+ *                  measurement stop and displays the elapsed time;
+ * clock_id         an ID to uniquely identify this clock, so that different
+ *                  things can be measured at the same time.-
+ *
+ */
+void measure_time_id (const char *message, const unsigned int clock_id)
+{
+    if (clock_id <= _NUMBER_OF_MULTIPLE_CLOCKS_)
+    {
+        if (message != NULL)
+        {
+            if (clock_id == _NUMBER_OF_MULTIPLE_CLOCKS_)
+                snprintf (time_message[clock_id],
+                          _METRIC_CHAR_BUFF_SIZE_,
+                          "%s", 
+                          message);
+            else
+                snprintf (time_message[clock_id],
+                          _METRIC_CHAR_BUFF_SIZE_,
+                          "%s (%d)", 
+                          message,
+                          clock_id);
+            last_clock[clock_id] = clock ( );
+        }
+        else
+        {
+            //
+            // ignore uninitialized calls
+            //
+            if (last_clock[clock_id] != 0)
+            {
+                double elapsed_time = (double) (clock ( ) - last_clock[clock_id]);
+                elapsed_time /= CLOCKS_PER_SEC;
+                fprintf (stdout, "TIME:\t%s\t%.5f sec\n", time_message[clock_id],
+                                                          elapsed_time);
+                last_clock[clock_id] = 0;
+            }
+        }
+    }
+    else
+    {
+        fprintf (stderr, 
+                 "ERROR You can have a maximum of %d concurrent time measurements\n",
+                 _NUMBER_OF_MULTIPLE_CLOCKS_);
+        exit (1);
+    }
+}
+
+
+
+/**
+ * Measures the time passed between calls.
+ *
+ * message          A message to be printed when the measurement starts;
+ *                  passing NULL to this parameter marks the end of the 
+ *                  measurement stop and displays the elapsed time;
  *
  */
 void measure_time (const char *message)
 {
-    if (message != NULL)
-    {
-        strncpy (time_message, message, _METRIC_CHAR_BUFF_SIZE_);
-        last_clock = clock ( );
-    }
-    else
-    {
-        double elapsed_time = (double) (clock ( ) - last_clock);
-        elapsed_time /= CLOCKS_PER_SEC;
-        fprintf (stdout, "TIME:\t%s\t%.5f sec\n", time_message,
-                                                  elapsed_time);
-    }
+    measure_time_id (message, 
+                     _NUMBER_OF_MULTIPLE_CLOCKS_);
 }
 
