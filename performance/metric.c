@@ -1,6 +1,6 @@
 #include "performance/metric.h"
 
-#define _NUMBER_OF_MULTIPLE_CLOCKS_ 128
+#define _NUMBER_OF_MULTIPLE_CLOCKS_ 2048
 
 
 //

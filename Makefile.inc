@@ -1,5 +1,5 @@
 # common definitions used in all Makefiles
-GRASS_TOPDIR = /usr/local/grass-6.4.2
+GRASS_TOPDIR = ${HOME}/grass-6.4.2
 
 CC          = gcc
 #PRJCFLAGS   = -D_PERFORMANCE_METRICS_-fno-strict-aliasing -mtune=native -g -O -Wall -Wno-unused-function -pipe
