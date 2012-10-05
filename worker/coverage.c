@@ -332,7 +332,7 @@ void init_coverage (FILE       *ini_file,
     //
     // create an array containing the transmitters to be processed
     //
-    char *tx_sections [8192];
+    char *tx_sections [10240];
     params->ntx = split_sections (tx_sections_list,
                                   tx_sections);
     // 
