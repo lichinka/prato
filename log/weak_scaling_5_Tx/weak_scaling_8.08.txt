@@ -1,0 +1,87 @@
+Number of processors:	8
+Transmitters per processor:	5
+Processes per node:	2
+Spawning 8 workers to process 40 transmitters ...
+TIME:	Dynamic process spawning	1.31000 sec
+TIME:	Common data distribution	41.26000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (0)	19.83000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (6)	22.89000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	22.93000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (2)	22.92000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	23.25000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (5)	24.71000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (4)	26.86000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (1)	26.89000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.52000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.21000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.72000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.73000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.84000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.80000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.72000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.73000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.74000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.71000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.24000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.72000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.72000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.81000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.79000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.71000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.78000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.83000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.70000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.22000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.79000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Calculation and result dump (7)	10.74000 sec
+TIME:	Calculation and result dump (2)	10.78000 sec
+TIME:	Calculation and result dump (6)	10.78000 sec
+TIME:	Calculation and result dump (3)	10.75000 sec
+TIME:	Calculation and result dump (5)	10.70000 sec
+TIME:	Calculation and result dump (1)	10.65000 sec
+TIME:	Calculation and result dump (4)	10.75000 sec
+Process took 122 sec

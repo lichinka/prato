@@ -1,0 +1,47 @@
+Number of processors:	2
+Transmitters per processor:	10
+Processes per node:	2
+Spawning 2 workers to process 20 transmitters ...
+TIME:	Dynamic process spawning	1.29000 sec
+TIME:	Common data distribution	18.70000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	19.79000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	26.91000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.69000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.52000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.74000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.51000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.81000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.52000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.78000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.41000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.81000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.71000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.52000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.74000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.51000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.79000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.51000 sec
+TIME:	Calculation and result dump (1)	10.63000 sec
+Process took 153 sec
