@@ -45,6 +45,7 @@ static Diagram *diagram = NULL;
  * total_height transmitter's height above sea level;
  * beam_dir     direction of the antenna beam, in degrees;
  * mech_tilt    mechanical antenna tilt angle, in degress;
+ * frequency    transmitter frequency, in Mhz;
  * radius       calculation radius around the given transmitter;
  * rec_height   Rx antenna height above ground level;
  * nrows        number of rows within the 2D-matrices;
@@ -67,6 +68,7 @@ void calculate_antenna_influence (const char *ant_dir,
                                   const double total_height,
                                   const int beam_dir,
                                   const int mech_tilt,
+                                  const double frequency,
                                   const double radius,
                                   const double rec_height,
                                   const int nrows,

@@ -5,8 +5,8 @@
 
 
 /**
- * Reads the received file into memory, returning the number of bytes saved to
- * the buffer.
+ * Reads the received file into memory, returning the number of bytes 
+ * saved into the buffer.
  *
  * file_name        The file to be read;
  * content_buffer   the buffer to which the read data is saved.-

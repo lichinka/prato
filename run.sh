@@ -15,10 +15,11 @@ if [ -n "${TX}" ]; then
     #
     CREATE_SQL=$(cat create.sql | sed -e "s/@table/coverage_$$/g" -)
     echo "${CREATE_SQL}"
-    psql -h ${PSQL_SERVER} -U garufa grass_backend -c "${CREATE_SQL}"
+    #psql -h ${PSQL_SERVER} -U garufa grass_backend -c "${CREATE_SQL}"
     COPY_SQL=$(cat copy.sql | sed -e "s/@table/coverage_$$/g" -)
     echo "${COPY_SQL}"
-    echo ${CMD} >&2 && ${CMD} | psql -h ${PSQL_SERVER} -U garufa grass_backend -c "${COPY_SQL}"
+    #echo ${CMD} >&2 && ${CMD} | psql -h ${PSQL_SERVER} -U garufa grass_backend -c "${COPY_SQL}"
+    echo ${CMD} >&2 && ${CMD}
 else
     echo "Usage"
     echo "  $0 [transmitter's section name in the INI file] [output raster name]"
