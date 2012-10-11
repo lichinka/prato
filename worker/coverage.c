@@ -371,7 +371,8 @@ void init_coverage (FILE       *ini_file,
  *
  * params           a structure holding configuration parameters which are common
  *                  to all transmitters;
- * tx_params        the output parameter: a structure holding transmitter-specific
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
  *                  configuration parameters needed for calculation;
  * eric_params      contains the four tunning parameters for the Ericsson 9999 
  *                  model;
@@ -504,12 +505,30 @@ void coverage (const Parameters     *params,
 
 
 /**
- * Displays the calculation result in the standard output.-
+ * Displays the calculation result in the standard output.
+ *
+ * params           a structure holding configuration parameters which are common
+ *                  to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
  */
-void output_to_stdout (const Parameters *params)
+void output_to_stdout (const Parameters *params,
+                       const Tx_parameters *tx_params)
 {
     int r, c;
-
+    
+    // 
+    // tell the DB server to get ready before sending the data
+    //
+    fprintf (stdout, 
+             "CREATE TABLE IF NOT EXISTS coverage_%s (east int, north int, rscp float);\n",
+             tx_params->tx_name);
+    fprintf (stdout,
+             "\\COPY coverage_%s (east, north, rscp) FROM STDIN WITH DELIMITER ' '\n",
+             tx_params->tx_name);
+    //
+    // output the data
+    //
     for (r = 0; r < params->nrows; r ++)
     {
         for (c = 0; c < params->ncols; c ++)
@@ -520,7 +539,7 @@ void output_to_stdout (const Parameters *params)
                 float east_coord  = params->map_west + c * params->map_ew_res;
                 float north_coord = params->map_north - r * params->map_ns_res;
 
-                fprintf (stdout, "%.f;%.f;%.5f\n", east_coord,
+                fprintf (stdout, "%.f %.f %.5f\n", east_coord,
                                                    north_coord,
                                                    rscp);
             }

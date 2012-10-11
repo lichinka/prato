@@ -128,14 +128,15 @@ int main (int argc, char *argv [])
         if (params->ntx > 1)
             fprintf (stderr, "WARNING Only the first transmitter will be processed\n");
         coverage (params,
-                  &(params->tx_params[0]),
+                  params->tx_params,
                   ericsson_params,
                   4);
         //
         // calculation finished, do we have to write the raster output?
         //
         if (output->answer == NULL)
-            output_to_stdout (params);
+            output_to_stdout (params,
+                              params->tx_params);
         else
         {
             int outfd, row, col;

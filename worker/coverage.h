@@ -38,7 +38,7 @@ struct Tx_parameters
     double  tx_east_coord;
     double  tx_north_coord;
     double  tx_power;
-    double  total_tx_height;
+        double  total_tx_height;
     char    tx_name              [_CHAR_BUFFER_SIZE_];
     char    antenna_diagram_file [_CHAR_BUFFER_SIZE_];
 } __attribute__((__packed__));
@@ -251,10 +251,16 @@ worker (const int rank,
 
 
 /**
- * Displays the calculation result in the standard output.-
+ * Displays the calculation result in the standard output.
+ *
+ * params           a structure holding configuration parameters which are common
+ *                  to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
  */
 extern void 
-output_to_stdout (const Parameters *params);
+output_to_stdout (const Parameters *params,
+                  const Tx_parameters *tx_params);
 
 
 #endif

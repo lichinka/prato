@@ -177,7 +177,8 @@ void worker (const int rank,
             //
             // starting result dump
             //
-            output_to_stdout (params);
+            output_to_stdout (params,
+                              params->tx_params);
         }
     }
 
