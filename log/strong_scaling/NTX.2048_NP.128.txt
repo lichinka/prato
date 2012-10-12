@@ -1,0 +1,5 @@
+Number of processors:	128
+Transmitters per processor:	16
+Processes per node:	2
+Spawning 128 workers to process 2048 transmitters ...
+Process took 18 sec
