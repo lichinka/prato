@@ -2,17 +2,24 @@ Number of processors:	128
 Transmitters per processor:	1
 Processes per node:	2
 Spawning 128 workers to process 128 transmitters ...
-TIME:	Dynamic process spawning	1.61000 sec
-TIME:	Common data distribution	44.79000 sec
+TIME:	Dynamic process spawning	1.64000 sec
+TIME:	Common data distribution	44.49000 sec
 TIME:	Transmitter data send (0)	0.00000 sec
 TIME:	Transmitter data send (64)	0.00000 sec
+TIME:	Transmitter data send (65)	0.00000 sec
 TIME:	Transmitter data send (1)	0.00000 sec
 TIME:	Transmitter data send (2)	0.00000 sec
 TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Transmitter data send (16)	0.00000 sec
+TIME:	Transmitter data send (17)	0.00000 sec
+TIME:	Transmitter data send (32)	0.00000 sec
+TIME:	Transmitter data send (33)	0.00000 sec
+TIME:	Transmitter data send (80)	0.00000 sec
+TIME:	Transmitter data send (97)	0.00000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
 TIME:	Transmitter data send (4)	0.00000 sec
 TIME:	Transmitter data send (5)	0.00000 sec
 TIME:	Transmitter data send (6)	0.00000 sec
-TIME:	Transmitter data send (7)	0.00000 sec
 TIME:	Transmitter data send (8)	0.00000 sec
 TIME:	Transmitter data send (9)	0.00000 sec
 TIME:	Transmitter data send (10)	0.00000 sec
@@ -21,8 +28,6 @@ TIME:	Transmitter data send (12)	0.00000 sec
 TIME:	Transmitter data send (13)	0.00000 sec
 TIME:	Transmitter data send (14)	0.00000 sec
 TIME:	Transmitter data send (15)	0.00000 sec
-TIME:	Transmitter data send (16)	0.00000 sec
-TIME:	Transmitter data send (17)	0.00000 sec
 TIME:	Transmitter data send (18)	0.00000 sec
 TIME:	Transmitter data send (19)	0.00000 sec
 TIME:	Transmitter data send (20)	0.00000 sec
@@ -37,8 +42,6 @@ TIME:	Transmitter data send (28)	0.00000 sec
 TIME:	Transmitter data send (29)	0.00000 sec
 TIME:	Transmitter data send (30)	0.00000 sec
 TIME:	Transmitter data send (31)	0.00000 sec
-TIME:	Transmitter data send (32)	0.00000 sec
-TIME:	Transmitter data send (33)	0.00000 sec
 TIME:	Transmitter data send (34)	0.00000 sec
 TIME:	Transmitter data send (35)	0.00000 sec
 TIME:	Transmitter data send (36)	0.00000 sec
@@ -69,11 +72,12 @@ TIME:	Transmitter data send (60)	0.00000 sec
 TIME:	Transmitter data send (61)	0.00000 sec
 TIME:	Transmitter data send (62)	0.00000 sec
 TIME:	Transmitter data send (63)	0.00000 sec
-TIME:	Transmitter data send (65)	0.00000 sec
 TIME:	Transmitter data send (66)	0.00000 sec
 TIME:	Transmitter data send (67)	0.00000 sec
 TIME:	Transmitter data send (68)	0.00000 sec
 TIME:	Transmitter data send (69)	0.00000 sec
+TIME:	Transmitter data send (70)	0.00000 sec
+TIME:	Transmitter data send (71)	0.00000 sec
 TIME:	Transmitter data send (72)	0.00000 sec
 TIME:	Transmitter data send (73)	0.00000 sec
 TIME:	Transmitter data send (74)	0.00000 sec
@@ -82,7 +86,6 @@ TIME:	Transmitter data send (76)	0.00000 sec
 TIME:	Transmitter data send (77)	0.00000 sec
 TIME:	Transmitter data send (78)	0.00000 sec
 TIME:	Transmitter data send (79)	0.00000 sec
-TIME:	Transmitter data send (80)	0.00000 sec
 TIME:	Transmitter data send (81)	0.00000 sec
 TIME:	Transmitter data send (82)	0.00000 sec
 TIME:	Transmitter data send (83)	0.00000 sec
@@ -99,13 +102,10 @@ TIME:	Transmitter data send (93)	0.00000 sec
 TIME:	Transmitter data send (94)	0.00000 sec
 TIME:	Transmitter data send (95)	0.00000 sec
 TIME:	Transmitter data send (96)	0.00000 sec
-TIME:	Transmitter data send (97)	0.00000 sec
 TIME:	Transmitter data send (98)	0.00000 sec
 TIME:	Transmitter data send (99)	0.00000 sec
 TIME:	Transmitter data send (100)	0.00000 sec
 TIME:	Transmitter data send (101)	0.00000 sec
-TIME:	Transmitter data send (102)	0.00000 sec
-TIME:	Transmitter data send (103)	0.00000 sec
 TIME:	Transmitter data send (104)	0.00000 sec
 TIME:	Transmitter data send (105)	0.00000 sec
 TIME:	Transmitter data send (106)	0.00000 sec
@@ -118,6 +118,8 @@ TIME:	Transmitter data send (112)	0.00000 sec
 TIME:	Transmitter data send (113)	0.00000 sec
 TIME:	Transmitter data send (114)	0.00000 sec
 TIME:	Transmitter data send (115)	0.00000 sec
+TIME:	Transmitter data send (116)	0.00000 sec
+TIME:	Transmitter data send (117)	0.00000 sec
 TIME:	Transmitter data send (118)	0.00000 sec
 TIME:	Transmitter data send (119)	0.00000 sec
 TIME:	Transmitter data send (120)	0.00000 sec
@@ -128,136 +130,134 @@ TIME:	Transmitter data send (124)	0.00000 sec
 TIME:	Transmitter data send (125)	0.00000 sec
 TIME:	Transmitter data send (126)	0.00000 sec
 TIME:	Transmitter data send (127)	0.00000 sec
-TIME:	Transmitter data send (117)	0.00000 sec
-TIME:	Transmitter data send (70)	0.00000 sec
-TIME:	Transmitter data send (71)	0.00000 sec
-TIME:	Transmitter data send (116)	0.00000 sec
-TIME:	Calculation and result dump (80)	19.79000 sec
-TIME:	Calculation and result dump (100)	19.79000 sec
-TIME:	Calculation and result dump (110)	19.79000 sec
-TIME:	Calculation and result dump (90)	19.81000 sec
-TIME:	Calculation and result dump (17)	19.82000 sec
-TIME:	Calculation and result dump (7)	19.84000 sec
-TIME:	Calculation and result dump (57)	19.83000 sec
-TIME:	Calculation and result dump (37)	19.85000 sec
-TIME:	Calculation and result dump (47)	19.86000 sec
-TIME:	Calculation and result dump (122)	19.86000 sec
-TIME:	Calculation and result dump (27)	19.95000 sec
-TIME:	Calculation and result dump (68)	19.96000 sec
-TIME:	Calculation and result dump (61)	22.89000 sec
-TIME:	Calculation and result dump (52)	22.91000 sec
-TIME:	Calculation and result dump (31)	22.91000 sec
-TIME:	Calculation and result dump (63)	22.90000 sec
-TIME:	Calculation and result dump (74)	22.90000 sec
-TIME:	Calculation and result dump (114)	22.90000 sec
-TIME:	Calculation and result dump (51)	22.91000 sec
-TIME:	Calculation and result dump (22)	22.91000 sec
-TIME:	Calculation and result dump (11)	22.92000 sec
-TIME:	Calculation and result dump (84)	22.91000 sec
-TIME:	Calculation and result dump (106)	22.91000 sec
-TIME:	Calculation and result dump (127)	22.91000 sec
-TIME:	Calculation and result dump (86)	22.91000 sec
-TIME:	Calculation and result dump (85)	22.91000 sec
-TIME:	Calculation and result dump (95)	22.91000 sec
-TIME:	Calculation and result dump (33)	22.92000 sec
-TIME:	Calculation and result dump (104)	22.92000 sec
-TIME:	Calculation and result dump (75)	22.93000 sec
-TIME:	Calculation and result dump (23)	22.94000 sec
-TIME:	Calculation and result dump (21)	22.94000 sec
-TIME:	Calculation and result dump (2)	22.94000 sec
-TIME:	Calculation and result dump (94)	22.93000 sec
-TIME:	Calculation and result dump (13)	22.94000 sec
-TIME:	Calculation and result dump (96)	22.93000 sec
-TIME:	Calculation and result dump (105)	22.93000 sec
-TIME:	Calculation and result dump (43)	22.94000 sec
-TIME:	Calculation and result dump (53)	22.94000 sec
-TIME:	Calculation and result dump (115)	22.94000 sec
-TIME:	Calculation and result dump (126)	22.95000 sec
-TIME:	Calculation and result dump (1)	22.96000 sec
-TIME:	Calculation and result dump (12)	22.96000 sec
-TIME:	Calculation and result dump (117)	22.95000 sec
-TIME:	Calculation and result dump (41)	22.97000 sec
-TIME:	Calculation and result dump (42)	22.98000 sec
-TIME:	Calculation and result dump (3)	23.00000 sec
-TIME:	Calculation and result dump (62)	22.99000 sec
-TIME:	Calculation and result dump (118)	23.11000 sec
-TIME:	Calculation and result dump (32)	23.15000 sec
-TIME:	Calculation and result dump (46)	23.17000 sec
-TIME:	Calculation and result dump (56)	23.16000 sec
-TIME:	Calculation and result dump (6)	23.17000 sec
-TIME:	Calculation and result dump (26)	23.19000 sec
-TIME:	Calculation and result dump (99)	23.20000 sec
-TIME:	Calculation and result dump (14)	23.21000 sec
-TIME:	Calculation and result dump (25)	23.21000 sec
-TIME:	Calculation and result dump (45)	23.21000 sec
-TIME:	Calculation and result dump (78)	23.20000 sec
-TIME:	Calculation and result dump (4)	23.21000 sec
-TIME:	Calculation and result dump (116)	23.20000 sec
-TIME:	Calculation and result dump (88)	23.22000 sec
-TIME:	Calculation and result dump (107)	23.22000 sec
-TIME:	Calculation and result dump (34)	23.23000 sec
-TIME:	Calculation and result dump (67)	23.22000 sec
-TIME:	Calculation and result dump (97)	23.22000 sec
-TIME:	Calculation and result dump (36)	23.23000 sec
+TIME:	Transmitter data send (103)	0.00000 sec
+TIME:	Transmitter data send (102)	0.00000 sec
+TIME:	Calculation and result dump (54)	19.79000 sec
+TIME:	Calculation and result dump (120)	19.80000 sec
+TIME:	Calculation and result dump (10)	19.80000 sec
+TIME:	Calculation and result dump (110)	19.80000 sec
+TIME:	Calculation and result dump (66)	19.80000 sec
+TIME:	Calculation and result dump (32)	19.81000 sec
+TIME:	Calculation and result dump (34)	19.81000 sec
+TIME:	Calculation and result dump (22)	19.82000 sec
+TIME:	Calculation and result dump (76)	19.84000 sec
+TIME:	Calculation and result dump (87)	19.84000 sec
+TIME:	Calculation and result dump (98)	19.84000 sec
+TIME:	Calculation and result dump (44)	20.22000 sec
+TIME:	Calculation and result dump (14)	22.89000 sec
+TIME:	Calculation and result dump (58)	22.89000 sec
+TIME:	Calculation and result dump (104)	22.89000 sec
+TIME:	Calculation and result dump (18)	22.91000 sec
+TIME:	Calculation and result dump (5)	22.91000 sec
+TIME:	Calculation and result dump (72)	22.91000 sec
+TIME:	Calculation and result dump (81)	22.91000 sec
+TIME:	Calculation and result dump (91)	22.91000 sec
+TIME:	Calculation and result dump (60)	22.91000 sec
+TIME:	Calculation and result dump (124)	22.92000 sec
+TIME:	Calculation and result dump (50)	22.92000 sec
+TIME:	Calculation and result dump (7)	22.92000 sec
+TIME:	Calculation and result dump (65)	22.92000 sec
+TIME:	Calculation and result dump (125)	22.92000 sec
+TIME:	Calculation and result dump (83)	22.92000 sec
+TIME:	Calculation and result dump (38)	22.92000 sec
+TIME:	Calculation and result dump (4)	22.92000 sec
+TIME:	Calculation and result dump (28)	22.92000 sec
+TIME:	Calculation and result dump (114)	22.92000 sec
+TIME:	Calculation and result dump (15)	22.93000 sec
+TIME:	Calculation and result dump (71)	22.93000 sec
+TIME:	Calculation and result dump (106)	22.93000 sec
+TIME:	Calculation and result dump (48)	22.93000 sec
+TIME:	Calculation and result dump (105)	22.94000 sec
+TIME:	Calculation and result dump (1)	22.94000 sec
+TIME:	Calculation and result dump (40)	22.94000 sec
+TIME:	Calculation and result dump (82)	22.94000 sec
+TIME:	Calculation and result dump (70)	22.95000 sec
+TIME:	Calculation and result dump (2)	22.96000 sec
+TIME:	Calculation and result dump (126)	22.96000 sec
+TIME:	Calculation and result dump (59)	22.96000 sec
+TIME:	Calculation and result dump (49)	22.97000 sec
+TIME:	Calculation and result dump (115)	22.97000 sec
+TIME:	Calculation and result dump (92)	23.00000 sec
+TIME:	Calculation and result dump (26)	23.11000 sec
+TIME:	Calculation and result dump (39)	23.11000 sec
+TIME:	Calculation and result dump (93)	23.14000 sec
+TIME:	Calculation and result dump (86)	23.17000 sec
+TIME:	Calculation and result dump (96)	23.21000 sec
+TIME:	Calculation and result dump (127)	23.21000 sec
+TIME:	Calculation and result dump (94)	23.21000 sec
+TIME:	Calculation and result dump (31)	23.21000 sec
+TIME:	Calculation and result dump (107)	23.21000 sec
+TIME:	Calculation and result dump (75)	23.22000 sec
 TIME:	Calculation and result dump (108)	23.22000 sec
-TIME:	Calculation and result dump (54)	23.23000 sec
-TIME:	Calculation and result dump (66)	23.22000 sec
-TIME:	Calculation and result dump (15)	23.23000 sec
-TIME:	Calculation and result dump (16)	23.23000 sec
-TIME:	Calculation and result dump (70)	23.22000 sec
-TIME:	Calculation and result dump (89)	23.23000 sec
-TIME:	Calculation and result dump (65)	23.24000 sec
-TIME:	Calculation and result dump (55)	23.25000 sec
-TIME:	Calculation and result dump (24)	23.25000 sec
-TIME:	Calculation and result dump (5)	23.25000 sec
-TIME:	Calculation and result dump (98)	23.24000 sec
-TIME:	Calculation and result dump (44)	23.25000 sec
-TIME:	Calculation and result dump (109)	23.24000 sec
-TIME:	Calculation and result dump (77)	23.24000 sec
-TIME:	Calculation and result dump (121)	23.24000 sec
-TIME:	Calculation and result dump (120)	23.26000 sec
-TIME:	Calculation and result dump (119)	23.30000 sec
-TIME:	Calculation and result dump (87)	23.30000 sec
-TIME:	Calculation and result dump (79)	23.31000 sec
-TIME:	Calculation and result dump (35)	23.34000 sec
-TIME:	Calculation and result dump (76)	23.60000 sec
-TIME:	Calculation and result dump (71)	23.80000 sec
-TIME:	Calculation and result dump (20)	24.60000 sec
-TIME:	Calculation and result dump (40)	24.60000 sec
-TIME:	Calculation and result dump (103)	24.59000 sec
-TIME:	Calculation and result dump (60)	24.59000 sec
-TIME:	Calculation and result dump (50)	24.60000 sec
-TIME:	Calculation and result dump (125)	24.60000 sec
-TIME:	Calculation and result dump (64)	24.63000 sec
-TIME:	Calculation and result dump (10)	24.63000 sec
-TIME:	Calculation and result dump (113)	24.62000 sec
-TIME:	Calculation and result dump (73)	24.62000 sec
-TIME:	Calculation and result dump (93)	24.64000 sec
-TIME:	Calculation and result dump (83)	24.71000 sec
-TIME:	Calculation and result dump (30)	25.21000 sec
-TIME:	Calculation and result dump (91)	26.71000 sec
-TIME:	Calculation and result dump (81)	26.75000 sec
-TIME:	Calculation and result dump (69)	26.75000 sec
-TIME:	Calculation and result dump (111)	26.76000 sec
-TIME:	Calculation and result dump (101)	26.76000 sec
-TIME:	Calculation and result dump (123)	26.80000 sec
-TIME:	Calculation and result dump (72)	26.82000 sec
-TIME:	Calculation and result dump (0)	26.83000 sec
-TIME:	Calculation and result dump (8)	26.83000 sec
-TIME:	Calculation and result dump (102)	26.83000 sec
-TIME:	Calculation and result dump (82)	26.83000 sec
-TIME:	Calculation and result dump (58)	26.83000 sec
-TIME:	Calculation and result dump (124)	26.83000 sec
-TIME:	Calculation and result dump (48)	26.84000 sec
-TIME:	Calculation and result dump (112)	26.84000 sec
-TIME:	Calculation and result dump (38)	26.85000 sec
-TIME:	Calculation and result dump (18)	26.86000 sec
-TIME:	Calculation and result dump (59)	26.86000 sec
-TIME:	Calculation and result dump (92)	26.86000 sec
-TIME:	Calculation and result dump (19)	26.88000 sec
-TIME:	Calculation and result dump (9)	26.88000 sec
-TIME:	Calculation and result dump (49)	26.91000 sec
-TIME:	Calculation and result dump (39)	26.91000 sec
-TIME:	Calculation and result dump (29)	27.03000 sec
-TIME:	Calculation and result dump (28)	27.23000 sec
-Process took 84 sec
+TIME:	Calculation and result dump (6)	23.22000 sec
+TIME:	Calculation and result dump (102)	23.23000 sec
+TIME:	Calculation and result dump (63)	23.23000 sec
+TIME:	Calculation and result dump (41)	23.23000 sec
+TIME:	Calculation and result dump (53)	23.23000 sec
+TIME:	Calculation and result dump (117)	23.24000 sec
+TIME:	Calculation and result dump (8)	23.24000 sec
+TIME:	Calculation and result dump (51)	23.24000 sec
+TIME:	Calculation and result dump (119)	23.24000 sec
+TIME:	Calculation and result dump (74)	23.24000 sec
+TIME:	Calculation and result dump (29)	23.24000 sec
+TIME:	Calculation and result dump (9)	23.24000 sec
+TIME:	Calculation and result dump (95)	23.24000 sec
+TIME:	Calculation and result dump (118)	23.24000 sec
+TIME:	Calculation and result dump (30)	23.25000 sec
+TIME:	Calculation and result dump (109)	23.25000 sec
+TIME:	Calculation and result dump (61)	23.25000 sec
+TIME:	Calculation and result dump (85)	23.25000 sec
+TIME:	Calculation and result dump (73)	23.25000 sec
+TIME:	Calculation and result dump (43)	23.25000 sec
+TIME:	Calculation and result dump (19)	23.26000 sec
+TIME:	Calculation and result dump (52)	23.27000 sec
+TIME:	Calculation and result dump (103)	23.27000 sec
+TIME:	Calculation and result dump (42)	23.27000 sec
+TIME:	Calculation and result dump (21)	23.27000 sec
+TIME:	Calculation and result dump (3)	23.27000 sec
+TIME:	Calculation and result dump (84)	23.27000 sec
+TIME:	Calculation and result dump (62)	23.31000 sec
+TIME:	Calculation and result dump (17)	23.32000 sec
+TIME:	Calculation and result dump (20)	23.33000 sec
+TIME:	Calculation and result dump (27)	23.39000 sec
+TIME:	Calculation and result dump (16)	23.46000 sec
+TIME:	Calculation and result dump (116)	24.25000 sec
+TIME:	Calculation and result dump (37)	24.58000 sec
+TIME:	Calculation and result dump (90)	24.58000 sec
+TIME:	Calculation and result dump (64)	24.59000 sec
+TIME:	Calculation and result dump (69)	24.59000 sec
+TIME:	Calculation and result dump (57)	24.61000 sec
+TIME:	Calculation and result dump (97)	24.61000 sec
+TIME:	Calculation and result dump (25)	24.61000 sec
+TIME:	Calculation and result dump (101)	24.61000 sec
+TIME:	Calculation and result dump (47)	24.62000 sec
+TIME:	Calculation and result dump (79)	24.63000 sec
+TIME:	Calculation and result dump (113)	24.64000 sec
+TIME:	Calculation and result dump (123)	24.64000 sec
+TIME:	Calculation and result dump (13)	24.70000 sec
+TIME:	Calculation and result dump (33)	26.73000 sec
+TIME:	Calculation and result dump (45)	26.73000 sec
+TIME:	Calculation and result dump (35)	26.73000 sec
+TIME:	Calculation and result dump (23)	26.74000 sec
+TIME:	Calculation and result dump (99)	26.74000 sec
+TIME:	Calculation and result dump (121)	26.74000 sec
+TIME:	Calculation and result dump (67)	26.74000 sec
+TIME:	Calculation and result dump (111)	26.74000 sec
+TIME:	Calculation and result dump (11)	26.76000 sec
+TIME:	Calculation and result dump (77)	26.76000 sec
+TIME:	Calculation and result dump (55)	26.77000 sec
+TIME:	Calculation and result dump (80)	26.81000 sec
+TIME:	Calculation and result dump (46)	26.82000 sec
+TIME:	Calculation and result dump (24)	26.82000 sec
+TIME:	Calculation and result dump (78)	26.83000 sec
+TIME:	Calculation and result dump (112)	26.83000 sec
+TIME:	Calculation and result dump (12)	26.84000 sec
+TIME:	Calculation and result dump (36)	26.84000 sec
+TIME:	Calculation and result dump (100)	26.85000 sec
+TIME:	Calculation and result dump (88)	26.86000 sec
+TIME:	Calculation and result dump (89)	26.88000 sec
+TIME:	Calculation and result dump (68)	26.90000 sec
+TIME:	Calculation and result dump (122)	26.91000 sec
+TIME:	Calculation and result dump (0)	26.94000 sec
+TIME:	Calculation and result dump (56)	26.95000 sec
+Process took 83 sec
