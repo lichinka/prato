@@ -125,9 +125,11 @@ void measure_time_id (const char *message, const unsigned int clock_id)
             if (last_clock[clock_id] != 0)
             {
                 double elapsed_time = (double) (clock ( ) - last_clock[clock_id]);
+                double current_time = (double) (clock ( ) / CLOCKS_PER_SEC);
                 elapsed_time /= CLOCKS_PER_SEC;
-                fprintf (stdout, "TIME:\t%s\t%.5f sec\n", time_message[clock_id],
-                                                          elapsed_time);
+                fprintf (stdout, "TIME:%.8f:\t%s\t%.8f sec\n", current_time,
+                                                               time_message[clock_id],
+                                                               elapsed_time);
                 last_clock[clock_id] = 0;
             }
         }
