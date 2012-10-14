@@ -1,21 +1,17 @@
 #!/bin/bash
 
-DIR=$1
-NP=$2
-NRUNS=$3
+LOG_FILES=$@
 BEST_TIME=99999
 
-if [ -n "${DIR}" ] && [ -n "${NP}" ] && [ -n "${NRUNS}" ]; then
-    INPUT="weak_scaling_${NP}"
-    for i in $(seq -w 1 ${NRUNS}); do 
-        F="${INPUT}.${i}.txt"
-        TOTAL_TIME=$(tail -n1 ${DIR}/${F} | tr -d '[:alpha:]' | tr -d '[:blank:]')
-        if [ ${BEST_TIME} -gt ${TOTAL_TIME} ]; then
-            BEST_TIME=${TOTAL_TIME}
+if [ $# -gt 1 ]; then
+    for LOG in ${@:1}; do
+        TIME=$( cat ${LOG} | grep "Process took" | tr -d '[:alpha:]' | tr -d '[:blank:]' )
+        if [ ${BEST_TIME} -gt ${TIME} ]; then
+            BEST_TIME=${TIME}
         fi
     done
-    echo "Best time is ${BEST_TIME}"
+    echo "${BEST_TIME}"
 else
-    echo "Usage:"
-    echo -e "\t $0 [dir containing log files] [number of processes] [number of runs]"
+    echo -e "Usage:\t $0 [log files ...]"
+    echo "Extracts the best running time from a group of simulation results for weak scaling."
 fi
