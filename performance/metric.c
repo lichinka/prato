@@ -18,7 +18,7 @@ static long long last_flpins;
 // variables to measure time
 //
 static char time_message  [_NUMBER_OF_MULTIPLE_CLOCKS_ + 1][_METRIC_CHAR_BUFF_SIZE_];
-static clock_t last_clock [_NUMBER_OF_MULTIPLE_CLOCKS_ + 1];
+static long last_clock [_NUMBER_OF_MULTIPLE_CLOCKS_ + 1];
 
 
 
@@ -115,7 +115,7 @@ void measure_time_id (const char *message, const unsigned int clock_id)
                           "%s (%d)", 
                           message,
                           clock_id);
-            last_clock[clock_id] = clock ( );
+            last_clock[clock_id] = PAPI_get_real_usec ( );
         }
         else
         {
@@ -124,9 +124,10 @@ void measure_time_id (const char *message, const unsigned int clock_id)
             //
             if (last_clock[clock_id] != 0)
             {
-                double elapsed_time = (double) (clock ( ) - last_clock[clock_id]);
-                double current_time = (double) (clock ( ) / CLOCKS_PER_SEC);
-                elapsed_time /= CLOCKS_PER_SEC;
+                double elapsed_time = PAPI_get_real_usec ( ) - last_clock[clock_id];
+                double current_time = elapsed_time + last_clock[clock_id];
+                elapsed_time /= 1000000.0;
+		current_time /= 1000000.0;
                 fprintf (stdout, "TIME:%.8f:\t%s\t%.8f sec\n", current_time,
                                                                time_message[clock_id],
                                                                elapsed_time);

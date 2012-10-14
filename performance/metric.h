@@ -3,7 +3,6 @@
 
 #define _METRIC_CHAR_BUFF_SIZE_    2048
 
-#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

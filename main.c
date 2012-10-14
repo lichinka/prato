@@ -1,3 +1,4 @@
+#include "performance/metric.h"
 #include "worker/coverage.h"
 #include "master/master.h"
 
@@ -86,6 +87,8 @@ int main (int argc, char *argv [])
     if (G_parser (argc, argv) < 0)
 	    exit (EXIT_FAILURE);
 
+    measure_time ("Read input data");
+
     //
     // read the whole configuration INI file into memory
     //
@@ -108,6 +111,8 @@ int main (int argc, char *argv [])
                    tx_ini_sections->answer,
                    params);
     fclose (ini_file_stream);
+
+    measure_time (NULL);
 
     //
     // ... and execute it

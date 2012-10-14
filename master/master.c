@@ -217,6 +217,7 @@ void coverage_mpi (int argc,
         exit (1);
     }
     measure_time (NULL);
+
     //
     // sync point: pass common input data to all workers
     //
