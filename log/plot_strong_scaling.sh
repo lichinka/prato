@@ -4,7 +4,7 @@ NTX=4096
 
 
 #################################
-# Discriminated wall clock time
+# Relative processing time
 #
 #################################
 for ntx in $( ./log_scale.sh 64 ${NTX} ); do 
@@ -14,27 +14,26 @@ done
 for ntx in 64 256 1024 4096; do
     CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "strong_scaling/discriminated_time_plot_${ntx}.eps";
+set output "strong_scaling/relative_time_plot_${ntx}.eps";
 set title ".:. Strong scalability -- ${ntx} Transmitters .:.";
-set style fill pattern 1 border;
+set style data histograms;
+set style histogram rowstacked;
+set boxwidth 1 relative;
+set style fill pattern 3 border;
 set xlabel "Number of cores";
-set xtics 2;
-set grid xtics;
-set xrange [1:140];
-set log x; 
-set ylabel "Wall clock time (sec)";
-set format y "10^%T";
-set ytics 10;
-set yrange [1:50000];
-set log y;
+set nolog x; 
+set ylabel "Relative processing time";
+set ytics 0.1;
+set yrange [0:1.20];
+set nolog y;
 EOF
     )
     PLOT="plot "
     PLOT="$( echo "${PLOT}" | sed -e 's/, $//g' )"
-    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 1:(\$2+\$3+\$4+\$5) with filledcurve y1=0 title \"Result aggregation\", "
-    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 1:(\$2+\$3+\$4) with filledcurve y1=0 title \"Processing loop\", "
-    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 1:(\$2+\$3) with filledcurve y1=0 title \"Read and Broadcast common data\", "
-    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 1:(\$2) with filledcurve y1=0 title \"Dynamic worker-process spawning\";"
+    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using (\$2/\$6) title \"Dynamic worker-process spawning\", "
+    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using (\$3/\$6):xticlabels(1) title \"Input data broadcasting\", "
+    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using (\$4/\$6):xticlabels(1) title \"Processing loop\", "
+    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using (\$5/\$6):xticlabels(1) title \"Create final coverage prediction\"; "
     CMD="$( echo -e "${CMD}\n${PLOT}" )"
     echo "${CMD}"
     gnuplot -p -e "${CMD}"
@@ -62,7 +61,7 @@ set log x;
 set ylabel "Wall clock time (sec)";
 set format y "10^%T";
 set ytics 10;
-set yrange [60:30000];
+set yrange [60:50000];
 set log y;
 EOF
 )
