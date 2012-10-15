@@ -1,3 +1,0 @@
-Spawning 200 workers to process 512 transmitters ...
-TIME:	Dynamic process spawning	1.82000 sec
-Process took 42 sec
