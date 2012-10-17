@@ -425,8 +425,8 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
     int i;
 
 	// Ericsson model constants and variables
-	double BSxIndex = IniEric->BSxIndex;		//	normalized position of BS -> UTMx/resolution 
-	double BSyIndex = IniEric->BSyIndex;		//	normalized position of BS -> UTMy/resolution
+	int BSxIndex = IniEric->BSxIndex;		    //	normalized position of BS -> UTMx/resolution 
+	int BSyIndex = IniEric->BSyIndex;		    //	normalized position of BS -> UTMy/resolution
 	double AntHeightBS = IniEric->BSAntHeight;	//	Antenna height of BS [m]
 	double AntHeightMS = IniEric->MSAntHeight;	//	Antenna height of MS [m]
 	int xN = IniEric->xN;				//	dimension of the input(Raster) and output (PathLoss)
@@ -451,7 +451,8 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 	double PathLossFreq = 0;			// path loss due to carrier frequency
 	double PathLossTmp = 0;				// tmp path loss
 	int ix; int iy;	
-	double DiffX, DiffY, Zeff;			// Difference in X and Y direction
+	int DiffX, DiffY;
+    double Zeff;			// Difference in X and Y direction
 	double PathLossAntHeightBS;
 	double DistBS2MSNorm, DistBS2MSKm;		// distance between MS and BS in Km sqrt(x2+y2+z2) * scale / 1000
 							// normalized distance between MS and BS in xy plan sqrt(x2+y2)
@@ -499,7 +500,7 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 			// ZoMS = Raster[ix][iy];
 			ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
 			Zeff = ZoTransBS - ZoTransMS;		// ??
-			DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
+			DistBS2MSKm = sqrt (DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
 			DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
 //			if(ZoBS <= Raster[ix][iy]) 
 //			{
@@ -510,10 +511,10 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 				DistBS2MSKm = 0.01;
 			}
 
-			if ((DistBS2MSKm) > radi)
-		    	{    
+			if (DistBS2MSKm > radi)
+		    {    
 			      	continue;
-		    	}
+		    }
 
 			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
 			
@@ -536,9 +537,12 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 		
 			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
 
-			if (DistBS2MSNorm > 0) {
-				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; }
-			else {
+			if (DistBS2MSNorm > 0) 
+            {
+				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+            }
+			else 
+            {
 				tiltBS2MS = 0; 
 			}
 			
@@ -546,7 +550,8 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 			ZObs2LOS = Obst_high[ix][iy];
 			DistObs2BS = Obst_dist[ix][iy];
 			// Calc path loss due to NLOS conditions
-/*Patrik/scale*/	ElevAngCos = cos(atan(tiltBS2MS/scale));
+/*Patrik/scale*/	
+            ElevAngCos = cos(atan(tiltBS2MS/scale));
 
 			Ddot = DistObs2BS; 
 			if (ElevAngCos != 0) 

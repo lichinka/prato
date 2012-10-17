@@ -24,7 +24,7 @@ static void distribute_common_data (Parameters *params,
     //
     // broadcast the DEM array content
     // 
-    MPI_Bcast (&(params->m_dem[0][0]),
+    MPI_Bcast (params->m_dem[0],
                params->nrows * params->ncols,
                MPI_DOUBLE,
                MPI_ROOT,
@@ -32,7 +32,7 @@ static void distribute_common_data (Parameters *params,
     //
     // broadcast the Clutter array content
     // 
-    MPI_Bcast (&(params->m_clut[0][0]),
+    MPI_Bcast (params->m_clut[0],
                params->nrows * params->ncols,
                MPI_DOUBLE,
                MPI_ROOT,

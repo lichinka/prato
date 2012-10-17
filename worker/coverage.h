@@ -38,7 +38,7 @@ struct Tx_parameters
     double  tx_east_coord;
     double  tx_north_coord;
     double  tx_power;
-        double  total_tx_height;
+    double  total_tx_height;
     char    tx_name              [_CHAR_BUFFER_SIZE_];
     char    antenna_diagram_file [_CHAR_BUFFER_SIZE_];
 } __attribute__((__packed__));
