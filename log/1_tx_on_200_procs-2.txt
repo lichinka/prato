@@ -1,3 +1,0 @@
-Spawning 1 workers to process 1 transmitters ...
-TIME:	Dynamic process spawning	0.95000 sec
-Process took 21 sec

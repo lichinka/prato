@@ -38,7 +38,7 @@ static void receive_common_data (Parameters *params,
     double *m_loss_data = (double *) calloc (params->nrows * params->ncols,
                                              sizeof (double));
     params->m_loss = (double **) calloc (params->nrows,
-                                        sizeof (double *));
+                                         sizeof (double *));
     for (i = 0; i < params->nrows; i ++)
         params->m_loss[i] = &(m_loss_data[i * params->ncols]);
 
@@ -52,7 +52,7 @@ static void receive_common_data (Parameters *params,
     for (i = 0; i < params->nrows; i ++)
         params->m_dem[i] = &(m_dem_data[i * params->ncols]);
 
-    MPI_Bcast (&(params->m_dem[0][0]),
+    MPI_Bcast (params->m_dem[0],
                params->nrows * params->ncols,
                MPI_DOUBLE,
                _COVERAGE_MASTER_RANK_,
@@ -67,7 +67,7 @@ static void receive_common_data (Parameters *params,
     for (i = 0; i < params->nrows; i ++)
         params->m_clut[i] = &(m_clut_data[i * params->ncols]);
 
-    MPI_Bcast (&(params->m_clut[0][0]),
+    MPI_Bcast (params->m_clut[0],
                params->nrows * params->ncols,
                MPI_DOUBLE,
                _COVERAGE_MASTER_RANK_,
@@ -177,7 +177,8 @@ void worker (const int rank,
             //
             // starting result dump
             //
-            output_to_stdout (params);
+            output_to_stdout (params,
+                              params->tx_params);
         }
     }
 

@@ -9,8 +9,8 @@
 // Parameters of the Ericsson 9999 radio propagation model
 //
 struct StructEric {
-	double BSxIndex;    /* normalized position of BS -> UTMx/resolution */	
-	double BSyIndex; 	/* normalized position of BS -> UTMx/resolution */
+	int BSxIndex;       // normalized position of BS -> UTMx/resolution	
+	int BSyIndex; 	    // normalized position of BS -> UTMx/resolution
 	double BSAntHeight; /* Antenna height of BS [m] */
 	double MSAntHeight; /* Antenna height of MS [m] */
 	int xN;			    /* dimension of teh input(Raster) and output (PathLoss) */

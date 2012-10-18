@@ -251,10 +251,16 @@ worker (const int rank,
 
 
 /**
- * Displays the calculation result in the standard output.-
+ * Displays the calculation result in the standard output.
+ *
+ * params           a structure holding configuration parameters which are common
+ *                  to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
  */
 extern void 
-output_to_stdout (const Parameters *params);
+output_to_stdout (const Parameters *params,
+                  const Tx_parameters *tx_params);
 
 
 #endif

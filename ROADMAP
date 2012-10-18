@@ -1,7 +1,14 @@
-- Separate the steps of 'r.coverage'
-    - initialization and data distribution (5);
-    - calculation (3);
-    - result gathering (2).
++ Separate the steps of 'r.coverage'
+    + initialization and data distribution (5);
+    + calculation (3);
+    + result gathering (2).
+- Implement parallel loops in OpenMP on workers (1).
+- Simulations (8).
+- Plotting and their analysis (3).
+- Write paper (5).
+
+===> Deadline 20.10.
+
 - Implement GPU kernels for each of the steps in the coverage prediction
     - divide input data in radius-sized chunks with offsets (2);
     - path-loss calculation, using an empirical mathematical model
@@ -10,4 +17,8 @@
         - terrain type (2).
     - apply antenna gain, based on its diagram (2)
     - apply Tx power (1)
+- Simulations (4)
+- Plotting and their analysis (3)
+- Write paper (7)
 
+==> Deadline 29.10.

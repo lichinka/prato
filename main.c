@@ -1,3 +1,4 @@
+#include "performance/metric.h"
 #include "worker/coverage.h"
 #include "master/master.h"
 
@@ -86,6 +87,8 @@ int main (int argc, char *argv [])
     if (G_parser (argc, argv) < 0)
 	    exit (EXIT_FAILURE);
 
+    measure_time ("Read input data");
+
     //
     // read the whole configuration INI file into memory
     //
@@ -109,6 +112,8 @@ int main (int argc, char *argv [])
                    params);
     fclose (ini_file_stream);
 
+    measure_time (NULL);
+
     //
     // ... and execute it
     //
@@ -128,14 +133,15 @@ int main (int argc, char *argv [])
         if (params->ntx > 1)
             fprintf (stderr, "WARNING Only the first transmitter will be processed\n");
         coverage (params,
-                  &(params->tx_params[0]),
+                  params->tx_params,
                   ericsson_params,
                   4);
         //
         // calculation finished, do we have to write the raster output?
         //
         if (output->answer == NULL)
-            output_to_stdout (params);
+            output_to_stdout (params,
+                              params->tx_params);
         else
         {
             int outfd, row, col;

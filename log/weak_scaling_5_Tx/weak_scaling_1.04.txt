@@ -1,0 +1,14 @@
+Spawning 1 workers to process 5 transmitters ...
+TIME:	Dynamic process spawning	0.28000 sec
+TIME:	Common data distribution	18.05000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (0)	22.46000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.62000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.56000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.55000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.57000 sec
+Process took 93 sec

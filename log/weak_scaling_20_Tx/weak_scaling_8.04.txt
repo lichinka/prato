@@ -1,0 +1,327 @@
+Number of processors:	8
+Transmitters per processor:	20
+Processes per node:	2
+Spawning 8 workers to process 160 transmitters ...
+TIME:	Dynamic process spawning	1.31000 sec
+TIME:	Common data distribution	41.70000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (0)	19.83000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (6)	22.93000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (3)	22.93000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (7)	22.93000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (2)	23.21000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (1)	24.61000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (5)	26.83000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (4)	26.86000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.21000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.72000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.80000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.78000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.71000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.74000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.74000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.21000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.73000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.69000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.80000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.55000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.80000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.72000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.73000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.23000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.80000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.56000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.71000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.79000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.80000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.78000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.77000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.42000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.79000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.79000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.72000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.73000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.79000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.21000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.74000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.75000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.78000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.72000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.72000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.80000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.21000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.82000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.68000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.53000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.72000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.79000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.74000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.23000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.80000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.56000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.68000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.78000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.80000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.79000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.79000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.77000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.42000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.78000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.76000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.72000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.79000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.72000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.73000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.78000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.20000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.80000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.76000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.76000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.79000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.73000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.73000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.74000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.80000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.21000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.73000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.82000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.69000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.80000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.72000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.73000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.66000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.23000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.79000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.56000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.71000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.81000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.79000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.79000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.77000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.42000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.74000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.80000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.72000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.78000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.72000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.73000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.78000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.20000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.74000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.76000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.78000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.73000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.54000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.72000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.79000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.73000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.22000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.81000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.55000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.72000 sec
+TIME:	Transmitter data send (5)	0.00000 sec
+TIME:	Calculation and result dump (2)	10.74000 sec
+TIME:	Transmitter data send (2)	0.00000 sec
+TIME:	Calculation and result dump (3)	10.79000 sec
+TIME:	Transmitter data send (3)	0.00000 sec
+TIME:	Calculation and result dump (6)	10.73000 sec
+TIME:	Transmitter data send (6)	0.00000 sec
+TIME:	Calculation and result dump (7)	10.73000 sec
+TIME:	Transmitter data send (7)	0.00000 sec
+TIME:	Calculation and result dump (1)	10.67000 sec
+TIME:	Transmitter data send (1)	0.00000 sec
+TIME:	Calculation and result dump (4)	10.24000 sec
+TIME:	Transmitter data send (4)	0.00000 sec
+TIME:	Calculation and result dump (0)	10.55000 sec
+TIME:	Transmitter data send (0)	0.00000 sec
+TIME:	Calculation and result dump (5)	10.81000 sec
+TIME:	Calculation and result dump (2)	10.68000 sec
+TIME:	Calculation and result dump (3)	10.78000 sec
+TIME:	Calculation and result dump (6)	10.81000 sec
+TIME:	Calculation and result dump (7)	10.79000 sec
+TIME:	Calculation and result dump (1)	10.68000 sec
+TIME:	Calculation and result dump (4)	10.64000 sec
+TIME:	Calculation and result dump (0)	10.51000 sec
+Process took 283 sec

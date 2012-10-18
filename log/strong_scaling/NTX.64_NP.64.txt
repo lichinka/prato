@@ -1,0 +1,135 @@
+Number of processors:	64
+Transmitters per processor:	1
+Processes per node:	2
+Spawning 64 workers to process 64 transmitters ...
+TIME:9.00000000:	Dynamic process spawning	1.44000000 sec
+TIME:54.00000000:	Common data distribution	44.16000000 sec
+TIME:54.00000000:	Transmitter data send (0)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (33)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (1)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (2)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (3)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (4)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (5)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (6)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (7)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (8)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (9)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (10)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (11)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (12)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (13)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (14)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (15)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (16)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (17)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (18)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (19)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (20)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (21)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (22)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (23)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (24)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (25)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (26)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (27)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (28)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (29)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (30)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (31)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (32)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (34)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (35)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (36)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (37)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (38)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (39)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (40)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (41)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (42)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (43)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (44)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (45)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (46)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (47)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (48)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (49)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (50)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (51)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (52)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (53)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (54)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (55)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (56)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (57)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (58)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (59)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (60)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (61)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (62)	0.00000000 sec
+TIME:54.00000000:	Transmitter data send (63)	0.00000000 sec
+TIME:73.00000000:	Calculation and result dump (34)	19.80000000 sec
+TIME:73.00000000:	Calculation and result dump (54)	19.82000000 sec
+TIME:73.00000000:	Calculation and result dump (44)	19.82000000 sec
+TIME:73.00000000:	Calculation and result dump (23)	19.82000000 sec
+TIME:73.00000000:	Calculation and result dump (3)	19.82000000 sec
+TIME:74.00000000:	Calculation and result dump (13)	20.25000000 sec
+TIME:76.00000000:	Calculation and result dump (40)	22.89000000 sec
+TIME:76.00000000:	Calculation and result dump (19)	22.89000000 sec
+TIME:76.00000000:	Calculation and result dump (48)	22.90000000 sec
+TIME:76.00000000:	Calculation and result dump (8)	22.90000000 sec
+TIME:76.00000000:	Calculation and result dump (29)	22.90000000 sec
+TIME:76.00000000:	Calculation and result dump (7)	22.91000000 sec
+TIME:76.00000000:	Calculation and result dump (18)	22.92000000 sec
+TIME:76.00000000:	Calculation and result dump (50)	22.92000000 sec
+TIME:76.00000000:	Calculation and result dump (60)	22.92000000 sec
+TIME:76.00000000:	Calculation and result dump (9)	22.92000000 sec
+TIME:76.00000000:	Calculation and result dump (0)	22.95000000 sec
+TIME:76.00000000:	Calculation and result dump (28)	22.94000000 sec
+TIME:76.00000000:	Calculation and result dump (38)	22.94000000 sec
+TIME:76.00000000:	Calculation and result dump (59)	22.94000000 sec
+TIME:77.00000000:	Calculation and result dump (49)	22.98000000 sec
+TIME:77.00000000:	Calculation and result dump (17)	23.02000000 sec
+TIME:77.00000000:	Calculation and result dump (27)	23.14000000 sec
+TIME:77.00000000:	Calculation and result dump (2)	23.16000000 sec
+TIME:77.00000000:	Calculation and result dump (22)	23.17000000 sec
+TIME:77.00000000:	Calculation and result dump (12)	23.19000000 sec
+TIME:77.00000000:	Calculation and result dump (33)	23.20000000 sec
+TIME:77.00000000:	Calculation and result dump (51)	23.20000000 sec
+TIME:77.00000000:	Calculation and result dump (1)	23.20000000 sec
+TIME:77.00000000:	Calculation and result dump (30)	23.21000000 sec
+TIME:77.00000000:	Calculation and result dump (53)	23.21000000 sec
+TIME:77.00000000:	Calculation and result dump (21)	23.21000000 sec
+TIME:77.00000000:	Calculation and result dump (11)	23.22000000 sec
+TIME:77.00000000:	Calculation and result dump (63)	23.22000000 sec
+TIME:77.00000000:	Calculation and result dump (43)	23.23000000 sec
+TIME:77.00000000:	Calculation and result dump (10)	23.24000000 sec
+TIME:77.00000000:	Calculation and result dump (52)	23.24000000 sec
+TIME:77.00000000:	Calculation and result dump (42)	23.26000000 sec
+TIME:77.00000000:	Calculation and result dump (20)	23.26000000 sec
+TIME:77.00000000:	Calculation and result dump (62)	23.30000000 sec
+TIME:77.00000000:	Calculation and result dump (31)	23.31000000 sec
+TIME:77.00000000:	Calculation and result dump (32)	23.31000000 sec
+TIME:77.00000000:	Calculation and result dump (61)	23.31000000 sec
+TIME:77.00000000:	Calculation and result dump (39)	23.62000000 sec
+TIME:77.00000000:	Calculation and result dump (41)	23.94000000 sec
+TIME:78.00000000:	Calculation and result dump (58)	24.21000000 sec
+TIME:78.00000000:	Calculation and result dump (6)	24.57000000 sec
+TIME:78.00000000:	Calculation and result dump (37)	24.58000000 sec
+TIME:78.00000000:	Calculation and result dump (16)	24.58000000 sec
+TIME:78.00000000:	Calculation and result dump (57)	24.58000000 sec
+TIME:78.00000000:	Calculation and result dump (26)	24.71000000 sec
+TIME:78.00000000:	Calculation and result dump (47)	24.85000000 sec
+TIME:80.00000000:	Calculation and result dump (45)	26.74000000 sec
+TIME:80.00000000:	Calculation and result dump (55)	26.75000000 sec
+TIME:80.00000000:	Calculation and result dump (35)	26.78000000 sec
+TIME:80.00000000:	Calculation and result dump (14)	26.81000000 sec
+TIME:80.00000000:	Calculation and result dump (36)	26.82000000 sec
+TIME:80.00000000:	Calculation and result dump (56)	26.83000000 sec
+TIME:80.00000000:	Calculation and result dump (4)	26.84000000 sec
+TIME:80.00000000:	Calculation and result dump (24)	26.84000000 sec
+TIME:80.00000000:	Calculation and result dump (46)	26.86000000 sec
+TIME:80.00000000:	Calculation and result dump (25)	26.86000000 sec
+TIME:80.00000000:	Calculation and result dump (5)	26.87000000 sec
+TIME:81.00000000:	Calculation and result dump (15)	27.07000000 sec
+Process took 82 sec

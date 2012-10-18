@@ -1,10 +1,16 @@
 #!/bin/bash
 
 
-for i in $(seq 0 255); do 
-	echo -n "${i}     "
-	SUM=$(grep 'result' log/weak_scaling_256.txt | cut -d '(' -f2 | grep "^${i})" - | cut -d')' -f2 | sed -e 's/sec/+/g' | tr -d '\n' | sed -e 's/+$/\n/g' | tr -d '[:blank:]' | bc)
-	COUNT=$(grep 'result' log/weak_scaling_256.txt | cut -d '(' -f2 | grep "^${i})" - | wc -l)
-	AVG=$(echo -e "scale=10\n ${SUM}/${COUNT}" | bc)
-	echo "${SUM}	${COUNT}	${AVG}"
-done
+NTX=$1
+LOG_FILES=$@
+
+if [ $# -gt 2 ]; then
+    for LOG in ${@:2}; do
+        NP=$( grep 'Number of processors' ${LOG} | tr -dc '[:digit:]' )
+        TIME=$( cat ${LOG} | grep 'Process took' | tr -d '[:alpha:]' | tr -d '[:blank:]' )
+        echo "${NTX}	${NP}	${TIME}"
+    done
+else
+    echo "Usage:"
+    echo -e "\t $0 [number of transmitters] [log files ...]"
+fi
