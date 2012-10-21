@@ -1,0 +1,520 @@
+Number of processors:	8
+Transmitters per processor:	32
+Processes per node:	4
+TIME:1350574545.73973298:	Read input data	9.20887500 sec
+Spawning 8 workers to process 256 transmitters ...
+TIME:1350574547.15925407:	Dynamic process spawning	1.41949300 sec
+TIME:1350574585.30900097:	Common data distribution	38.14783600 sec
+TIME:1350574585.30908203:	Transmitter data send (0)	0.00000600 sec
+TIME:1350574585.30943203:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574585.30944610:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574585.30945706:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574585.30946994:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574585.30948210:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574585.30949903:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574585.30951095:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574594.58837700:	Calculation and result dump (6)	9.27887400 sec
+TIME:1350574594.58839297:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574595.41631794:	Calculation and result dump (0)	10.10723100 sec
+TIME:1350574595.41633105:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574595.43025589:	Calculation and result dump (2)	10.12081800 sec
+TIME:1350574595.43026900:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574595.43213105:	Calculation and result dump (1)	10.12268100 sec
+TIME:1350574595.43214393:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574595.45663095:	Calculation and result dump (5)	10.14714500 sec
+TIME:1350574595.45664501:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574595.46813011:	Calculation and result dump (3)	10.15866900 sec
+TIME:1350574595.46814299:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574595.47003508:	Calculation and result dump (4)	10.16056100 sec
+TIME:1350574595.47004795:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574596.24680996:	Calculation and result dump (7)	10.93729500 sec
+TIME:1350574596.24682403:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574602.77673602:	Calculation and result dump (6)	8.18833900 sec
+TIME:1350574602.77675009:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574603.66251493:	Calculation and result dump (2)	8.23224200 sec
+TIME:1350574603.66252804:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574603.66959000:	Calculation and result dump (1)	8.23744200 sec
+TIME:1350574603.66960192:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574603.67332411:	Calculation and result dump (5)	8.21667500 sec
+TIME:1350574603.67333603:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574603.68143702:	Calculation and result dump (0)	8.26510200 sec
+TIME:1350574603.68144989:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574603.70336008:	Calculation and result dump (3)	8.23521300 sec
+TIME:1350574603.70337200:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574603.70476198:	Calculation and result dump (4)	8.23471000 sec
+TIME:1350574603.70477390:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574604.47024393:	Calculation and result dump (7)	8.22341600 sec
+TIME:1350574604.47025609:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574610.57499194:	Calculation and result dump (6)	7.79823800 sec
+TIME:1350574610.57500601:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574611.89363503:	Calculation and result dump (2)	8.23110300 sec
+TIME:1350574611.89364910:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574611.91369510:	Calculation and result dump (0)	8.23224100 sec
+TIME:1350574611.91370702:	Transmitter data send (0)	0.00000300 sec
+TIME:1350574611.91642809:	Calculation and result dump (1)	8.24682200 sec
+TIME:1350574611.91644001:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574611.92207503:	Calculation and result dump (5)	8.24873500 sec
+TIME:1350574611.92208695:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574611.94546795:	Calculation and result dump (4)	8.24069000 sec
+TIME:1350574611.94548106:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574611.94924998:	Calculation and result dump (3)	8.24587400 sec
+TIME:1350574611.94926310:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574612.69725108:	Calculation and result dump (7)	8.22699100 sec
+TIME:1350574612.69726491:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574618.73867297:	Calculation and result dump (6)	8.16366300 sec
+TIME:1350574618.73868608:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574619.77926207:	Calculation and result dump (0)	7.86555100 sec
+TIME:1350574619.77927494:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574620.11974192:	Calculation and result dump (2)	8.22608900 sec
+TIME:1350574620.11975598:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574620.14623499:	Calculation and result dump (1)	8.22979100 sec
+TIME:1350574620.14624691:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574620.16126895:	Calculation and result dump (5)	8.23917800 sec
+TIME:1350574620.16128206:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574620.18750501:	Calculation and result dump (3)	8.23823800 sec
+TIME:1350574620.18751693:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574620.21009707:	Calculation and result dump (4)	8.26461200 sec
+TIME:1350574620.21010900:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574620.93522406:	Calculation and result dump (7)	8.23795500 sec
+TIME:1350574620.93523693:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574626.90114403:	Calculation and result dump (6)	8.16245400 sec
+TIME:1350574626.90116000:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574628.01024795:	Calculation and result dump (5)	7.84896200 sec
+TIME:1350574628.01026106:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574628.01463509:	Calculation and result dump (0)	8.23535600 sec
+TIME:1350574628.01464701:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574628.34135795:	Calculation and result dump (2)	8.22159800 sec
+TIME:1350574628.34137106:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574628.36151290:	Calculation and result dump (1)	8.21526200 sec
+TIME:1350574628.36152601:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574628.41653299:	Calculation and result dump (3)	8.22901200 sec
+TIME:1350574628.41654611:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574628.47066593:	Calculation and result dump (4)	8.26055300 sec
+TIME:1350574628.47067904:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574629.18906593:	Calculation and result dump (7)	8.25382500 sec
+TIME:1350574629.18908000:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574635.07189107:	Calculation and result dump (6)	8.17072700 sec
+TIME:1350574635.07190490:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574636.24306011:	Calculation and result dump (5)	8.23279500 sec
+TIME:1350574636.24307394:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574636.25070095:	Calculation and result dump (0)	8.23605000 sec
+TIME:1350574636.25071406:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574636.33659506:	Calculation and result dump (4)	7.86591200 sec
+TIME:1350574636.33660698:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574636.56575894:	Calculation and result dump (2)	8.22438400 sec
+TIME:1350574636.56577110:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574636.57841396:	Calculation and result dump (1)	8.21688400 sec
+TIME:1350574636.57842588:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574636.64057398:	Calculation and result dump (3)	8.22402400 sec
+TIME:1350574636.64058590:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574637.41670394:	Calculation and result dump (7)	8.22762000 sec
+TIME:1350574637.41671610:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574643.25897503:	Calculation and result dump (6)	8.18706600 sec
+TIME:1350574643.25898790:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574644.48759007:	Calculation and result dump (0)	8.23687200 sec
+TIME:1350574644.48760295:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574644.49028707:	Calculation and result dump (5)	8.24720900 sec
+TIME:1350574644.49029994:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574644.58757806:	Calculation and result dump (4)	8.25096700 sec
+TIME:1350574644.58759093:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574644.79011202:	Calculation and result dump (2)	8.22433700 sec
+TIME:1350574644.79012489:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574644.79738593:	Calculation and result dump (1)	8.21895600 sec
+TIME:1350574644.79739809:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574644.86324596:	Calculation and result dump (3)	8.22265600 sec
+TIME:1350574644.86325908:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574645.64325809:	Calculation and result dump (7)	8.22653800 sec
+TIME:1350574645.64327097:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574651.05664396:	Calculation and result dump (6)	7.79765200 sec
+TIME:1350574651.05665708:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574652.72870898:	Calculation and result dump (5)	8.23840500 sec
+TIME:1350574652.72872210:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574652.72887206:	Calculation and result dump (0)	8.24126500 sec
+TIME:1350574652.72888303:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574652.81448388:	Calculation and result dump (4)	8.22688900 sec
+TIME:1350574652.81449699:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574653.01572394:	Calculation and result dump (2)	8.22559500 sec
+TIME:1350574653.01573610:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574653.02859902:	Calculation and result dump (1)	8.23119700 sec
+TIME:1350574653.02861094:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574653.09175491:	Calculation and result dump (3)	8.22849200 sec
+TIME:1350574653.09176803:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574653.87528491:	Calculation and result dump (7)	8.23201000 sec
+TIME:1350574653.87529707:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574659.22072506:	Calculation and result dump (6)	8.16406400 sec
+TIME:1350574659.22074008:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574660.59923792:	Calculation and result dump (0)	7.87035100 sec
+TIME:1350574660.59925103:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574660.94332409:	Calculation and result dump (5)	8.21459800 sec
+TIME:1350574660.94333792:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574661.05734801:	Calculation and result dump (4)	8.24284700 sec
+TIME:1350574661.05736089:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574661.26314211:	Calculation and result dump (2)	8.24740200 sec
+TIME:1350574661.26315498:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574661.27993107:	Calculation and result dump (1)	8.25131600 sec
+TIME:1350574661.27994299:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574661.31911492:	Calculation and result dump (3)	8.22734400 sec
+TIME:1350574661.31912804:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574662.11814809:	Calculation and result dump (7)	8.24284700 sec
+TIME:1350574662.11816096:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574667.38635802:	Calculation and result dump (6)	8.16561400 sec
+TIME:1350574667.38637209:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574668.84107399:	Calculation and result dump (0)	8.24181900 sec
+TIME:1350574668.84108591:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574669.12207294:	Calculation and result dump (2)	7.85891400 sec
+TIME:1350574669.12208605:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574669.15737009:	Calculation and result dump (5)	8.21402800 sec
+TIME:1350574669.15738201:	Transmitter data send (5)	0.00000300 sec
+TIME:1350574669.29316592:	Calculation and result dump (4)	8.23580100 sec
+TIME:1350574669.29317808:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574669.50510502:	Calculation and result dump (1)	8.22515700 sec
+TIME:1350574669.50511694:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574669.56770205:	Calculation and result dump (3)	8.24856900 sec
+TIME:1350574669.56771398:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574670.37865710:	Calculation and result dump (7)	8.26049200 sec
+TIME:1350574670.37866902:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574675.56225395:	Calculation and result dump (6)	8.17587800 sec
+TIME:1350574675.56226897:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574677.09014392:	Calculation and result dump (0)	8.24905400 sec
+TIME:1350574677.09015799:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574677.34884095:	Calculation and result dump (2)	8.22675100 sec
+TIME:1350574677.34885406:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574677.37400794:	Calculation and result dump (5)	8.21662200 sec
+TIME:1350574677.37402105:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574677.41941309:	Calculation and result dump (3)	7.85169500 sec
+TIME:1350574677.41942596:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574677.52692604:	Calculation and result dump (4)	8.23374400 sec
+TIME:1350574677.52693892:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574677.72689891:	Calculation and result dump (1)	8.22177800 sec
+TIME:1350574677.72691202:	Transmitter data send (1)	0.00000500 sec
+TIME:1350574678.60877299:	Calculation and result dump (7)	8.23010000 sec
+TIME:1350574678.60878611:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574683.75305510:	Calculation and result dump (6)	8.19078200 sec
+TIME:1350574683.75307012:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574685.26577902:	Calculation and result dump (0)	8.17561700 sec
+TIME:1350574685.26579189:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574685.57299709:	Calculation and result dump (2)	8.22413900 sec
+TIME:1350574685.57300901:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574685.60388803:	Calculation and result dump (5)	8.22986300 sec
+TIME:1350574685.60389996:	Transmitter data send (5)	0.00000300 sec
+TIME:1350574685.64364505:	Calculation and result dump (3)	8.22421500 sec
+TIME:1350574685.64365697:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574685.76460505:	Calculation and result dump (4)	8.23766200 sec
+TIME:1350574685.76461792:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574685.94872904:	Calculation and result dump (1)	8.22181300 sec
+TIME:1350574685.94874096:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574686.83738399:	Calculation and result dump (7)	8.22859400 sec
+TIME:1350574686.83739901:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574691.55546904:	Calculation and result dump (6)	7.80239500 sec
+TIME:1350574691.55548310:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574693.50588799:	Calculation and result dump (0)	8.24009200 sec
+TIME:1350574693.50590205:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574693.81989098:	Calculation and result dump (2)	8.24687800 sec
+TIME:1350574693.81990409:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574693.85334992:	Calculation and result dump (5)	8.24944600 sec
+TIME:1350574693.85336304:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574693.86764598:	Calculation and result dump (3)	8.22398500 sec
+TIME:1350574693.86765909:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574694.01781511:	Calculation and result dump (4)	8.25319300 sec
+TIME:1350574694.01782799:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574694.17413592:	Calculation and result dump (1)	8.22539100 sec
+TIME:1350574694.17414904:	Transmitter data send (1)	0.00000500 sec
+TIME:1350574695.06922603:	Calculation and result dump (7)	8.23182300 sec
+TIME:1350574695.06924009:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574699.72405505:	Calculation and result dump (6)	8.16856800 sec
+TIME:1350574699.72406912:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574701.67761993:	Calculation and result dump (2)	7.85771200 sec
+TIME:1350574701.67763400:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574701.74087906:	Calculation and result dump (0)	8.23497300 sec
+TIME:1350574701.74089098:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574702.07260394:	Calculation and result dump (5)	8.21923700 sec
+TIME:1350574702.07261610:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574702.11424398:	Calculation and result dump (3)	8.24658100 sec
+TIME:1350574702.11425710:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574702.24505901:	Calculation and result dump (4)	8.22722700 sec
+TIME:1350574702.24507189:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574702.39863610:	Calculation and result dump (1)	8.22448300 sec
+TIME:1350574702.39864802:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574703.31240392:	Calculation and result dump (7)	8.24316000 sec
+TIME:1350574703.31241703:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574707.89438105:	Calculation and result dump (6)	8.17030800 sec
+TIME:1350574707.89439511:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574709.90659189:	Calculation and result dump (2)	8.22895400 sec
+TIME:1350574709.90660596:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574709.96429610:	Calculation and result dump (3)	7.85003500 sec
+TIME:1350574709.96430802:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574709.96952105:	Calculation and result dump (0)	8.22862600 sec
+TIME:1350574709.96953392:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574710.28829002:	Calculation and result dump (5)	8.21567000 sec
+TIME:1350574710.28830290:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574710.48786902:	Calculation and result dump (4)	8.24279300 sec
+TIME:1350574710.48788190:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574710.64904189:	Calculation and result dump (1)	8.25039000 sec
+TIME:1350574710.64905500:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574711.57266998:	Calculation and result dump (7)	8.26024900 sec
+TIME:1350574711.57268405:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574716.07219005:	Calculation and result dump (6)	8.17779100 sec
+TIME:1350574716.07220888:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574718.14617705:	Calculation and result dump (2)	8.23956700 sec
+TIME:1350574718.14618993:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574718.19024706:	Calculation and result dump (3)	8.22593500 sec
+TIME:1350574718.19025898:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574718.20197797:	Calculation and result dump (0)	8.23244000 sec
+TIME:1350574718.20199108:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574718.50454807:	Calculation and result dump (5)	8.21624100 sec
+TIME:1350574718.50456095:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574718.51461792:	Calculation and result dump (1)	7.86555900 sec
+TIME:1350574718.51463008:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574718.72703195:	Calculation and result dump (4)	8.23914600 sec
+TIME:1350574718.72704411:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574719.80207109:	Calculation and result dump (7)	8.22938300 sec
+TIME:1350574719.80208397:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574724.26675105:	Calculation and result dump (6)	8.19453800 sec
+TIME:1350574724.26676512:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574726.40663409:	Calculation and result dump (2)	8.26044000 sec
+TIME:1350574726.40664911:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574726.41847992:	Calculation and result dump (3)	8.22821700 sec
+TIME:1350574726.41849303:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574726.44832206:	Calculation and result dump (0)	8.24632700 sec
+TIME:1350574726.44833493:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574726.72266698:	Calculation and result dump (5)	8.21810200 sec
+TIME:1350574726.72268009:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574726.74413991:	Calculation and result dump (1)	8.22950600 sec
+TIME:1350574726.74415207:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574726.96414208:	Calculation and result dump (4)	8.23709400 sec
+TIME:1350574726.96415496:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574728.03144503:	Calculation and result dump (7)	8.22935700 sec
+TIME:1350574728.03145790:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574732.07052302:	Calculation and result dump (6)	7.80375300 sec
+TIME:1350574732.07053709:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574734.62130308:	Calculation and result dump (0)	8.17296400 sec
+TIME:1350574734.62131596:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574734.63703609:	Calculation and result dump (2)	8.23038300 sec
+TIME:1350574734.63704801:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574734.66515088:	Calculation and result dump (3)	8.24665400 sec
+TIME:1350574734.66516304:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574734.94678092:	Calculation and result dump (5)	8.22409700 sec
+TIME:1350574734.94679308:	Transmitter data send (5)	0.00000300 sec
+TIME:1350574734.98578405:	Calculation and result dump (1)	8.24162700 sec
+TIME:1350574734.98579597:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574735.20913696:	Calculation and result dump (4)	8.24497800 sec
+TIME:1350574735.20915008:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574736.26185012:	Calculation and result dump (7)	8.23038800 sec
+TIME:1350574736.26186299:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574740.24657512:	Calculation and result dump (6)	8.17603400 sec
+TIME:1350574740.24658990:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574742.49996400:	Calculation and result dump (2)	7.86291200 sec
+TIME:1350574742.49997807:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574742.85234308:	Calculation and result dump (0)	8.23102300 sec
+TIME:1350574742.85235596:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574742.89953589:	Calculation and result dump (3)	8.23436900 sec
+TIME:1350574742.89954901:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574743.18902707:	Calculation and result dump (5)	8.24223000 sec
+TIME:1350574743.18903995:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574743.24320412:	Calculation and result dump (1)	8.25740400 sec
+TIME:1350574743.24321699:	Transmitter data send (1)	0.00000500 sec
+TIME:1350574743.45398903:	Calculation and result dump (4)	8.24483500 sec
+TIME:1350574743.45400190:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574744.50032997:	Calculation and result dump (7)	8.23846300 sec
+TIME:1350574744.50034308:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574748.42045593:	Calculation and result dump (6)	8.17386200 sec
+TIME:1350574748.42047095:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574750.73264289:	Calculation and result dump (2)	8.23266100 sec
+TIME:1350574750.73266196:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574751.04160905:	Calculation and result dump (5)	7.85256500 sec
+TIME:1350574751.04162312:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574751.07759404:	Calculation and result dump (0)	8.22523300 sec
+TIME:1350574751.07760692:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574751.12096691:	Calculation and result dump (3)	8.22141400 sec
+TIME:1350574751.12097907:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574751.47094011:	Calculation and result dump (1)	8.22771900 sec
+TIME:1350574751.47095203:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574751.71789289:	Calculation and result dump (4)	8.26388700 sec
+TIME:1350574751.71790504:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574752.75746799:	Calculation and result dump (7)	8.25712100 sec
+TIME:1350574752.75748110:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574756.60219502:	Calculation and result dump (6)	8.18172000 sec
+TIME:1350574756.60221100:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574758.97766209:	Calculation and result dump (2)	8.24499600 sec
+TIME:1350574758.97767496:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574759.26354408:	Calculation and result dump (5)	8.22191700 sec
+TIME:1350574759.26355696:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574759.30662107:	Calculation and result dump (0)	8.22901000 sec
+TIME:1350574759.30663395:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574759.34139991:	Calculation and result dump (3)	8.22041700 sec
+TIME:1350574759.34141302:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574759.59133911:	Calculation and result dump (4)	7.87343000 sec
+TIME:1350574759.59135199:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574759.69255495:	Calculation and result dump (1)	8.22159900 sec
+TIME:1350574759.69256806:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574760.98522305:	Calculation and result dump (7)	8.22773800 sec
+TIME:1350574760.98523688:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574764.80050707:	Calculation and result dump (6)	8.19829200 sec
+TIME:1350574764.80051994:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574767.24273705:	Calculation and result dump (2)	8.26505800 sec
+TIME:1350574767.24274993:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574767.48531604:	Calculation and result dump (5)	8.22175500 sec
+TIME:1350574767.48532891:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574767.54826593:	Calculation and result dump (0)	8.24162800 sec
+TIME:1350574767.54827809:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574767.56681895:	Calculation and result dump (3)	8.22540200 sec
+TIME:1350574767.56683111:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574767.83416510:	Calculation and result dump (4)	8.24280900 sec
+TIME:1350574767.83417797:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574767.91729808:	Calculation and result dump (1)	8.22472600 sec
+TIME:1350574767.91731095:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574769.21057701:	Calculation and result dump (7)	8.22533600 sec
+TIME:1350574769.21058989:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574772.60877991:	Calculation and result dump (6)	7.80825600 sec
+TIME:1350574772.60879397:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574775.47773504:	Calculation and result dump (2)	8.23498100 sec
+TIME:1350574775.47774696:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574775.71778893:	Calculation and result dump (0)	8.16950700 sec
+TIME:1350574775.71780205:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574775.73018408:	Calculation and result dump (5)	8.24485100 sec
+TIME:1350574775.73019600:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574775.79413295:	Calculation and result dump (3)	8.22729800 sec
+TIME:1350574775.79414606:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574776.09271407:	Calculation and result dump (4)	8.25853200 sec
+TIME:1350574776.09272695:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574776.14418006:	Calculation and result dump (1)	8.22686500 sec
+TIME:1350574776.14419198:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574777.43767500:	Calculation and result dump (7)	8.22708100 sec
+TIME:1350574777.43768811:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574780.78436899:	Calculation and result dump (6)	8.17557100 sec
+TIME:1350574780.78438306:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574783.57698202:	Calculation and result dump (0)	7.85917600 sec
+TIME:1350574783.57699490:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574783.70851803:	Calculation and result dump (2)	8.23076700 sec
+TIME:1350574783.70853090:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574783.95419097:	Calculation and result dump (5)	8.22398600 sec
+TIME:1350574783.95421004:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574784.03855896:	Calculation and result dump (3)	8.24440900 sec
+TIME:1350574784.03857207:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574784.32439089:	Calculation and result dump (4)	8.23166000 sec
+TIME:1350574784.32440400:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574784.36905289:	Calculation and result dump (1)	8.22485700 sec
+TIME:1350574784.36906505:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574785.67493105:	Calculation and result dump (7)	8.23723900 sec
+TIME:1350574785.67494392:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574788.96138096:	Calculation and result dump (6)	8.17699400 sec
+TIME:1350574788.96139407:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574791.81042695:	Calculation and result dump (0)	8.23342800 sec
+TIME:1350574791.81044102:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574791.88863492:	Calculation and result dump (3)	7.85005900 sec
+TIME:1350574791.88864708:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574791.93572211:	Calculation and result dump (2)	8.22718700 sec
+TIME:1350574791.93573403:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574792.17505193:	Calculation and result dump (5)	8.22083800 sec
+TIME:1350574792.17506504:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574792.57039905:	Calculation and result dump (4)	8.24599100 sec
+TIME:1350574792.57041097:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574792.61948490:	Calculation and result dump (1)	8.25041600 sec
+TIME:1350574792.61949706:	Transmitter data send (1)	0.00000300 sec
+TIME:1350574793.92924404:	Calculation and result dump (7)	8.25429600 sec
+TIME:1350574793.92925596:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574797.14655495:	Calculation and result dump (6)	8.18515700 sec
+TIME:1350574797.14656901:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574800.05202198:	Calculation and result dump (0)	8.24157700 sec
+TIME:1350574800.05203605:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574800.11198497:	Calculation and result dump (3)	8.22333400 sec
+TIME:1350574800.11199808:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574800.16341209:	Calculation and result dump (2)	8.22767400 sec
+TIME:1350574800.16342497:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574800.39707303:	Calculation and result dump (5)	8.22200400 sec
+TIME:1350574800.39708591:	Transmitter data send (5)	0.00000500 sec
+TIME:1350574800.48379588:	Calculation and result dump (1)	7.86429500 sec
+TIME:1350574800.48380899:	Transmitter data send (1)	0.00000500 sec
+TIME:1350574800.81157589:	Calculation and result dump (4)	8.24116100 sec
+TIME:1350574800.81158805:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574802.15341401:	Calculation and result dump (7)	8.22415400 sec
+TIME:1350574802.15342808:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574805.34625697:	Calculation and result dump (6)	8.19968400 sec
+TIME:1350574805.34626889:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574808.22234297:	Calculation and result dump (0)	8.17030300 sec
+TIME:1350574808.22235703:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574808.33894300:	Calculation and result dump (3)	8.22694100 sec
+TIME:1350574808.33895612:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574808.40242600:	Calculation and result dump (2)	8.23899700 sec
+TIME:1350574808.40243793:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574808.62141800:	Calculation and result dump (5)	8.22432800 sec
+TIME:1350574808.62142992:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574808.70877504:	Calculation and result dump (1)	8.22496200 sec
+TIME:1350574808.70878696:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574809.04996109:	Calculation and result dump (4)	8.23836900 sec
+TIME:1350574809.04997301:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574810.37642002:	Calculation and result dump (7)	8.22298800 sec
+TIME:1350574810.37643290:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574813.15174699:	Calculation and result dump (6)	7.80547400 sec
+TIME:1350574813.15176201:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574816.45748711:	Calculation and result dump (0)	8.23512600 sec
+TIME:1350574816.45750093:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574816.57968092:	Calculation and result dump (3)	8.24072100 sec
+TIME:1350574816.57969403:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574816.66195607:	Calculation and result dump (2)	8.25951400 sec
+TIME:1350574816.66196895:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574816.85004711:	Calculation and result dump (5)	8.22861300 sec
+TIME:1350574816.85005999:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574816.94515896:	Calculation and result dump (1)	8.23636800 sec
+TIME:1350574816.94517207:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574817.29446006:	Calculation and result dump (4)	8.24448300 sec
+TIME:1350574817.29447293:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574818.60116005:	Calculation and result dump (7)	8.22472300 sec
+TIME:1350574818.60117292:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574821.32433391:	Calculation and result dump (6)	8.17256800 sec
+TIME:1350574821.32434797:	Transmitter data send (6)	0.00000500 sec
+TIME:1350574824.42901301:	Calculation and result dump (3)	7.84931500 sec
+TIME:1350574824.42902589:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574824.68805003:	Calculation and result dump (0)	8.23054500 sec
+TIME:1350574824.68806291:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574824.89201093:	Calculation and result dump (2)	8.23003800 sec
+TIME:1350574824.89202309:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574825.09755707:	Calculation and result dump (5)	8.24749300 sec
+TIME:1350574825.09756994:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574825.20064902:	Calculation and result dump (1)	8.25547300 sec
+TIME:1350574825.20066094:	Transmitter data send (1)	0.00000400 sec
+TIME:1350574825.53709006:	Calculation and result dump (4)	8.24261300 sec
+TIME:1350574825.53710294:	Transmitter data send (4)	0.00000400 sec
+TIME:1350574826.83633900:	Calculation and result dump (7)	8.23516200 sec
+TIME:1350574826.83635211:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574829.49908304:	Calculation and result dump (6)	8.17473100 sec
+TIME:1350574829.49909592:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574832.65928602:	Calculation and result dump (3)	8.23025600 sec
+TIME:1350574832.65930009:	Transmitter data send (3)	0.00000500 sec
+TIME:1350574832.91424203:	Calculation and result dump (0)	8.22617500 sec
+TIME:1350574832.91425610:	Transmitter data send (0)	0.00000500 sec
+TIME:1350574832.95516706:	Calculation and result dump (5)	7.85759300 sec
+TIME:1350574832.95517993:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574833.11396503:	Calculation and result dump (2)	8.22193800 sec
+TIME:1350574833.11397791:	Transmitter data send (2)	0.00000500 sec
+TIME:1350574833.42759609:	Calculation and result dump (1)	8.22693100 sec
+TIME:1350574833.42760897:	Transmitter data send (1)	0.00000500 sec
+TIME:1350574833.79723191:	Calculation and result dump (4)	8.26012500 sec
+TIME:1350574833.79724503:	Transmitter data send (4)	0.00000500 sec
+TIME:1350574835.09021997:	Calculation and result dump (7)	8.25386400 sec
+TIME:1350574835.09023309:	Transmitter data send (7)	0.00000500 sec
+TIME:1350574837.68233895:	Calculation and result dump (6)	8.18323900 sec
+TIME:1350574837.68235207:	Transmitter data send (6)	0.00000400 sec
+TIME:1350574840.90146899:	Calculation and result dump (3)	8.24216500 sec
+TIME:1350574840.90148211:	Transmitter data send (3)	0.00000400 sec
+TIME:1350574841.14210200:	Calculation and result dump (0)	8.22784200 sec
+TIME:1350574841.14211512:	Transmitter data send (0)	0.00000400 sec
+TIME:1350574841.18315911:	Calculation and result dump (5)	8.22797500 sec
+TIME:1350574841.18317103:	Transmitter data send (5)	0.00000400 sec
+TIME:1350574841.33952594:	Calculation and result dump (2)	8.22554400 sec
+TIME:1350574841.33953905:	Transmitter data send (2)	0.00000400 sec
+TIME:1350574841.64836407:	Calculation and result dump (1)	8.22075100 sec
+TIME:1350574841.64837599:	Transmitter data send (1)	0.00000300 sec
+TIME:1350574841.66568303:	Calculation and result dump (4)	7.86843400 sec
+TIME:1350574841.66569495:	Transmitter data send (4)	0.00000300 sec
+TIME:1350574843.31590509:	Calculation and result dump (7)	8.22566800 sec
+TIME:1350574843.31591702:	Transmitter data send (7)	0.00000400 sec
+TIME:1350574845.88218307:	Calculation and result dump (6)	8.19982600 sec
+TIME:1350574849.06432199:	Calculation and result dump (5)	7.88114700 sec
+TIME:1350574849.15676498:	Calculation and result dump (3)	8.25527900 sec
+TIME:1350574849.36796689:	Calculation and result dump (0)	8.22584800 sec
+TIME:1350574849.47940993:	Calculation and result dump (4)	7.81371100 sec
+TIME:1350574849.54033709:	Calculation and result dump (2)	8.20079400 sec
+TIME:1350574849.80497289:	Calculation and result dump (1)	8.15659200 sec
+TIME:1350574850.86734605:	Calculation and result dump (7)	7.55142500 sec
+Process took 315 sec

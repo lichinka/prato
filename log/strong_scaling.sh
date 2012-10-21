@@ -7,7 +7,12 @@ NP_NODE=$4
 
 if [ -n "${HFILE}" ] && [ -n "${NTX}" ] && [ -n "${NP}" ] && [ -n "${NP_NODE}" ]; then
 	echo -e "localhost	slots=1\n" > ${HFILE}
-	NODES=$( echo "${NP}/${NP_NODE}" | bc )
+	if [ ${NP} -lt ${NP_NODE} ]; then
+		NODES=1
+		NP_NODE=${NP}
+	else
+		NODES=$(echo "${NP}/${NP_NODE}" | bc)
+	fi
 	for h in $(grep -v '^#' ~/hosts.20121003 | head -n ${NODES}); 
 	do 
 		echo "${h}        slots=${NP_NODE}" >> ${HFILE}

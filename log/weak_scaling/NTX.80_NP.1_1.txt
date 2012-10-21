@@ -1,0 +1,168 @@
+Number of processors:	1
+Transmitters per processor:	80
+Processes per node:	1
+TIME:1350548384.45387506:	Read input data	9.17529500 sec
+Spawning 1 workers to process 80 transmitters ...
+TIME:1350548384.85234308:	Dynamic process spawning	0.39843800 sec
+TIME:1350548402.90811896:	Common data distribution	18.05540400 sec
+TIME:1350548402.90818310:	Transmitter data send (0)	0.00000600 sec
+TIME:1350548410.72436309:	Calculation and result dump (0)	7.81617500 sec
+TIME:1350548410.72437692:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548417.61107492:	Calculation and result dump (0)	6.88669300 sec
+TIME:1350548417.61108994:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548424.51202607:	Calculation and result dump (0)	6.90093200 sec
+TIME:1350548424.51203990:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548431.42204499:	Calculation and result dump (0)	6.91000100 sec
+TIME:1350548431.42205906:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548438.30778003:	Calculation and result dump (0)	6.88571700 sec
+TIME:1350548438.30779409:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548445.19967389:	Calculation and result dump (0)	6.89187600 sec
+TIME:1350548445.19968891:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548452.07931709:	Calculation and result dump (0)	6.87962300 sec
+TIME:1350548452.07933211:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548458.96362805:	Calculation and result dump (0)	6.88429200 sec
+TIME:1350548458.96364188:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548465.84364009:	Calculation and result dump (0)	6.87999400 sec
+TIME:1350548465.84366608:	Transmitter data send (0)	0.00000700 sec
+TIME:1350548472.72456002:	Calculation and result dump (0)	6.88088900 sec
+TIME:1350548472.72457290:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548479.29676008:	Calculation and result dump (0)	6.57218200 sec
+TIME:1350548479.29677391:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548486.18551707:	Calculation and result dump (0)	6.88873800 sec
+TIME:1350548486.18553090:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548493.08685803:	Calculation and result dump (0)	6.90132200 sec
+TIME:1350548493.08687210:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548499.96441889:	Calculation and result dump (0)	6.87754300 sec
+TIME:1350548499.96443200:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548506.85062194:	Calculation and result dump (0)	6.88618500 sec
+TIME:1350548506.85063601:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548513.74360704:	Calculation and result dump (0)	6.89296700 sec
+TIME:1350548513.74362111:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548520.62453294:	Calculation and result dump (0)	6.88090800 sec
+TIME:1350548520.62454796:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548527.51060390:	Calculation and result dump (0)	6.88605200 sec
+TIME:1350548527.51061797:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548534.39024591:	Calculation and result dump (0)	6.87962300 sec
+TIME:1350548534.39025998:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548541.27422810:	Calculation and result dump (0)	6.88396400 sec
+TIME:1350548541.27424097:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548547.84674191:	Calculation and result dump (0)	6.57249700 sec
+TIME:1350548547.84675598:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548554.73505211:	Calculation and result dump (0)	6.88829200 sec
+TIME:1350548554.73506594:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548561.63683009:	Calculation and result dump (0)	6.90176000 sec
+TIME:1350548561.63684511:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548568.51378989:	Calculation and result dump (0)	6.87694100 sec
+TIME:1350548568.51380396:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548575.40009904:	Calculation and result dump (0)	6.88629100 sec
+TIME:1350548575.40011311:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548582.29293609:	Calculation and result dump (0)	6.89281900 sec
+TIME:1350548582.29294991:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548589.17277193:	Calculation and result dump (0)	6.87981800 sec
+TIME:1350548589.17278695:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548596.05928397:	Calculation and result dump (0)	6.88649300 sec
+TIME:1350548596.05929804:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548602.93884706:	Calculation and result dump (0)	6.87954500 sec
+TIME:1350548602.93886089:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548609.82337594:	Calculation and result dump (0)	6.88451100 sec
+TIME:1350548609.82339001:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548616.39626288:	Calculation and result dump (0)	6.57286900 sec
+TIME:1350548616.39627600:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548623.28504896:	Calculation and result dump (0)	6.88876900 sec
+TIME:1350548623.28506303:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548630.18632603:	Calculation and result dump (0)	6.90125900 sec
+TIME:1350548630.18633890:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548637.06382108:	Calculation and result dump (0)	6.87747800 sec
+TIME:1350548637.06383491:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548643.95115495:	Calculation and result dump (0)	6.88731600 sec
+TIME:1350548643.95116806:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548650.84438705:	Calculation and result dump (0)	6.89321400 sec
+TIME:1350548650.84440088:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548657.72495699:	Calculation and result dump (0)	6.88055100 sec
+TIME:1350548657.72497010:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548664.61154604:	Calculation and result dump (0)	6.88657200 sec
+TIME:1350548664.61156011:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548671.49141502:	Calculation and result dump (0)	6.87985000 sec
+TIME:1350548671.49142790:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548678.37585402:	Calculation and result dump (0)	6.88442100 sec
+TIME:1350548678.37588096:	Transmitter data send (0)	0.00000800 sec
+TIME:1350548684.94879603:	Calculation and result dump (0)	6.57291000 sec
+TIME:1350548684.94881010:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548691.83750010:	Calculation and result dump (0)	6.88868600 sec
+TIME:1350548691.83751512:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548698.73916292:	Calculation and result dump (0)	6.90164400 sec
+TIME:1350548698.73917603:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548705.61693311:	Calculation and result dump (0)	6.87775200 sec
+TIME:1350548705.61695099:	Transmitter data send (0)	0.00000600 sec
+TIME:1350548712.50326705:	Calculation and result dump (0)	6.88631200 sec
+TIME:1350548712.50328112:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548719.39654994:	Calculation and result dump (0)	6.89326500 sec
+TIME:1350548719.39656401:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548726.27741289:	Calculation and result dump (0)	6.88084500 sec
+TIME:1350548726.27742600:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548733.16336989:	Calculation and result dump (0)	6.88593900 sec
+TIME:1350548733.16338396:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548740.04392910:	Calculation and result dump (0)	6.88054100 sec
+TIME:1350548740.04394293:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548746.92852497:	Calculation and result dump (0)	6.88457800 sec
+TIME:1350548746.92853808:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548753.50186491:	Calculation and result dump (0)	6.57332300 sec
+TIME:1350548753.50187898:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548760.39051390:	Calculation and result dump (0)	6.88863100 sec
+TIME:1350548760.39052701:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548767.29194689:	Calculation and result dump (0)	6.90141600 sec
+TIME:1350548767.29196095:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548774.19474697:	Calculation and result dump (0)	6.90278200 sec
+TIME:1350548774.19476008:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548781.08102393:	Calculation and result dump (0)	6.88626000 sec
+TIME:1350548781.08103800:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548787.97419691:	Calculation and result dump (0)	6.89315500 sec
+TIME:1350548787.97421098:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548794.85425496:	Calculation and result dump (0)	6.88003900 sec
+TIME:1350548794.85426903:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548801.74133801:	Calculation and result dump (0)	6.88706400 sec
+TIME:1350548801.74135089:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548808.62116504:	Calculation and result dump (0)	6.87981000 sec
+TIME:1350548808.62117910:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548815.50514793:	Calculation and result dump (0)	6.88396500 sec
+TIME:1350548815.50516105:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548822.07753491:	Calculation and result dump (0)	6.57237000 sec
+TIME:1350548822.07754898:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548828.96632910:	Calculation and result dump (0)	6.88877600 sec
+TIME:1350548828.96634293:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548835.86766291:	Calculation and result dump (0)	6.90131600 sec
+TIME:1350548835.86767697:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548842.77066803:	Calculation and result dump (0)	6.90298700 sec
+TIME:1350548842.77068210:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548849.65799093:	Calculation and result dump (0)	6.88730500 sec
+TIME:1350548849.65800500:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548856.55157495:	Calculation and result dump (0)	6.89356600 sec
+TIME:1350548856.55158901:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548863.43216896:	Calculation and result dump (0)	6.88057600 sec
+TIME:1350548863.43218398:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548870.31840396:	Calculation and result dump (0)	6.88621600 sec
+TIME:1350548870.31841803:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548877.19808507:	Calculation and result dump (0)	6.87966300 sec
+TIME:1350548877.19809890:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548884.08218288:	Calculation and result dump (0)	6.88408000 sec
+TIME:1350548884.08219695:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548890.65486002:	Calculation and result dump (0)	6.57265300 sec
+TIME:1350548890.65487409:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548897.54330802:	Calculation and result dump (0)	6.88843000 sec
+TIME:1350548897.54332209:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548904.44490099:	Calculation and result dump (0)	6.90157500 sec
+TIME:1350548904.44491410:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548911.34851909:	Calculation and result dump (0)	6.90360100 sec
+TIME:1350548911.34853292:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548918.23525405:	Calculation and result dump (0)	6.88671700 sec
+TIME:1350548918.23526812:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548925.12904310:	Calculation and result dump (0)	6.89377100 sec
+TIME:1350548925.12905693:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548932.00866890:	Calculation and result dump (0)	6.87960800 sec
+TIME:1350548932.00868201:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548938.89490199:	Calculation and result dump (0)	6.88621600 sec
+TIME:1350548938.89491606:	Transmitter data send (0)	0.00000500 sec
+TIME:1350548945.77451897:	Calculation and result dump (0)	6.87959900 sec
+TIME:1350548945.77453303:	Transmitter data send (0)	0.00000400 sec
+TIME:1350548952.65913200:	Calculation and result dump (0)	6.88459500 sec
+Process took 577 sec
