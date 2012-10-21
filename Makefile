@@ -4,7 +4,7 @@ DIRS 	= master worker performance
 BIN		= r.coverage
 CFLAGS 	= $(PRJCFLAGS) 
 INCS 	= $(PRJINCS)
-LIBS 	= $(PRJLIBS) -L. -lworker -lperformance
+LIBS 	= $(PRJLIBS) -L. -lworker -lperformance -lOpenCL
 SRCS    = $(wildcard *.c) $(wildcard master/*.c)
 OBJS    = $(SRCS:.c=.o)
 OBJLIBS = libworker.so libperformance.so

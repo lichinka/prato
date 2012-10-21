@@ -2,7 +2,6 @@
 
 
 
-
 /**
  * Reads the kernel source file from and saves it in the output parameter,
  * returning the number of bytes read.
@@ -40,37 +39,135 @@ static int read_kernel_file (const char *file_name,
  */
 static void print_opencl_error (int error)
 {
-    if (error == CL_BUILD_PROGRAM_FAILURE)  fprintf (stderr, "Build program failure");
-    if (error == CL_COMPILER_NOT_AVAILABLE) fprintf (stderr, "Compiler not available");
-    if (error == CL_DEVICE_NOT_AVAILABLE)   fprintf (stderr, "Device not available");
-    if (error == CL_INVALID_CONTEXT)        fprintf (stderr, "Invalid context");
-    if (error == CL_INVALID_BINARY)         fprintf (stderr, "Invalid binary");
-    if (error == CL_INVALID_BUFFER_SIZE)    fprintf (stderr, "Invalid buffer size");
-    if (error == CL_INVALID_BUILD_OPTIONS)  fprintf (stderr, "Invalid build options");
-    if (error == CL_INVALID_DEVICE)         fprintf (stderr, "Invalid device");
-    if (error == CL_INVALID_EVENT)          fprintf (stderr, "Invalid event");
-    if (error == CL_INVALID_HOST_PTR)       fprintf (stderr, "Invalid host pointer");
-    if (error == CL_INVALID_OPERATION)      fprintf (stderr, "Invalid operation");
-    if (error == CL_INVALID_PLATFORM)       fprintf (stderr, "Invalid platform");
-    if (error == CL_INVALID_PROGRAM)        fprintf (stderr, "Invalid program");
-    if (error == CL_INVALID_PROPERTY)       fprintf (stderr, "Invalid property");
-    if (error == CL_INVALID_VALUE)          fprintf (stderr, "Invalid value");
-    if (error == CL_MEM_OBJECT_ALLOCATION_FAILURE) fprintf (stderr, "Cl_mem object allocation failure");
-    if (error == CL_OUT_OF_HOST_MEMORY)     fprintf (stderr, "Out of host memory");
-    if (error == CL_OUT_OF_RESOURCES)       fprintf (stderr, "Out of resources");
-    if (error == CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST) fprintf (stderr, "invalid context");
-    fprintf (stderr, "\n");
+    switch (error)
+    {
+        case (CL_BUILD_PROGRAM_FAILURE):
+            fprintf (stderr, "Build program failure\n");
+            break;
+        case (CL_COMPILER_NOT_AVAILABLE):
+            fprintf (stderr, "Compiler not available\n");
+            break;
+        case (CL_DEVICE_NOT_AVAILABLE):
+            fprintf (stderr, "Device not available\n");
+            break;
+        case (CL_INVALID_ARG_SIZE):
+            fprintf (stderr, "If the argument is not a memory object, [arg_size] does not match the size of the data type.\n");
+            fprintf (stderr, "If the argument is a memory object, [arg_size] != sizeof(cl_mem).\n");
+            fprintf (stderr, "If the argument is declared with the __local qualifier, [arg_size] is 0.\n");
+            break;
+        case (CL_INVALID_CONTEXT):
+            fprintf (stderr, "Invalid context\n");
+            break;
+        case (CL_INVALID_BINARY):
+            fprintf (stderr, "Invalid binary\n");
+            break;
+        case (CL_INVALID_BUFFER_SIZE):
+            fprintf (stderr, "Invalid buffer size\n");
+            break;
+        case (CL_INVALID_BUILD_OPTIONS):
+            fprintf (stderr, "Invalid build options\n");
+            break;
+        case (CL_INVALID_DEVICE):
+            fprintf (stderr, "Invalid device\n");
+            break;
+        case (CL_INVALID_EVENT):
+            fprintf (stderr, "Invalid event\n");
+            break;
+        case (CL_INVALID_HOST_PTR):
+            fprintf (stderr, "Invalid host pointer\n");
+            break;
+        case (CL_INVALID_KERNEL_ARGS):
+            fprintf (stderr, "Kernel argument values have not been specified\n");
+            break;
+        case (CL_INVALID_MEM_OBJECT):
+            fprintf (stderr, "Memory objects are not valid or are not buffer objects\n");
+            break;
+        case (CL_INVALID_OPERATION):
+            fprintf (stderr, "Invalid operation\n");
+            break;
+        case (CL_INVALID_PLATFORM):
+            fprintf (stderr, "Invalid platform\n");
+            break;
+        case (CL_INVALID_PROGRAM):
+            fprintf (stderr, "Invalid program\n");
+            break;
+        case (CL_INVALID_PROPERTY):
+            fprintf (stderr, "Invalid property\n");
+            break;
+        case (CL_INVALID_VALUE):
+            fprintf (stderr, "Invalid value\n");
+            break;
+        case (CL_MEM_OBJECT_ALLOCATION_FAILURE):
+            fprintf (stderr, "Cl_mem object allocation failure\n");
+            break;
+        case (CL_OUT_OF_HOST_MEMORY):
+            fprintf (stderr, "Out of host memory\n");
+            break;
+        case (CL_OUT_OF_RESOURCES):
+            fprintf (stderr, "Out of resources\n");
+            break;
+        case (CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST):
+            fprintf (stderr, "invalid context\n");
+            break;
+        default:
+            fprintf (stderr, "Unkown error code [%d]\n", error);
+    }
+}
+
+
+/**
+ * Checks that the structure passed has been correctly initialized.-
+ */
+static void check_is_initialized (OCL_objects *ocl_obj)
+{
+    if (ocl_obj->is_initialized == 0)
+    {
+        fprintf (stderr,
+                 "ERROR OpenCL has not been correctly initialized\n");
+        exit (1);
+    }
+}
+
+
+
+/**
+ * Checks that the command queue with this index exists.-
+ */
+static void check_queue (OCL_objects *ocl_obj,
+                         int queue_index)
+{
+    if (queue_index >= ocl_obj->queue_count)
+    {
+        fprintf (stderr,
+                 "ERROR Command queue with index (%d) does not exist\n",
+                 queue_index);
+        exit (1);
+    }
+    /*
+    else
+    {
+        cl_device_id *param_value = (cl_device_id *) malloc (sizeof (cl_device_id));
+        clGetCommandQueueInfo (ocl_obj->queues[queue_index],
+                               CL_QUEUE_DEVICE,
+                               sizeof (cl_device_id),
+                               param_value,
+                               NULL);
+        printf ("INFO command queue\n");
+        print_device_information (param_value);
+        free (param_value);
+    }
+    */
 }
 
 
 
 void check_error (int status, char *msg)
 {
-  if (status != CL_SUCCESS)
-  {
-    fprintf (stderr, "OpenCL error at %s: ", msg);
-    print_opencl_error (status);
-  }
+    if (status != CL_SUCCESS)
+    {
+        fprintf (stderr, "*** OpenCL ERROR at %s: ", msg);
+        print_opencl_error (status);
+    }
 }
 
 
@@ -93,7 +190,72 @@ void print_device_information (cl_device_id *device)
 
 
 
-void get_amd_platform(cl_platform_id *platform)
+/**
+ * Initializes the OpenCL platform. 
+ * This function should be called before any other one.
+ *
+ * ocl_obj          A pointer to the uninitialized OCL_objects structure on
+ *                  the user's side;
+ * number_of_queues the number of queues to initialize.-
+ *
+ */
+void init_opencl (OCL_objects *ocl_obj, int number_of_queues)
+{
+    int i;
+
+    if (ocl_obj->is_initialized == 1)
+        fprintf (stderr,
+                 "WARNING OpenCL has already been initialized [%d]\n",
+                 ocl_obj->is_initialized);
+
+    get_amd_platform (&(ocl_obj->platform_id));
+    set_device_and_context (&(ocl_obj->platform_id),
+                            &(ocl_obj->device_id),
+                            &(ocl_obj->context));
+    ocl_obj->queues = (cl_command_queue *) calloc (number_of_queues,
+                                                   sizeof (cl_command_queue));
+    ocl_obj->events = (cl_event *) calloc (number_of_queues,
+                                           sizeof (cl_event));
+    for (i = 0; i < number_of_queues; i ++)
+    {
+        ocl_obj->queues[i] = clCreateCommandQueue (ocl_obj->context, 
+                                                   ocl_obj->device_id, 
+                                                   0,
+                                                   &(ocl_obj->status));
+        check_error (ocl_obj->status,
+                     "Initialize OpenCL: create command queue");
+    }
+    ocl_obj->queue_count = number_of_queues;
+    ocl_obj->is_initialized = 1;
+}
+
+
+
+/**
+ * Initializes the OpenCL platform. 
+ * This function should be called before any other one.-
+ *
+ */
+void init_platform (cl_platform_id *platform, 
+                    cl_device_id *device, 
+                    cl_context *context,
+                    cl_command_queue *queue)
+{
+    cl_int status;
+    get_amd_platform (platform);
+    set_device_and_context (platform,
+                            device,
+                            context);
+    *queue = clCreateCommandQueue (*context, 
+                                   *device, 
+                                   0, 
+                                   &status);
+    check_error (status, "Initialize platform");
+}
+
+
+
+void get_amd_platform (cl_platform_id *platform)
 {
   int  i;
   int  status;
@@ -130,7 +292,9 @@ void get_amd_platform(cl_platform_id *platform)
 
 
 
-int set_device_and_context(cl_platform_id *platform, cl_device_id *device, cl_context *context)
+int set_device_and_context (cl_platform_id *platform, 
+                            cl_device_id *device, 
+                            cl_context *context)
 {
   int status;
 
@@ -140,8 +304,14 @@ int set_device_and_context(cl_platform_id *platform, cl_device_id *device, cl_co
   uint           device_number = 0; /* Get first device it sees */
   cl_device_type device_type   = CL_DEVICE_TYPE_GPU;
 
-  status = clGetDeviceIDs(*platform, device_type, 0, NULL, &num_devices);
-  check_error(status, "Get device ID");
+  status = clGetDeviceIDs (*platform, device_type, 0, NULL, &num_devices);
+  if (status == CL_DEVICE_NOT_FOUND)
+  {
+      fprintf (stderr,
+               "GPU not found. Falling back to CPU.\n");
+      device_type = CL_DEVICE_TYPE_CPU;
+  }
+  check_error (status, "Get device ID");
 
   if (num_devices > 0)
   {
@@ -215,24 +385,126 @@ void set_opencl_env_multiple_queues(int num_queues, cl_command_queue **list_queu
 
 
 /**
- * Attaches the received parameter as a kernel argument.-
+ * Attaches the received value as a kernel argument.-
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_size         size (in bytes) of the argument being passed;
+ * arg_value_ptr    pointer to the argument value.-
  *
  */
-void set_kernel_arg (cl_kernel *kernel, 
-                     cl_uint arg_index, 
-                     size_t arg_size, 
-                     const void *arg_value)
+void set_kernel_value_arg (OCL_objects *ocl_obj,
+                           cl_uint arg_index, 
+                           size_t arg_size, 
+                           const void *arg_value_ptr)
 {
-    cl_int status;
+    check_is_initialized (ocl_obj);
     char msg [1024];
 
-    snprintf (msg, 1024, "Set %d kernel argument", arg_index);
+    snprintf (msg, 
+              1024, 
+              "Set kernel value argument with index [%d]", 
+              arg_index);
+    ocl_obj->status = clSetKernelArg (ocl_obj->kernel,
+                                      arg_index,
+                                      arg_size,
+                                      arg_value_ptr);
+    check_error (ocl_obj->status, 
+                 msg);
+}
 
-    status = clSetKernelArg (*kernel, 
-                             arg_index,
-                             arg_size,
-                             arg_value);
-    check_error (status, msg);
+
+
+/**
+ * Attaches the received memory object as a kernel argument.-
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_value_ptr    pointer to the argument value.-
+ *
+ */
+void set_kernel_mem_arg (OCL_objects *ocl_obj,
+                         cl_uint arg_index, 
+                         const void *arg_value_ptr)
+{
+    check_is_initialized (ocl_obj);
+    char msg [1024];
+
+    snprintf (msg, 
+              1024, 
+              "Set kernel memory argument with index [%d]", 
+              arg_index);
+    ocl_obj->status = clSetKernelArg (ocl_obj->kernel,
+                                      arg_index,
+                                      sizeof (cl_mem),
+                                      arg_value_ptr);
+    check_error (ocl_obj->status, 
+                 msg);
+}
+
+
+
+/**
+ * Attaches the received integer value as a kernel argument.-
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_value_ptr    pointer to the argument value.-
+ *
+ */
+void set_kernel_int_arg (OCL_objects *ocl_obj,
+                         cl_uint arg_index, 
+                         const int *arg_value_ptr)
+{
+    set_kernel_value_arg (ocl_obj,
+                          arg_index,
+                          sizeof (*arg_value_ptr),
+                          arg_value_ptr);
+}
+
+
+
+/**
+ * Attaches the received float value as a kernel argument.-
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_value_ptr    pointer to the argument value.-
+ *
+ */
+void set_kernel_float_arg (OCL_objects *ocl_obj,
+                           cl_uint arg_index, 
+                           const float *arg_value_ptr)
+{
+    set_kernel_value_arg (ocl_obj,
+                          arg_index,
+                          sizeof (*arg_value_ptr),
+                          arg_value_ptr);
+}
+
+
+
+/**
+ * Attaches the received double value as a kernel argument.-
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_value_ptr    pointer to the argument value.-
+ *
+ */
+void set_kernel_double_arg (OCL_objects *ocl_obj,
+                           cl_uint arg_index, 
+                           const double *arg_value_ptr)
+{
+    set_kernel_value_arg (ocl_obj,
+                          arg_index,
+                          sizeof (*arg_value_ptr),
+                          arg_value_ptr);
 }
 
 
@@ -240,119 +512,188 @@ void set_kernel_arg (cl_kernel *kernel,
 /**
  * Marks a kernel parameter as local memory.-
  *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * arg_index        argument index in the kernel-function prototype;
+ * arg_size         size (in bytes) of the allocated local memory.-
+ *
  */
-void set_local_mem (cl_kernel *kernel, cl_uint arg_index, size_t arg_size)
+void set_local_mem (OCL_objects *ocl_obj,
+                    cl_uint arg_index, 
+                    size_t arg_size)
 {
-    cl_int status;
+    check_is_initialized (ocl_obj);
     char msg [1024];
 
     snprintf (msg, 
               1024, 
-              "Set %d kernel argument as local memory, with size %ld",
+              "Set kernel argument with index [%d] as local memory, with size [%ld]",
               arg_index,
               arg_size);
 
-    status = clSetKernelArg (*kernel, 
-                             arg_index,
-                             arg_size,
-                             NULL);
-    check_error (status, msg);
+    ocl_obj->status = clSetKernelArg (ocl_obj->kernel,
+                                      arg_index,
+                                      arg_size,
+                                      NULL);
+    check_error (ocl_obj->status, 
+                 msg);
 }
 
 
 
 /**
- * Creates an OpenCL buffer, returning a pointer to it in the last parameter.-
+ * Creates and returns a OpenCL buffer, i.e. cl_mem object.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * flags        memory flags, as defined by OpenCL;
+ * size         size (in bytes) of the buffer to create.-
  *
  */
-void create_buffer (cl_context *context, cl_mem_flags flags, size_t size, void *host_ptr, cl_mem *dev_ptr)
+cl_mem create_buffer (OCL_objects *ocl_obj,
+                      cl_mem_flags flags, 
+                      size_t size)
 {
-    cl_int status;
-    *dev_ptr = clCreateBuffer (*context,
-                               flags,
-                               size,
-                               host_ptr,
-                               &status);
-    if (*dev_ptr == NULL)
-        check_error (status, "Create buffer");
+    check_is_initialized (ocl_obj);
+    cl_mem ret_value = clCreateBuffer (ocl_obj->context,
+                                       flags,
+                                       size,
+                                       NULL,
+                                       &(ocl_obj->status));
+    check_error (ocl_obj->status, 
+                 "Create buffer");
+    return ret_value;
 }
 
 
 
 /**
- * Reads an OpenCL buffer from the device.-
+ * Reads an OpenCL buffer from the device, waiting for the operation to
+ * finish before returning.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * queue_index  index of the command queue on which the read is performed;
+ * cl_mem_ptr   pointer to a valid cl_mem object, from which to copy;
+ * size         size (in bytes) of the data to read from the device;
+ * target_ptr   pointer to the data to which to copy, on the host.-
  *
  */
-void read_buffer (cl_command_queue *queue, 
-                  cl_mem *dev_ptr, 
-                  cl_bool blocking_read, 
-                  size_t size, 
-                  void *host_ptr)
+void read_buffer_blocking (OCL_objects *ocl_obj,
+                           int queue_index,
+                           cl_mem *cl_mem_ptr, 
+                           size_t size, 
+                           void *target_ptr)
 {
-    cl_int status;
-    status = clEnqueueReadBuffer (*queue,
-                                  *dev_ptr,
-                                   blocking_read,
-                                   0,
-                                   size,
-                                   host_ptr,
-                                   0,
-                                   NULL,
-                                   NULL);
-     check_error (status, "Read buffer");
+    check_is_initialized (ocl_obj);
+    check_queue (ocl_obj, 
+                 queue_index);
+    ocl_obj->status = clEnqueueReadBuffer (ocl_obj->queues[queue_index],
+                                           *cl_mem_ptr,
+                                           CL_TRUE,
+                                           0,
+                                           size,
+                                           target_ptr,
+                                           0,
+                                           NULL,
+                                           &(ocl_obj->events[queue_index]));
+    check_error (ocl_obj->status, 
+                 "Read buffer");
 }
 
 
 
 /**
- * Writes an OpenCL buffer to the device.-
+ * Writes an OpenCL buffer to the device, waiting for the operation to
+ * finish before returning.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * queue_index  index of the command queue on which the write is performed;
+ * cl_mem_ptr   pointer to a valid cl_mem object;
+ * size         size (in bytes) of the data to write to the device;
+ * source_ptr   to the data from which to copy, on the host.-
  *
  */
-void write_buffer (cl_command_queue *queue, 
-                   cl_mem *dev_ptr, 
-                   cl_bool blocking_write, 
-                   size_t size, 
-                   const void *host_ptr)
+void write_buffer_blocking (OCL_objects *ocl_obj,
+                            int queue_index,
+                            cl_mem *cl_mem_ptr, 
+                            size_t size, 
+                            const void *source_ptr)
 {
-    cl_int status;
-    status = clEnqueueWriteBuffer (*queue,
-                                   *dev_ptr,
-                                   blocking_write,
-                                   0,
-                                   size,
-                                   host_ptr,
-                                   0,
-                                   NULL,
-                                   NULL);
-     check_error (status, "Write buffer");
+    check_is_initialized (ocl_obj);
+    check_queue (ocl_obj, 
+                 queue_index);
+    ocl_obj->status = clEnqueueWriteBuffer (ocl_obj->queues[queue_index],
+                                            *cl_mem_ptr,
+                                            CL_TRUE,
+                                            0,
+                                            size,
+                                            source_ptr,
+                                            0,
+                                            NULL,
+                                            NULL);
+     check_error (ocl_obj->status, 
+                  "Write buffer - blocking");
 }
 
 
 
 /**
- * Executes the specified kernel.-
+ * Executes the kernel, using the received 2D range, waiting for it to finish.
+ *
+ * ocl_obj          A pointer to the initialized OCL_objects structure on the
+ *                  user's side;
+ * queue_index      index of the command queue on which the kernel execution is 
+ *                  performed;
+ * global_offsets   offsets used for the kernel range (2 elements). If NULL
+ *                  is given, the offsets used are zero;
+ * global_sizes     global execution range sizes (2 elements);
+ * local_sizes      local execution range sizes (2 elements);
  *
  */
-void run_kernel (cl_command_queue *queue, cl_kernel *kernel)
+void run_kernel_2D_blocking (OCL_objects *ocl_obj,
+                             int queue_index,
+                             const size_t *global_offsets,
+                             const size_t *global_sizes,
+                             const size_t *local_sizes)
 {
-    cl_int status;
-    status = clEnqueueTask (*queue,
-  	                        *kernel,
-                            0,
-                            NULL,
-                            NULL);
-     check_error (status, "Run kernel");
+    size_t goff [] = {0, 0};
+    check_is_initialized (ocl_obj);
+    check_queue (ocl_obj,
+                 queue_index);
+    if (global_offsets != NULL)
+    {
+        goff[0] = global_offsets[0];
+        goff[1] = global_offsets[1];
+    }
+    ocl_obj->status = clEnqueueNDRangeKernel (ocl_obj->queues[queue_index],
+                                              ocl_obj->kernel,
+                                              2,
+                                              goff,
+                                              global_sizes,
+                                              local_sizes,
+                                              0,
+                                              NULL,
+                                              &(ocl_obj->events[queue_index]));
+    check_error (ocl_obj->status, 
+                 "Run kernel with 2D range");
+    clWaitForEvents (1,
+                     &(ocl_obj->events[queue_index]));
 }
 
 
 
+/**
+ * Releases OpenCL, deallocating all referenced memory.
+ */
 void release_opencl (int num_queues, 
                      cl_command_queue **list_queues, 
                      cl_context *context)
 {
   int i;
 
-  /* Flushes and finishes all queues in the list of queues  */
+  // Flushes and finishes all queues in the list of queues 
   for (i = 0; i < num_queues; i++)
   {
     clFinish((*list_queues)[i]);
@@ -360,8 +701,28 @@ void release_opencl (int num_queues,
 
   clReleaseContext(*context);
 
-  /* Free memory used by list of pointers */
+  // Free memory used by list of pointers
   free(*list_queues);
+}
+
+
+
+/**
+ * Deactivates OpenCL, deallocating all referenced memory.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side.-
+ *
+ */
+void deactivate_opencl (OCL_objects *ocl_obj)
+{
+    check_is_initialized (ocl_obj);
+    release_opencl (ocl_obj->queue_count,
+                    &(ocl_obj->queues),
+                    &(ocl_obj->context));
+
+    // Free memory used by the list of events
+    free (ocl_obj->events);
 }
 
 
@@ -369,65 +730,90 @@ void release_opencl (int num_queues,
 /**
  * Builds a kernel for a given device and context from a source file.-
  *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * kernel_name  name of the kernel to activate;
+ * file_name    file containing the OpenCL kernel code;
+ * options      compile-time options, like include directories or defines.-
+ *
  */
-void build_kernel_from_file (cl_context *context, 
+void build_kernel_from_file (OCL_objects *ocl_obj,
                              char *kernel_name, 
                              const char *file_name, 
-                             cl_kernel *kernel)
+                             const char *options)
 {
+    check_is_initialized (ocl_obj);
     int bytes_read;
     char *source = (char *) calloc (1024000,
                                     sizeof (char));
-    const char **kernel_source = (const char **) &(source[0]);
 
     bytes_read = read_kernel_file (file_name, 
                                    source);
     if (bytes_read < 1)
     {
         fprintf (stderr, 
-                 "ERROR Could load kernel source from <%s>",
+                 "ERROR Could not load kernel source from <%s>",
                  file_name);
         exit (1);
     }
-    build_kernel (context,
+    build_kernel (&(ocl_obj->context),
                   kernel_name,
-                  kernel_source,
-                  kernel);
+                  (const char **) &source,
+                  options,
+                  &(ocl_obj->kernel));
     free (source);
 }
 
 
 
+/**
+ * Builds a kernel for a given device and context from string buffer.-
+ *
+ */
 void build_kernel (cl_context *context, 
                    char *kernel_name, 
                    const char **kernel_source, 
+                   const char *options,
                    cl_kernel *kernel)
 {
-  int          status;
-  cl_device_id device;
-  uint         num_devices = 1;
+    int          status;
+    cl_device_id device;
+    uint         num_devices = 1;
+    uint         num_strings_in_kernel_source = 1;
 
-  get_device_from_context(context, &device);
+    get_device_from_context (context, &device);
+    cl_program program = clCreateProgramWithSource (*context, 
+                                                    num_strings_in_kernel_source, 
+                                                    kernel_source, 
+                                                    NULL, 
+                                                    &status);
+    check_error (status, "Create OCL program with source");
+    int build_status = clBuildProgram (program, 
+                                       num_devices, 
+                                       &device, 
+                                       options,
+                                       NULL, 
+                                       NULL);
+    check_error (status, "Build OCL program");
+    if (build_status != CL_SUCCESS)
+    {
+        int error_buffer_size = 102400;
+        char error_buffer [error_buffer_size];
 
-  uint num_strings_in_kernel_source = 1;
-
-  cl_program program = clCreateProgramWithSource(*context, num_strings_in_kernel_source, kernel_source, NULL, &status);
-  check_error(status, "Create Program With Source");
-
-  int build_status   = clBuildProgram(program, num_devices, &device, NULL, NULL, NULL);
-  check_error(status, "Build program");
-
-  if (build_status != CL_SUCCESS)
-  {
-    int error_buffer_size = 4000;
-    char error_buffer[error_buffer_size];
-
-    clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, error_buffer_size, error_buffer, NULL);
-
-    printf("OpenCL Build log:\n\n%s.\n", error_buffer);
-  }
-
-  *kernel = clCreateKernel(program, kernel_name, NULL);
+        clGetProgramBuildInfo (program, 
+                               device, 
+                               CL_PROGRAM_BUILD_LOG, 
+                               error_buffer_size, 
+                               error_buffer, 
+                               NULL);
+        fprintf (stderr, 
+                 "*** Compilation failed. Log follows:\n\n%s\n", 
+                 error_buffer);
+        exit (1);
+    }
+    *kernel = clCreateKernel (program, 
+                              kernel_name, 
+                              NULL);
 }
 
 

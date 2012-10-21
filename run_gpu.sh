@@ -6,7 +6,7 @@ CMD="./r.coverage"
 PSQL_SERVER=localhost
 
 if [ -n "${TX}" ]; then
-    CMD="${CMD} ini_file=$(pwd)/parameters.ini tx_ini_section=${TX}"
+    CMD="${CMD} -g ini_file=$(pwd)/parameters.ini tx_ini_section=${TX}"
     if [ -n "${OUT}" ]; then
         CMD="${CMD} output_raster=${OUT}"
     fi

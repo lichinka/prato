@@ -118,14 +118,14 @@ read_antenna_diagram (const char *file_name,
  *
  */
 static float 
-antenna_influence_on_point (const double d_east,
-                            const double d_north,
+antenna_influence_on_point (double d_east,
+                            double d_north,
                             const double total_height,
                             const int beam_dir,
                             const int mech_tilt,
                             const float dem_height,
                             const double rec_height,
-                            const double dist_Tx_Rx,
+                            double dist_Tx_Rx,
                             const float path_loss,
                             const Diagram *diagram)
 {
@@ -140,8 +140,12 @@ antenna_influence_on_point (const double d_east,
     double temp_angle;
 
     //
-    // determine horizontal angle and loss
+    // the arctan cannot be calculated if any of the involved numbers is 0
     //
+    if (d_east == 0)
+        d_east = 0.01;
+    if (d_north == 0)
+        d_north = 0.01;
     temp_angle = atan (d_east / d_north);
     if (temp_angle < 0)
       temp_angle = - temp_angle;
@@ -174,7 +178,6 @@ antenna_influence_on_point (const double d_east,
 #ifdef _PERFORMANCE_METRICS_
     memory_access (3, 4);
 #endif
-
     int index = (int) floor (hor_diag_angle);
     horizontal_loss  = diagram->horizontal[index];
     horizontal_loss += ((diagram->horizontal[(int)temp_angle] - diagram->horizontal[index])*(hor_diag_angle - floor(hor_diag_angle)));
@@ -182,6 +185,13 @@ antenna_influence_on_point (const double d_east,
     /* determine vertical angle and loss */
     height_diff_Tx_Rx = total_height - (double)dem_height - rec_height;
 
+    //
+    // the arctan cannot be calculated if any of the involved numbers is 0
+    //
+    if (height_diff_Tx_Rx == 0)
+        height_diff_Tx_Rx = 0.01;
+    if (dist_Tx_Rx == 0)
+        dist_Tx_Rx = 0.01;
     vert_coor_angle = atan (height_diff_Tx_Rx / (dist_Tx_Rx * 1000));
     vert_coor_angle = vert_coor_angle * 180 / _PI_;	
   
@@ -213,7 +223,9 @@ antenna_influence_on_point (const double d_east,
     vert_diag_angle = vert_coor_angle - (double)mechanicalAntennaTilt_Corrected;
   
     if (vert_diag_angle < 0)
-        vert_diag_angle = 360 + vert_diag_angle;
+        vert_diag_angle += 360;
+    if (vert_diag_angle > 360)
+        vert_diag_angle -= 360;
 
     /* to prevent reading unallocated data (diagram comprises values 0 - 359) */
     temp_angle = ceil(vert_diag_angle);
@@ -227,93 +239,8 @@ antenna_influence_on_point (const double d_east,
     vertical_loss  = diagram->vertical[(int)floor(vert_diag_angle)];
     vertical_loss += ((diagram->vertical[(int)temp_angle] - diagram->vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
   
-    /* finally take into account pathloss for determined diagram angles and antenna gain */
+    // finally take into account pathloss for determined diagram angles and antenna gain 
     return (float)((double)path_loss + horizontal_loss + vertical_loss - diagram->gain);
-}
-
-
-
-/**
- * Standard CPU version of the antenna influence algorithm.
- * For a description of the parameters used, see the function
- * 'calculate_antenna_influence'.
- *
- */
-static void 
-antenna_influence_cpu (const double east,
-                       const double north,
-                       const double total_height,
-                       const int beam_dir,
-                       const int mech_tilt,
-                       const double radius,
-                       const double rec_height,
-                       const int nrows,
-                       const int ncols,
-                       const double west_ext,
-                       const double north_ext,
-                       const double ew_res,
-                       const double ns_res,
-                       const float  null_value,
-                       double **dem,
-                       double **path_loss)
-{
-    int r, c;
-
-    //
-    // this loop measures around 281.000 MFlops
-    // 
-    for (r = 0; r < nrows; r++) 
-    {
-        float f_in, f_out, f_in_dem; 
-
-        // calculate receiver coordinates
-        double rec_north = north_ext - (r * ns_res);
-
-        // calculate differences between receiver and transmitter coordinates
-        double d_north = rec_north - north;
-
-        //
-        // ... and each column 
-        // 
-        for (c = 0; c < ncols; c++) 
-        { 
-#ifdef _PERFORMANCE_METRICS_
-            memory_access (2, 8);
-#endif
-            f_in = (float) path_loss[r][c];
-            f_in_dem = (float) dem[r][c];
-
-            // calculate receiver coordinates
-            double rec_east = west_ext + (c * ew_res);
-
-            // calculate differences between receiver and transmitter coordinates
-            double d_east = rec_east - east;
-            
-            // calculate distance between Tx and Rx
-            double dist_Tx_Rx = sqrt (pow (d_east, 2) + 
-                                      pow (d_north, 2));
-            dist_Tx_Rx = dist_Tx_Rx / 1000;
-           
-            // If distance between Rx and Tx exceeds given radius, continue with other cells 
-            if (dist_Tx_Rx > radius)
-                f_out = null_value;
-            else
-                f_out = antenna_influence_on_point (d_east,
-                                                    d_north,
-                                                    total_height,
-                                                    beam_dir,
-                                                    mech_tilt,
-                                                    f_in_dem,
-                                                    rec_height,
-                                                    dist_Tx_Rx,
-                                                    f_in,
-                                                    diagram);
-            // 
-            // save the result in the output matrix
-            //
-            path_loss[r][c] = (double) f_out;
-        }
-    }
 }
 
 
@@ -325,7 +252,7 @@ antenna_influence_cpu (const double east,
  *
  * null_value   The value representing NULL on the output map.-
  *
- */
+ *
 static void 
 antenna_influence_unrolled (const double east,
                             const double north,
@@ -560,6 +487,96 @@ antenna_influence_unrolled (const double east,
         path_loss[r][c] = f_out;
     }
 }
+*
+*/
+
+
+
+/**
+ * Standard CPU version of the antenna influence algorithm.
+ * For a description of the parameters used, see the function
+ * 'calculate_antenna_influence'.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters.-
+ *
+ */
+static void 
+antenna_influence_cpu (const double tx_east_coord,
+                       const double tx_north_coord,
+                       const double antenna_height_AGL,
+                       const double total_tx_height,
+                       const int beam_direction,
+                       const int mechanical_tilt,
+                       const double frequency,
+                       const double rx_height_AGL,
+                       const int nrows,       
+                       const int ncols,      
+                       const double map_west,
+                       const double map_north,
+                       const double map_ew_res,  
+                       const double map_ns_res,  
+                       const float  null_value,
+                       double **m_dem,          
+                       double **m_loss)
+{
+    int r, c;
+
+    //
+    // this loop measures around 281.000 MFlops
+    // 
+    for (r = 0; r < nrows; r++) 
+    {
+        float f_in, f_out, f_in_dem; 
+
+        // calculate receiver coordinates
+        double rec_north = map_north - (r * map_ns_res);
+
+        // calculate differences between receiver and transmitter coordinates
+        double d_north = rec_north - tx_north_coord;
+
+        //
+        // ... and each column 
+        // 
+        for (c = 0; c < ncols; c++) 
+        { 
+#ifdef _PERFORMANCE_METRICS_
+            memory_access (2, 8);
+#endif
+            f_in = (float) m_loss[r][c];
+            f_in_dem = (float) m_dem[r][c];
+
+            // calculate receiver coordinates
+            double rec_east = map_west + (c * map_ew_res);
+
+            // calculate differences between receiver and transmitter coordinates
+            double d_east = rec_east - tx_east_coord;
+            
+            // calculate distance between Tx and Rx
+            double dist_Tx_Rx = sqrt (pow (d_east, 2) + 
+                                      pow (d_north, 2));
+            dist_Tx_Rx = dist_Tx_Rx / 1000;
+           
+            // 
+            // save the result in the output matrix
+            //
+            m_loss[r][c] = (double) antenna_influence_on_point (d_east,
+                                                                d_north,
+                                                                total_tx_height,
+                                                                beam_direction,
+                                                                mechanical_tilt,
+                                                                f_in_dem,
+                                                                rx_height_AGL,
+                                                                dist_Tx_Rx,
+                                                                f_in,
+                                                                diagram);
+        }
+    }
+}
+
+
 
 
 
@@ -568,231 +585,215 @@ antenna_influence_unrolled (const double east,
  * For a description of the parameters used, see the function
  * 'calculate_antenna_influence'.
  *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters.-
  */
 static void 
-antenna_influence_gpu (const double east,
-                       const double north,
-                       const double total_height,
-                       const int beam_dir,
-                       const int mech_tilt,
+antenna_influence_gpu (const double tx_east_coord,
+                       const double tx_north_coord,
+                       const double antenna_height_AGL,
+                       const double total_tx_height,
+                       const int beam_direction,
+                       const int mechanical_tilt,
                        const double frequency,
-                       const double radius,
-                       const double rec_height,
-                       const int nrows,
-                       const int ncols,
-                       const double west_ext,
-                       const double north_ext,
-                       const double ew_res,
-                       const double ns_res,
+                       const double radius,  
+                       const double rx_height_AGL,
+                       const int nrows,       
+                       const int ncols,      
+                       const double map_west,
+                       const double map_north,
+                       const double map_ew_res,  
+                       const double map_ns_res,  
                        const float  null_value,
-                       double **dem,
-                       double **path_loss)
+                       double **m_dem,          
+                       double **m_loss)
 {
-    cl_int            status;
-    cl_context        context;
-    cl_command_queue *list_queues;
-    uint              num_queues = 1;
-    cl_event          events [num_queues];
-    cl_kernel         kernel;
+    OCL_objects ocl_obj;
 
-    // the horizontal and vertical resolution of one raster pixel should match
-    assert (ew_res == ns_res);
+    // initialize the OpenCL platform
+    init_opencl (&ocl_obj, 1);
 
-    // create a new OpenCL environment
-    set_opencl_env_multiple_queues (num_queues, 
-                                    &list_queues, 
-                                    &context);
     // build and activate the kernel
-    build_kernel_from_file (&context,
+    build_kernel_from_file (&ocl_obj,
                             "sector_kern",
                             "r.coverage.cl",
-                            &kernel);
+                            "-I. -w");
 
-    // number of processing tiles needed around each transmitter 
-    if ((radius*2) < _WORK_ITEMS_PER_DIMENSION_)
-    {
-        fprintf (stderr, "Cannot execute. Increase radius and try again.");
-        exit (1);
-    }
+    // create OpenCL buffers
+    size_t diagram_size = 360 *
+                          sizeof (diagram->horizontal[0]);
+    size_t dem_in_size = nrows * 
+                         ncols * 
+                         sizeof (m_dem[0][0]);
+    size_t sect_out_size = nrows * 
+                           ncols * 
+                           sizeof (m_loss[0][0]);
 
-    size_t ntile = (radius*2) / _WORK_ITEMS_PER_DIMENSION_ + 1;
+    cl_mem horiz_diag_in_dev = create_buffer (&ocl_obj,
+                                              CL_MEM_READ_ONLY, 
+                                              diagram_size);
+    cl_mem vert_diag_in_dev = create_buffer (&ocl_obj,
+                                             CL_MEM_READ_ONLY, 
+                                             diagram_size);
+    cl_mem dem_in_dev = create_buffer (&ocl_obj,
+                                       CL_MEM_READ_ONLY, 
+                                       dem_in_size);
+    cl_mem sect_out_dev = create_buffer (&ocl_obj,
+                                         CL_MEM_WRITE_ONLY, 
+                                         sect_out_size);
 
-    // defines a 2D execution range for the kernel
-    size_t global_offsets [] = {0, 0};
-    size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
-                              ntile * _WORK_ITEMS_PER_DIMENSION_};
-    size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
-                             _WORK_ITEMS_PER_DIMENSION_};
-    status = clEnqueueNDRangeKernel (list_queues[0],
-                                     kernel,
-                                     2,
-                                     global_offsets,
-                                     global_sizes,
-                                     local_sizes,
-                                     0,
-                                     NULL,
-                                     &(events[0]));
-    check_error (status, "Set kernel range");
+    // send input data to the device
+    write_buffer_blocking (&ocl_obj,
+                           0,
+                           &horiz_diag_in_dev,
+                           diagram_size,
+                           diagram->horizontal);
+    write_buffer_blocking (&ocl_obj,
+                           0,
+                           &vert_diag_in_dev,
+                           diagram_size,
+                           diagram->vertical);
+    write_buffer_blocking (&ocl_obj,
+                           0,
+                           &dem_in_dev,
+                           dem_in_size,
+                           m_dem[0]);
+    write_buffer_blocking (&ocl_obj,
+                           0,
+                           &sect_out_dev,
+                           sect_out_size,
+                           m_loss[0]);
 
     // kernel parameters 
-    set_kernel_arg (&kernel, 
-                    0,
-                    sizeof (ns_res),
-                    &ns_res);
-    set_kernel_arg (&kernel, 
-                    1,
-                    sizeof (north_ext),
-                    &north_ext);
-    set_kernel_arg (&kernel, 
-                    2,
-                    sizeof (west_ext),
-                    &west_ext);
-    set_kernel_arg (&kernel, 
-                    3,
-                    sizeof (int),
-                    &ncols);
-    set_kernel_arg (&kernel, 
-                    6,
-                    sizeof (rec_height),
-                    &rec_height);
-    set_kernel_arg (&kernel, 
-                    7,
-                    sizeof (double),
-                    &frequency);
-    set_kernel_arg (&kernel, 
-                    8,
-                    sizeof (double),
-                    &(diagram->gain));
-    set_kernel_arg (&kernel, 
-                    9,
-                    sizeof (int),
-                    &beam_dir);
-    set_kernel_arg (&kernel, 
-                    10,
-                    sizeof (int),
-                    &mech_tilt);
+    set_kernel_double_arg (&ocl_obj,
+                           0,
+                           &map_ew_res);
+    set_kernel_double_arg (&ocl_obj,
+                           1,
+                           &map_north);
+    set_kernel_double_arg (&ocl_obj,
+                           2,
+                           &map_west);
+    set_kernel_int_arg (&ocl_obj,
+                        3,
+                        &ncols);
+    set_kernel_double_arg (&ocl_obj,
+                           6,
+                           &rx_height_AGL);
+    set_kernel_double_arg (&ocl_obj,
+                           7,
+                           &frequency);
+    set_kernel_double_arg (&ocl_obj,
+                           8,
+                           &(diagram->gain));
+    set_kernel_int_arg (&ocl_obj,
+                        9,
+                        &beam_direction);
+    set_kernel_int_arg (&ocl_obj,
+                        10,
+                        &mechanical_tilt);
 
     // reserve local memory on the device
     size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
                        _WORK_ITEMS_PER_DIMENSION_ *
                        sizeof (cl_float2);
-    set_local_mem (&kernel, 
+    set_local_mem (&ocl_obj,
                    15,
                    lmem_size);
 
-    // create OpenCL buffers
-    cl_mem horiz_diag_in_dev;
-    cl_mem vert_diag_in_dev;
-    cl_mem dem_in_dev;
-    cl_mem sect_out_dev;
-    size_t diagram_size = 360;
-    size_t dem_in_size = nrows * 
-                         ncols * 
-                         sizeof (dem[0][0]);
-    size_t sect_out_size = nrows * 
-                           ncols * 
-                           sizeof (path_loss[0][0]);
-
-    create_buffer (&context,
-                   CL_MEM_READ_ONLY, 
-                   diagram_size * sizeof (double),
-                   diagram->horizontal,
-                   &horiz_diag_in_dev);
-    create_buffer (&context,
-                   CL_MEM_READ_ONLY, 
-                   diagram_size * sizeof (double),
-                   diagram->vertical,
-                   &vert_diag_in_dev);
-    create_buffer (&context,
-                   CL_MEM_READ_ONLY, 
-                   dem_in_size,
-                   dem,
-                   &dem_in_dev);
-    create_buffer (&context,
-                   CL_MEM_WRITE_ONLY, 
-                   sect_out_size,
-                   path_loss,
-                   &sect_out_dev);
-
-    // send input data to the device
-    write_buffer (&(list_queues[0]),
-                  &horiz_diag_in_dev,
-                  CL_TRUE,
-                  diagram_size * sizeof (double),
-                  diagram->horizontal);
-    write_buffer (&(list_queues[0]),
-                  &vert_diag_in_dev,
-                  CL_TRUE,
-                  diagram_size * sizeof (double),
-                  diagram->vertical);
-    write_buffer (&(list_queues[0]),
-                  &dem_in_dev,
-                  CL_TRUE,
-                  dem_in_size,
-                  dem);
-
     // set the remaining parameters
-    set_kernel_arg (&kernel, 
-                    11,
-                    sizeof (double),
-                    &horiz_diag_in_dev);
-    set_kernel_arg (&kernel, 
-                    12,
-                    sizeof (double),
-                    &vert_diag_in_dev);
-    set_kernel_arg (&kernel, 
-                    13,
-                    sizeof (double),
-                    &dem_in_dev);
-    set_kernel_arg (&kernel, 
-                    14,
-                    sizeof (double),
-                    &sect_out_dev);
+    set_kernel_mem_arg (&ocl_obj,
+                        11,
+                        &horiz_diag_in_dev);
+    set_kernel_mem_arg (&ocl_obj,
+                        12,
+                        &vert_diag_in_dev);
+    set_kernel_mem_arg (&ocl_obj,
+                        13,
+                        &dem_in_dev);
+    set_kernel_mem_arg (&ocl_obj,
+                        14,
+                        &sect_out_dev);
 
-    printf ("Simulating antenna influence for one sector ...");
+    //
+    // calculation radius and diameter
+    //
+    double radius_in_meters = radius * 1000;
+    int radius_in_pixels    = (int) (radius_in_meters / map_ew_res);
+    int diameter_in_pixels  = 2 * radius_in_pixels;
 
-    // tile offset within the calculation radius, given in pixel coordinates
-    cl_int2 tx_offset;
-    tx_offset.s[0] = (int) ((east - west_ext) / ew_res - radius);
-    tx_offset.s[1] = (int) ((north_ext - north) / ns_res - radius);
+    //
+    // calculation tile offset within the target area, given in pixel coordinates
+    //
+    cl_int2 tile_offset;
+    tile_offset.s[0]  = (int) ((tx_east_coord - map_west) - radius_in_meters);
+    tile_offset.s[0] /= map_ew_res;
+    tile_offset.s[1]  = (int) ((map_north - tx_north_coord) - radius_in_meters);
+    tile_offset.s[1] /= map_ns_res;
+    //
     // transmitter data
+    //
     cl_double4 tx_data;
-    tx_data.s[0] = (double) east;                 // transmitter coordinate
-    tx_data.s[1] = (double) north;                // transmitter coordinate
-    tx_data.s[2] = (double) total_height;         // height above sea level
-    tx_data.s[3] = (double) 75;                   // FIXME: antenna height
+    tx_data.s[0] = (double) tx_east_coord;   // transmitter coordinate
+    tx_data.s[1] = (double) tx_north_coord;  // transmitter coordinate
+    tx_data.s[2] = (double) total_tx_height; // antenna height above sea level
+    tx_data.s[3] = (double) -1.0;            // not used
 
-    printf ("Transmitter located at %.0f,%.0f,%.0f,%.0f\n", tx_data.s[0],
-                                                            tx_data.s[1],
-                                                            tx_data.s[2],
-                                                            tx_data.s[3]);
     // set kernel parameters, specific for this transmitter
-    set_kernel_arg (&kernel,
-                    4,
-                    sizeof (double),
-                    &tx_data);
-    set_kernel_arg (&kernel,
-                    5,
-                    sizeof (double),
-                    &tx_offset);
+    set_kernel_value_arg (&ocl_obj,
+                          4,
+                          sizeof (cl_double4),
+                          &tx_data);
+    set_kernel_value_arg (&ocl_obj,
+                          5,
+                          sizeof (cl_int2),
+                          &tile_offset);
 
-    // start kernel execution 
-    run_kernel (&(list_queues[0]),
-                &kernel);
+    // number of processing tiles needed around each transmitter 
+
+    if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
+    {
+        fprintf (stderr, 
+                 "ERROR Cannot execute on GPU. Increase the calculation radius and try again.\n");
+        exit (1);
+    }
+    if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
+    {
+        fprintf (stderr, 
+                 "ERROR Cannot execute on GPU. Try to set a calculation radius multiple of %d\n",
+                 _WORK_ITEMS_PER_DIMENSION_);
+        exit (1);
+    }
+    //
+    // define a 2D execution range for the kernel ...
+    //
+    size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
+    size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
+                              ntile * _WORK_ITEMS_PER_DIMENSION_};
+    size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
+                             _WORK_ITEMS_PER_DIMENSION_};
+
+    //
+    // ... and execute it
+    //
+    run_kernel_2D_blocking (&ocl_obj,
+                            0,
+                            NULL,
+                            global_sizes,
+                            local_sizes);
 
     // sync memory
-    read_buffer (&(list_queues[0]),
-                 &sect_out_dev,
-                 CL_TRUE,
-                 sect_out_size,
-                 path_loss);
+    read_buffer_blocking (&ocl_obj,
+                          0,
+                          &sect_out_dev,
+                          sect_out_size,
+                          m_loss[0]);
 
-    // deactivate the OpenCL environment
-    release_opencl (num_queues, 
-                    &list_queues, 
-                    &context);
+    // deactivate OpenCL
+    deactivate_opencl (&ocl_obj);
 }
-
 
 
 
@@ -801,48 +802,36 @@ antenna_influence_gpu (const double east,
  * Calculates additional gain/pathloss according to the antenna's
  * 3-dimensional diagram.
  *
- * ant_dir      Directory containing antenna diagram file;
- * ant_file     file name of the antenna diagram;
- * east         transmitter's eastern coordinate;
- * north        transmitter's northern coordinate;
- * total_height transmitter's height above sea level;
- * beam_dir     direction of the antenna beam, in degrees;
- * mech_tilt    mechanical antenna tilt angle, in degress;
- * frequency    transmitter frequency, in Mhz;
- * radius       calculation radius around the given transmitter;
- * rec_height   Rx antenna height above ground level;
- * nrows        number of rows within the 2D-matrices;
- * ncols        number of columns within the 2D-matrices;
- * west_ext     western raster extent;
- * north_ext    northern raster extent;
- * ew_res       east/west raster resolution;
- * ns_res       north/south raster resolution;
- * null_value   the value representing NULL on the output map;
- * dem          a 2D-matrix containing the digital elevation model data;
- * path_loss    a 2D-matrix containing the path-loss values for the isotrophic
- *              antenna;
- *              WARNING: the output of this function overwrites this 2D-matrix!
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ * WARNING: the output of this function overwrites the path-loss matrix!
  *
  */
-void calculate_antenna_influence (const char *ant_dir,
-                                  const char *ant_file,
-                                  const double east,
-                                  const double north,
-                                  const double total_height,
-                                  const int beam_dir,
-                                  const int mech_tilt,
-                                  const double frequency,
-                                  const double radius,
-                                  const double rec_height,
-                                  const int nrows,
-                                  const int ncols,
-                                  const double west_ext,
-                                  const double north_ext,
-                                  const double ew_res,
-                                  const double ns_res,
-                                  const float null_value,
-                                  double **dem,
-                                  double **path_loss)
+void
+calculate_antenna_influence (const char use_gpu,
+                             const double tx_east_coord,
+                             const double tx_north_coord,
+                             const double antenna_height_AGL,
+                             const double total_tx_height,
+                             const int beam_direction,
+                             const int mechanical_tilt,
+                             const double frequency,
+                             const double radius,  
+                             const double rx_height_AGL,
+                             const int nrows,       
+                             const int ncols,      
+                             const double map_west,
+                             const double map_north,
+                             const double map_ew_res,  
+                             const double map_ns_res,  
+                             const float  null_value,
+                             const char *antenna_diagram_dir,
+                             const char *antenna_diagram_file,
+                             double **m_dem,          
+                             double **m_loss)
 {
     //
     // do we have to load the antenna diagram?
@@ -858,42 +847,78 @@ void calculate_antenna_influence (const char *ant_dir,
 
         // get antenna's gain and directional diagrams
         char fileName [1000];
-        if (strlen (ant_dir) == 0)
+        if (strlen (antenna_diagram_dir) == 0)
         {
-            fprintf (stderr, "ERROR Directory containing antenna files is empty\n");
+            fprintf (stderr, "ERROR Directory containing antenna files not given\n");
             exit (1);
         }
-        strcpy (fileName, ant_dir);
+        strcpy (fileName, antenna_diagram_dir);
         strcat (fileName, "/");
-        if (strlen (ant_file) == 0)
+        if (strlen (antenna_diagram_file) == 0)
         {
-            fprintf (stderr, "ERROR File name of antenna diagram is empty\n");
+            fprintf (stderr, "ERROR File name of antenna diagram not given\n");
             exit (1);
         }
-        strcat (fileName, ant_file);
+        strcat (fileName, antenna_diagram_file);
 
         diagram->gain = read_antenna_diagram (fileName,
                                               diagram->horizontal,
                                               diagram->vertical);
     }
+    // the horizontal and vertical resolution of one raster pixel should match
+    assert (map_ew_res == map_ns_res);
 
-    //antenna_influence_cpu (east,
-    antenna_influence_gpu (east,
-                           north,
-                           total_height,
-                           beam_dir,
-                           mech_tilt,
-                           frequency,
-                           radius,
-                           rec_height,
-                           nrows,
-                           ncols,
-                           west_ext,
-                           north_ext,
-                           ew_res,
-                           ns_res,
-                           null_value,
-                           dem,
-                           path_loss);
+    //
+    // calculate the antenna influence
+    //
+    if (use_gpu)
+        antenna_influence_gpu (tx_east_coord,
+                               tx_north_coord,
+                               antenna_height_AGL,
+                               total_tx_height,
+                               beam_direction,
+                               mechanical_tilt,
+                               frequency,
+                               radius,  
+                               rx_height_AGL,
+                               nrows,       
+                               ncols,      
+                               map_west,
+                               map_north,
+                               map_ew_res,  
+                               map_ns_res,  
+                               null_value,
+                               m_dem,          
+                               m_loss);
+    else
+        antenna_influence_cpu (tx_east_coord,
+                               tx_north_coord,
+                               antenna_height_AGL,
+                               total_tx_height,
+                               beam_direction,
+                               mechanical_tilt,
+                               frequency,
+                               rx_height_AGL,
+                               nrows,       
+                               ncols,      
+                               map_west,
+                               map_north,
+                               map_ew_res,  
+                               map_ns_res,  
+                               null_value,
+                               m_dem,          
+                               m_loss);
+    /*
+     * DEBUG memory
+     *
+    int r,c;
+    for (r=0;r<nrows;r++)
+    {
+        for (c=0;c<ncols;c++)
+        {
+            printf ("%.5f\t", m_loss[r][c]);
+        }
+        printf ("\n");
+    }*/
 }
 

@@ -388,45 +388,60 @@ void coverage (const Parameters     *params,
 {
     //
     // calculate the subregion (within the area) where this transmitter is 
-    // located, accounting calculation radius and its location
+    // located, taking into account its location and the calculation radius
     //
-    double radius_in_meters = params->radius * 1000;
-    int radius_in_pixels = (int) (radius_in_meters / params->map_ew_res);
-    int diameter_in_pixels = 2 * radius_in_pixels;
-    double west_border = tx_params->tx_east_coord - radius_in_meters;
-    double east_border = tx_params->tx_east_coord + radius_in_meters;
-    double south_border = tx_params->tx_north_coord - radius_in_meters;
-    double north_border = tx_params->tx_north_coord + radius_in_meters;
-    int west_border_idx = (west_border - params->map_west) / params->map_ew_res;
-    int east_border_idx = (east_border - params->map_west) / params->map_ew_res;
-    int south_border_idx = (params->map_north - south_border) / params->map_ns_res;
-    int north_border_idx = (params->map_north - north_border) / params->map_ns_res;
+    double radius_in_meters     = params->radius * 1000;
+    int radius_in_pixels        = (int) (radius_in_meters / params->map_ew_res);
+    int diameter_in_pixels      = 2 * radius_in_pixels;
+    double mini_west_border     = tx_params->tx_east_coord - radius_in_meters;
+    double mini_east_border     = tx_params->tx_east_coord + radius_in_meters;
+    double mini_south_border    = tx_params->tx_north_coord - radius_in_meters;
+    double mini_north_border    = tx_params->tx_north_coord + radius_in_meters;
+    int mini_west_border_idx    = (mini_west_border - params->map_west) / 
+                                  params->map_ew_res;
+    int mini_east_border_idx    = (mini_east_border - params->map_west) / 
+                                   params->map_ew_res;
+    int mini_south_border_idx   = (params->map_north - mini_south_border) / 
+                                  params->map_ns_res;
+    int mini_north_border_idx   = (params->map_north - mini_north_border) / 
+                                  params->map_ns_res;
+    int mini_nrows              = 2 * radius_in_pixels;
+    int mini_ncols              = 2 * radius_in_pixels;
+    int tx_east_coord_index     = radius_in_pixels - 1;
+    int tx_north_coord_index    = radius_in_pixels - 1;
 
     //
     // allocate memory for the mini matrices, that contain strictly the data needed
     // for the calculation inside the transmition radius
     //
     int r, c, mini_r, mini_c;
-    double *m_mini_dem_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+    //
+    // digital elevation model
+    //
+    double *mini_m_dem_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                  sizeof (double));
-    double **m_mini_dem = (double **) calloc (diameter_in_pixels,
+    double **mini_m_dem = (double **) calloc (diameter_in_pixels,
                                               sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_dem[r] = &(m_mini_dem_data[r * diameter_in_pixels]);
-
-    double *m_mini_clut_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+        mini_m_dem[r] = &(mini_m_dem_data[r * diameter_in_pixels]);
+    //
+    // clutter data
+    //
+    double *mini_m_clut_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                   sizeof (double));
-    double **m_mini_clut = (double **) calloc (diameter_in_pixels,
+    double **mini_m_clut = (double **) calloc (diameter_in_pixels,
                                                sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_clut[r] = &(m_mini_clut_data[r * diameter_in_pixels]);
-
-    double *m_mini_loss_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+        mini_m_clut[r] = &(mini_m_clut_data[r * diameter_in_pixels]);
+    //
+    // path loss
+    //
+    double *mini_m_loss_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                   sizeof (double));
-    double **m_mini_loss = (double **) calloc (diameter_in_pixels,
+    double **mini_m_loss = (double **) calloc (diameter_in_pixels,
                                                sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_loss[r] = &(m_mini_loss_data[r * diameter_in_pixels]);
+        mini_m_loss[r] = &(mini_m_loss_data[r * diameter_in_pixels]);
   
     //
     // copy data from the big matrices to the mini ones
@@ -434,16 +449,16 @@ void coverage (const Parameters     *params,
     mini_r = 0;
     for (r = 0; r < params->nrows; r ++)
     {
-        if ((r > north_border_idx) && (r <= south_border_idx))
+        if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
         {
             mini_c = 0;
             for (c = 0; c < params->ncols; c ++)
             {
-                if ((c > west_border_idx) && (c <= east_border_idx))
+                if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
                 {
-                    m_mini_dem[mini_r][mini_c] = params->m_dem[r][c];
-                    m_mini_clut[mini_r][mini_c] = params->m_clut[r][c];
-                    m_mini_loss[mini_r][mini_c] = params->m_loss[r][c];
+                    mini_m_dem[mini_r][mini_c]  = params->m_dem[r][c];
+                    mini_m_clut[mini_r][mini_c] = params->m_clut[r][c];
+                    mini_m_loss[mini_r][mini_c] = params->m_loss[r][c];
                     mini_c ++;
                 }
             }
@@ -451,68 +466,65 @@ void coverage (const Parameters     *params,
         }
     }
 
+    /*
+    // DEBUG memory
     //
-    // define structure variables for Ericsson 9999 model
+    if (params->use_gpu)
+    {
+        for (r=0;r<mini_nrows;r++)
+        {
+            for (c=0;c<mini_ncols;c++)
+            {
+                printf ("%.5f\t", mini_m_loss[r][c]);
+            }
+            printf ("\n");
+        }
+    }
+    else
+    {
+        mini_r = 0;
+        for (r = 0; r < params->nrows; r ++)
+        {
+            if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
+            {
+                mini_c = 0;
+                for (c = 0; c < params->ncols; c ++)
+                {
+                    if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
+                    {
+                        printf ("%.5f\t", params->m_loss[r][c]);
+                        mini_c ++;
+                    }
+                }
+                mini_r ++;
+                printf ("\n");
+            }
+        }
+    }*/
+
     //
-    double BSAntHeight = tx_params->antenna_height_AGL;
-    double MSAntHeight = params->rx_height_AGL;
-    double scale = params->map_ew_res;
-    double A0 = (double) eric_params[0];
-    double A1 = (double) eric_params[1];
-    double A2 = (double) eric_params[2];
-    double A3 = (double) eric_params[3];
-    double ResDist = 1;
-    double radi = params->radius;
-
-    int xN = 2*radius_in_pixels;
-    int yN = 2*radius_in_pixels;
-    int BSyIndex = radius_in_pixels - 1;
-    int BSxIndex = radius_in_pixels - 1;
-
-    struct StructEric IniEric = {BSxIndex, BSyIndex, 
-                                 BSAntHeight, MSAntHeight,
-                                 xN, yN, 
-                                 scale, params->frequency, 
-                                 A0, A1, A2, A3, 
-                                 ResDist, radi};
+    // initialize the structure variables for Ericsson 9999 model
+    //
+    struct StructEric IniEric = {tx_east_coord_index, 
+                                 tx_north_coord_index,
+                                 tx_params->antenna_height_AGL, 
+                                 params->rx_height_AGL,
+                                 mini_ncols,
+                                 mini_nrows,
+                                 params->map_ew_res,
+                                 params->frequency, 
+                                 (double) eric_params[0],
+                                 (double) eric_params[1],
+                                 (double) eric_params[2], 
+                                 (double) eric_params[3], 
+                                 1, 
+                                 params->radius};
 
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Ericsson", 1);
 #endif
 
-    EricPathLossSub (m_mini_dem, m_mini_clut, m_mini_loss, &IniEric);
-
-    //
-    // copy the PathLoss mini matrix back into the big one;
-    // we ignore the other ones, because they are used only as input
-    //
-    mini_r = 0;
-    for (r = 0; r < params->nrows; r ++)
-    {
-        if ((r > north_border_idx) && (r <= south_border_idx))
-        {
-            mini_c = 0;
-            for (c = 0; c < params->ncols; c ++)
-            {
-                if ((c > west_border_idx) && (c <= east_border_idx))
-                {
-                    params->m_loss[r][c] = m_mini_loss[mini_r][mini_c];
-                    mini_c ++;
-                }
-            }
-            mini_r ++;
-        }
-    }
-    
-    //
-    // deallocate the mini matrices
-    //
-    free (m_mini_dem[0]);
-    free (m_mini_dem);
-    free (m_mini_clut[0]);
-    free (m_mini_clut);
-    free (m_mini_loss[0]);
-    free (m_mini_loss);
+    EricPathLossSub (mini_m_dem, mini_m_clut, mini_m_loss, &IniEric);
 
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Ericsson", 0);
@@ -525,28 +537,68 @@ void coverage (const Parameters     *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 1);
 #endif
-    calculate_antenna_influence (params->antenna_diagram_dir,
-                                 tx_params->antenna_diagram_file,
+
+    calculate_antenna_influence (params->use_gpu,
                                  tx_params->tx_east_coord,
                                  tx_params->tx_north_coord,
+                                 tx_params->antenna_height_AGL,
                                  tx_params->total_tx_height,
                                  tx_params->beam_direction,
                                  tx_params->mechanical_tilt,
                                  params->frequency,
-                                 params->radius,
+                                 params->radius,  
                                  params->rx_height_AGL,
-                                 params->nrows,
-                                 params->ncols,
-                                 params->map_west,
-                                 params->map_north,
-                                 params->map_ew_res,
-                                 params->map_ns_res,
+                                 mini_nrows,       
+                                 mini_ncols,      
+                                 mini_west_border,
+                                 mini_north_border,
+                                 params->map_ew_res,  
+                                 params->map_ns_res,  
                                  params->null_value,
-                                 params->m_dem,
-                                 params->m_loss);
+                                 params->antenna_diagram_dir,
+                                 tx_params->antenna_diagram_file, 
+                                 mini_m_dem,          
+                                 mini_m_loss);
+
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 0);
 #endif
+
+    //
+    // copy the PathLoss mini matrix back into the big one;
+    // we ignore the other ones, because they are used only as input
+    //
+    mini_r = 0;
+    for (r = 0; r < params->nrows; r ++)
+    {
+        if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
+        {
+            mini_c = 0;
+            for (c = 0; c < params->ncols; c ++)
+            {
+                if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
+                {
+                    params->m_loss[r][c] = mini_m_loss[mini_r][mini_c];
+                    mini_c ++;
+                }
+                else
+                {
+                    params->m_loss[r][c] = params->null_value;
+                }
+            }
+            mini_r ++;
+        }
+    }
+    
+    //
+    // deallocate the mini matrices
+    //
+    free (mini_m_dem[0]);
+    free (mini_m_dem);
+    free (mini_m_clut[0]);
+    free (mini_m_clut);
+    free (mini_m_loss[0]);
+    free (mini_m_loss);
 
     /*
      * This part is only used when using this module as the objective

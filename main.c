@@ -42,7 +42,7 @@ int main (int argc, char *argv [])
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output;
-    struct Flag    *use_mpi;
+    struct Flag    *use_mpi, *use_gpu;
 
     //
     // initialize the GIS environment
@@ -81,6 +81,10 @@ int main (int argc, char *argv [])
     use_mpi->key = 'p';
     use_mpi->description = _("Whether to use the MPI implementation");
 
+    use_gpu = G_define_flag ( );
+    use_gpu->key = 'g';
+    use_gpu->description = _("Whether to use the GPU implementation");
+
     //
     // ... and parse them
     //
@@ -105,12 +109,17 @@ int main (int argc, char *argv [])
                                       params->ini_file_content_size,
                                       "r");
     //
-    // initialize the coverage calculation ...
+    // initialize the coverage calculation
     //
     init_coverage (ini_file_stream,
                    tx_ini_sections->answer,
                    params);
     fclose (ini_file_stream);
+
+    //
+    // flag to turn the GPU implementations on/off
+    //
+    params->use_gpu = use_gpu->answer;
 
     measure_time (NULL);
 
@@ -131,7 +140,8 @@ int main (int argc, char *argv [])
     else
     {
         if (params->ntx > 1)
-            fprintf (stderr, "WARNING Only the first transmitter will be processed\n");
+            fprintf (stderr, 
+                     "WARNING Only the first transmitter will be processed\n");
         coverage (params,
                   params->tx_params,
                   ericsson_params,

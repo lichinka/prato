@@ -156,6 +156,9 @@ struct Parameters
     // a buffer to save the INI file to memory
     char *  ini_file_content;
     int     ini_file_content_size;
+
+    // a flag to indicate the GPU should be used
+    char    use_gpu;
 } __attribute__((__packed__));
 
 typedef struct Parameters Parameters;
