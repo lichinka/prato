@@ -1,0 +1,28 @@
+Number of processors:	2
+Transmitters per processor:	5
+Processes per node:	2
+TIME:1350524558.01822400:	Read input data	8.71920200 sec
+Spawning 2 workers to process 10 transmitters ...
+TIME:1350524559.42741704:	Dynamic process spawning	1.40916200 sec
+TIME:1350524578.39064503:	Common data distribution	18.96287300 sec
+TIME:1350524578.39070010:	Transmitter data send (0)	0.00000600 sec
+TIME:1350524578.39089704:	Transmitter data send (1)	0.00000400 sec
+TIME:1350524586.35728908:	Calculation and result dump (0)	7.96658400 sec
+TIME:1350524586.35730290:	Transmitter data send (0)	0.00000400 sec
+TIME:1350524587.81629205:	Calculation and result dump (1)	9.42538900 sec
+TIME:1350524587.81630707:	Transmitter data send (1)	0.00000500 sec
+TIME:1350524593.38828492:	Calculation and result dump (0)	7.03097800 sec
+TIME:1350524593.38830709:	Transmitter data send (0)	0.00000600 sec
+TIME:1350524594.92634606:	Calculation and result dump (1)	7.11003500 sec
+TIME:1350524594.92635989:	Transmitter data send (1)	0.00000500 sec
+TIME:1350524600.40351200:	Calculation and result dump (0)	7.01520000 sec
+TIME:1350524600.40352607:	Transmitter data send (0)	0.00000500 sec
+TIME:1350524602.02040505:	Calculation and result dump (1)	7.09404100 sec
+TIME:1350524602.02041888:	Transmitter data send (1)	0.00000500 sec
+TIME:1350524607.42120695:	Calculation and result dump (0)	7.01767800 sec
+TIME:1350524607.42124796:	Transmitter data send (0)	0.00001000 sec
+TIME:1350524609.10880494:	Calculation and result dump (1)	7.08838200 sec
+TIME:1350524609.10884094:	Transmitter data send (1)	0.00000800 sec
+TIME:1350524614.42999005:	Calculation and result dump (0)	7.00873700 sec
+TIME:1350524616.16399789:	Calculation and result dump (1)	7.05515200 sec
+Process took 67 sec
