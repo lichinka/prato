@@ -3,11 +3,15 @@
 NTX=$( ./log_scale.sh 5 80 )
 NP=$( ./log_scale.sh 1 128 )
 
+
+#
+# find the fastest run, i.e. the one with the minimum total time
+#
 for ntx in ${NTX}; do
     rm -f /tmp/${ntx}.dat
     touch /tmp/${ntx}.dat
     for np in  ${NP}; do
-        BEST_TIME=$( ./best_time.sh weak_scaling_${ntx}_Tx/weak_scaling_${np}.*.txt | cut -f2 )
+        BEST_TIME=$( ./best_time.sh weak_scaling/NTX.${ntx}_NP.${np}_*.txt | cut -f2 )
         echo "${np}	${BEST_TIME}" >> /tmp/${ntx}.dat
     done
 done
@@ -18,7 +22,7 @@ done
 ################
 CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "weak_scaling-time_plot.eps";
+set output "weak_scaling/weak_scaling-time_plot.eps";
 set title ".:. Weak scalability .:.";
 set key bottom right;
 set xlabel "Number of cores";
@@ -49,13 +53,13 @@ gnuplot -p -e "${CMD}"
 #
 #################################
 for ntx in ${NTX}; do 
-    ./discriminated_times.sh $( for np in ${NP}; do ./best_time.sh weak_scaling_${ntx}_Tx/weak_scaling_${np}.*.txt; done | cut -f1 ) | sort -n -k1 > /tmp/${ntx}.dat
+    ./discriminated_times.sh $( for np in ${NP}; do ./best_time.sh weak_scaling/NTX.${ntx}_NP.${np}_*.txt; done | cut -f1 ) | sort -n -k1 > /tmp/${ntx}.dat
 done
 
 for ntx in 5 20 80; do
     CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "weak_scaling_relative_time_plot_${ntx}.eps";
+set output "weak_scaling/weak_scaling_relative_time_plot_${ntx}.eps";
 set title ".:. Weak scalability -- ${ntx} Transmitters .:.";
 set style data histograms;
 set style histogram rowstacked;

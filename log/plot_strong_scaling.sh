@@ -1,17 +1,56 @@
 #!/bin/bash
 
-NTX=4096
+NTX=$(./log_scale.sh 64 4096)
+NP=$( ./log_scale.sh 1 128 )
+
+
+######################
+# Speed-up 
+#
+######################
+for ntx in ${NTX}; do 
+    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
+    ./speedup_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
+done
+
+CMD=$( cat <<EOF
+set term postscript eps enhanced; 
+set output "strong_scaling/speedup_plot.eps";
+set title ".:. Strong scalability .:.";
+set key top left;
+set xlabel "Number of cores";
+set xtics 2;
+set grid xtics;
+set xrange [1:140];
+set log x; 
+set ylabel "Speed-up";
+set ytics 2;
+set yrange [1:150];
+set grid ytics;
+set log y;
+EOF
+)
+PLOT="plot "
+for ntx in ${NTX}; do
+    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 2:3 with lines lw 2 title \"${ntx} Transmitters\", "
+done
+PLOT="${PLOT} x with lines lw 2 title \"Perfect speed-up\""
+CMD="$( echo -e "${CMD}\n${PLOT}" )"
+echo "${CMD}"
+gnuplot -p -e "${CMD}"
+
 
 
 #################################
 # Relative processing time
 #
 #################################
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do 
-    ./discriminated_times.sh strong_scaling/NTX.${ntx}_NP.*.txt | sort -n -k1 > /tmp/${ntx}.dat
+for ntx in ${NTX}; do 
+    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
+    ./discriminated_times.sh ${LOGS} | sort -n -k1 > /tmp/${ntx}.dat
 done
 
-for ntx in 64 256 1024 4096; do
+for ntx in ${NTX}; do
     CMD=$( cat <<EOF
 set term postscript eps enhanced; 
 set output "strong_scaling/relative_time_plot_${ntx}.eps";
@@ -45,8 +84,9 @@ done
 # Wall clock time
 #
 ######################
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do 
-    ./time_stats.sh ${ntx} strong_scaling/NTX.${ntx}_NP.*.txt | sort -n -k2 > /tmp/${ntx}.dat
+for ntx in ${NTX}; do 
+    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
+    ./time_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
 done
 
 CMD=$( cat <<EOF
@@ -66,7 +106,7 @@ set log y;
 EOF
 )
 PLOT="plot "
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do
+for ntx in ${NTX}; do
     PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 2:3 with lines lw 2 title \"${ntx} Transmitters\", "
 done
 PLOT="$( echo "${PLOT}" | sed -e 's/, $//g' )"
@@ -77,46 +117,12 @@ gnuplot -p -e "${CMD}"
 
 
 ######################
-# Speed-up 
-#
-######################
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do 
-    ./speedup_stats.sh ${ntx} strong_scaling/NTX.${ntx}_NP.*.txt | sort -n -k2 > /tmp/${ntx}.dat
-done
-
-CMD=$( cat <<EOF
-set term postscript eps enhanced; 
-set output "strong_scaling/speedup_plot.eps";
-set title ".:. Strong scalability .:.";
-set key top left;
-set xlabel "Number of cores";
-set xtics 2;
-set grid xtics;
-set xrange [1:140];
-set log x; 
-set ylabel "Speed-up";
-set ytics 2;
-set yrange [1:150];
-set grid ytics;
-set log y;
-EOF
-)
-PLOT="plot "
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do
-    PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 2:3 with lines lw 2 title \"${ntx} Transmitters\", "
-done
-PLOT="${PLOT} x with lines lw 2 title \"Perfect speed-up\""
-CMD="$( echo -e "${CMD}\n${PLOT}" )"
-echo "${CMD}"
-gnuplot -p -e "${CMD}"
-
-
-######################
 # Efficiency
 #
 ######################
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do 
-    ./efficiency_stats.sh ${ntx} strong_scaling/NTX.${ntx}_NP.*.txt | sort -n -k2 > /tmp/${ntx}.dat
+for ntx in ${NTX}; do 
+    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
+    ./efficiency_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
 done
 
 CMD=$( cat <<EOF
@@ -137,10 +143,11 @@ unset log y;
 EOF
 )
 PLOT="plot "
-for ntx in $( ./log_scale.sh 64 ${NTX} ); do
+for ntx in ${NTX}; do
     PLOT="${PLOT} \"/tmp/${ntx}.dat\" using 2:3 with lines lw 2 title \"${ntx} Transmitters\", "
 done
 PLOT="$( echo "${PLOT}" | sed -e 's/, $//g' )"
 CMD="$( echo -e "${CMD}\n${PLOT}" )"
 echo "${CMD}"
 gnuplot -p -e "${CMD}"
+

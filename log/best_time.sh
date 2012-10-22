@@ -14,5 +14,5 @@ if [ $# -gt 1 ]; then
     echo "${BEST_FILE}	${BEST_TIME}"
 else
     echo -e "Usage:\t $0 [log files ...]"
-    echo "Extracts the best running time from a group of simulation results for weak scaling."
+    echo "Extracts the best running time from a group of simulation results."
 fi

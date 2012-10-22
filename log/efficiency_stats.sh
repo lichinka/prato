@@ -8,7 +8,7 @@ BASE_CASE=''
 if [ $# -gt 2 ]; then
     for LOG in ${@:2}; do
         if [ -z "${BASE_CASE}" ]; then
-            BASE_CASE="$( echo ${LOG} | grep 'NP\.1\.' - )"
+            BASE_CASE="$( echo ${LOG} | grep 'NP\.1\_' - )"
             echo "${BASE_CASE}"
         fi
     done
