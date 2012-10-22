@@ -3,19 +3,34 @@
 NTX=$(./log_scale.sh 64 4096)
 NP=$( ./log_scale.sh 1 128 )
 
+#
+# Returns the files with the best execution time,
+# out of a set of runs. 
+#
+# $1    Number of transmitters.-
+#
+function get_files {
+    ntx=$1
+    for np in ${NP}; do
+        F=$( find strong_scaling -iname "NTX.${ntx}_NP.${np}_?.txt" )
+        if [ -n "${F}" ]; then
+            ./best_time.sh ${F};  
+        fi
+    done | cut -f1
+}
+
 
 ######################
 # Speed-up 
 #
 ######################
 for ntx in ${NTX}; do 
-    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
-    ./speedup_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
+    ./speedup_stats.sh ${ntx} $( get_files ${ntx} ) | sort -n -k2 > /tmp/${ntx}.dat
 done
 
 CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "strong_scaling/speedup_plot.eps";
+set output "strong_scaling/strong_scaling-speedup_plot.eps";
 set title ".:. Strong scalability .:.";
 set key top left;
 set xlabel "Number of cores";
@@ -46,14 +61,13 @@ gnuplot -p -e "${CMD}"
 #
 #################################
 for ntx in ${NTX}; do 
-    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
-    ./discriminated_times.sh ${LOGS} | sort -n -k1 > /tmp/${ntx}.dat
+    ./discriminated_times.sh $( get_files ${ntx} ) | sort -n -k1 > /tmp/${ntx}.dat
 done
 
 for ntx in ${NTX}; do
     CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "strong_scaling/relative_time_plot_${ntx}.eps";
+set output "strong_scaling/strong_scaling-relative_time_plot_${ntx}.eps";
 set title ".:. Strong scalability -- ${ntx} Transmitters .:.";
 set style data histograms;
 set style histogram rowstacked;
@@ -85,13 +99,12 @@ done
 #
 ######################
 for ntx in ${NTX}; do 
-    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
-    ./time_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
+    ./time_stats.sh ${ntx} $( get_files ${ntx} ) | sort -n -k2 > /tmp/${ntx}.dat
 done
 
 CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "strong_scaling/time_plot.eps";
+set output "strong_scaling/strong_scaling-time_plot.eps";
 set title ".:. Strong scalability .:.";
 set xlabel "Number of cores";
 set xtics 2;
@@ -121,13 +134,12 @@ gnuplot -p -e "${CMD}"
 #
 ######################
 for ntx in ${NTX}; do 
-    LOGS=$( for np in ${NP}; do ./best_time.sh strong_scaling/NTX.${ntx}_NP.${np}_*.txt;  done | cut -f1 )
-    ./efficiency_stats.sh ${ntx} ${LOGS} | sort -n -k2 > /tmp/${ntx}.dat
+    ./efficiency_stats.sh ${ntx} $( get_files ${ntx} ) | sort -n -k2 > /tmp/${ntx}.dat
 done
 
 CMD=$( cat <<EOF
 set term postscript eps enhanced; 
-set output "strong_scaling/efficiency_plot.eps";
+set output "strong_scaling/strong_scaling-efficiency_plot.eps";
 set title ".:. Strong scalability .:.";
 set key bottom left;
 set xlabel "Number of cores";
