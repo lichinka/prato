@@ -535,31 +535,33 @@ eric_pathloss_on_gpu (const double tx_east_coord,
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("OpenCL data transfer to device");
 #endif
-        write_buffer_blocking (gpu_params->ocl_obj,
-                               0,
-                               &m_obst_height_dev,
-                               buffer_size,
-                               Obst_high[0]);
-        write_buffer_blocking (gpu_params->ocl_obj,
-                               0,
-                               &m_obst_dist_dev,
-                               buffer_size,
-                               Obst_dist[0]);
-        write_buffer_blocking (gpu_params->ocl_obj,
-                               0,
-                               gpu_params->m_dem_dev,
-                               buffer_size,
-                               m_dem[0]);
-        write_buffer_blocking (gpu_params->ocl_obj,
-                               0,
-                               gpu_params->m_clut_dev,
-                               buffer_size,
-                               m_clut[0]);
-        write_buffer_blocking (gpu_params->ocl_obj,
-                               0,
-                               gpu_params->m_loss_dev,
-                               buffer_size,
-                               m_loss[0]);
+        cl_event *event;
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      &m_obst_height_dev,
+                      buffer_size,
+                      Obst_high[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      &m_obst_dist_dev,
+                      buffer_size,
+                      Obst_dist[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      gpu_params->m_dem_dev,
+                      buffer_size,
+                      m_dem[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      gpu_params->m_clut_dev,
+                      buffer_size,
+                      m_clut[0]);
+        event = write_buffer (gpu_params->ocl_obj,
+                              0,
+                              gpu_params->m_loss_dev,
+                              buffer_size,
+                              m_loss[0]);
+        clWaitForEvents (1, event);
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
 #endif

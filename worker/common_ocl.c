@@ -115,6 +115,7 @@ static void print_opencl_error (int error)
 }
 
 
+
 /**
  * Checks that the structure passed has been correctly initialized.-
  */
@@ -604,6 +605,43 @@ void read_buffer_blocking (OCL_objects *ocl_obj,
 
 
 /**
+ * Enqueues a write operation of an OpenCL buffer to the device, returning
+ * the associated event object.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * queue_index  index of the command queue on which the write is performed;
+ * cl_mem_ptr   pointer to a valid cl_mem object;
+ * size         size (in bytes) of the data to write to the device;
+ * source_ptr   to the data from which to copy, on the host.-
+ *
+ */
+cl_event* write_buffer (OCL_objects *ocl_obj,
+                        int queue_index,
+                        cl_mem *cl_mem_ptr, 
+                        size_t size, 
+                        const void *source_ptr)
+{
+    check_is_initialized (ocl_obj);
+    check_queue (ocl_obj, 
+                 queue_index);
+    ocl_obj->status = clEnqueueWriteBuffer (ocl_obj->queues[queue_index],
+                                            *cl_mem_ptr,
+                                            CL_TRUE,
+                                            0,
+                                            size,
+                                            source_ptr,
+                                            0,
+                                            NULL,
+                                            &(ocl_obj->events[queue_index]));
+    check_error (ocl_obj->status, 
+                 "Write buffer - non blocking");
+    return &(ocl_obj->events[queue_index]);
+}
+
+
+
+/**
  * Writes an OpenCL buffer to the device, waiting for the operation to
  * finish before returning.
  *
@@ -633,8 +671,8 @@ void write_buffer_blocking (OCL_objects *ocl_obj,
                                             0,
                                             NULL,
                                             NULL);
-     check_error (ocl_obj->status, 
-                  "Write buffer - blocking");
+    check_error (ocl_obj->status, 
+                 "Write buffer - blocking");
 }
 
 

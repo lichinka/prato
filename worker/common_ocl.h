@@ -199,6 +199,24 @@ void read_buffer_blocking (OCL_objects *ocl_obj,
                            void *target_ptr);
 
 /**
+ * Enqueues a write operation of an OpenCL buffer to the device, returning
+ * the associated event object.
+ *
+ * ocl_obj      A pointer to the initialized OCL_objects structure on the
+ *              user's side;
+ * queue_index  index of the command queue on which the write is performed;
+ * cl_mem_ptr   pointer to a valid cl_mem object;
+ * size         size (in bytes) of the data to write to the device;
+ * source_ptr   to the data from which to copy, on the host.-
+ *
+ */
+cl_event* write_buffer (OCL_objects *ocl_obj,
+                        int queue_index,
+                        cl_mem *cl_mem_ptr, 
+                        size_t size, 
+                        const void *source_ptr);
+
+/**
  * Writes an OpenCL buffer to the device, waiting for the operation to
  * finish before returning.
  *

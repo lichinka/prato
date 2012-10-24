@@ -640,16 +640,18 @@ antenna_influence_gpu (const double tx_east_coord,
     //
     // send input data to the device
     //
-    write_buffer_blocking (gpu_params->ocl_obj,
-                           0,
-                           &horiz_diag_in_dev,
-                           diagram_size,
-                           diagram->horizontal);
-    write_buffer_blocking (gpu_params->ocl_obj,
-                           0,
-                           &vert_diag_in_dev,
-                           diagram_size,
-                           diagram->vertical);
+    cl_event *event;
+    write_buffer (gpu_params->ocl_obj,
+                  0,
+                  &horiz_diag_in_dev,
+                  diagram_size,
+                  diagram->horizontal);
+    event = write_buffer (gpu_params->ocl_obj,
+                          0,
+                          &vert_diag_in_dev,
+                          diagram_size,
+                          diagram->vertical);
+    clWaitForEvents (1, event);
 
     // kernel parameters 
     set_kernel_double_arg (gpu_params->ocl_obj,
