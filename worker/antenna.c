@@ -613,91 +613,70 @@ antenna_influence_gpu (const double tx_east_coord,
                        const double map_ew_res,  
                        const double map_ns_res,  
                        const float  null_value,
+                       GPU_parameters *gpu_params,
                        double **m_dem,          
                        double **m_loss)
 {
-    OCL_objects ocl_obj;
-
-    // initialize the OpenCL platform
-    init_opencl (&ocl_obj, 1);
-
     // build and activate the kernel
-    build_kernel_from_file (&ocl_obj,
+    build_kernel_from_file (gpu_params->ocl_obj,
                             "sector_kern",
                             "r.coverage.cl",
                             "-I. -w");
-
+    //
     // create OpenCL buffers
+    //
     size_t diagram_size = 360 *
                           sizeof (diagram->horizontal[0]);
-    size_t dem_in_size = nrows * 
+    size_t buffer_size = nrows * 
                          ncols * 
-                         sizeof (m_dem[0][0]);
-    size_t sect_out_size = nrows * 
-                           ncols * 
-                           sizeof (m_loss[0][0]);
+                         sizeof (double);
 
-    cl_mem horiz_diag_in_dev = create_buffer (&ocl_obj,
+    cl_mem horiz_diag_in_dev = create_buffer (gpu_params->ocl_obj,
                                               CL_MEM_READ_ONLY, 
                                               diagram_size);
-    cl_mem vert_diag_in_dev = create_buffer (&ocl_obj,
+    cl_mem vert_diag_in_dev = create_buffer (gpu_params->ocl_obj,
                                              CL_MEM_READ_ONLY, 
                                              diagram_size);
-    cl_mem dem_in_dev = create_buffer (&ocl_obj,
-                                       CL_MEM_READ_ONLY, 
-                                       dem_in_size);
-    cl_mem sect_out_dev = create_buffer (&ocl_obj,
-                                         CL_MEM_WRITE_ONLY, 
-                                         sect_out_size);
-
+    //
     // send input data to the device
-    write_buffer_blocking (&ocl_obj,
+    //
+    write_buffer_blocking (gpu_params->ocl_obj,
                            0,
                            &horiz_diag_in_dev,
                            diagram_size,
                            diagram->horizontal);
-    write_buffer_blocking (&ocl_obj,
+    write_buffer_blocking (gpu_params->ocl_obj,
                            0,
                            &vert_diag_in_dev,
                            diagram_size,
                            diagram->vertical);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &dem_in_dev,
-                           dem_in_size,
-                           m_dem[0]);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &sect_out_dev,
-                           sect_out_size,
-                           m_loss[0]);
 
     // kernel parameters 
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            0,
                            &map_ew_res);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            1,
                            &map_north);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            2,
                            &map_west);
-    set_kernel_int_arg (&ocl_obj,
+    set_kernel_int_arg (gpu_params->ocl_obj,
                         3,
                         &ncols);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            6,
                            &rx_height_AGL);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            7,
                            &frequency);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            8,
                            &(diagram->gain));
-    set_kernel_int_arg (&ocl_obj,
+    set_kernel_int_arg (gpu_params->ocl_obj,
                         9,
                         &beam_direction);
-    set_kernel_int_arg (&ocl_obj,
+    set_kernel_int_arg (gpu_params->ocl_obj,
                         10,
                         &mechanical_tilt);
 
@@ -705,23 +684,23 @@ antenna_influence_gpu (const double tx_east_coord,
     size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
                        _WORK_ITEMS_PER_DIMENSION_ *
                        sizeof (cl_float2);
-    set_local_mem (&ocl_obj,
+    set_local_mem (gpu_params->ocl_obj,
                    15,
                    lmem_size);
 
     // set the remaining parameters
-    set_kernel_mem_arg (&ocl_obj,
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         11,
                         &horiz_diag_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         12,
                         &vert_diag_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         13,
-                        &dem_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+                        gpu_params->m_dem_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         14,
-                        &sect_out_dev);
+                        gpu_params->m_loss_dev);
 
     //
     // calculation radius and diameter
@@ -748,11 +727,11 @@ antenna_influence_gpu (const double tx_east_coord,
     tx_data.s[3] = (double) -1.0;            // not used
 
     // set kernel parameters, specific for this transmitter
-    set_kernel_value_arg (&ocl_obj,
+    set_kernel_value_arg (gpu_params->ocl_obj,
                           4,
                           sizeof (cl_double4),
                           &tx_data);
-    set_kernel_value_arg (&ocl_obj,
+    set_kernel_value_arg (gpu_params->ocl_obj,
                           5,
                           sizeof (cl_int2),
                           &tile_offset);
@@ -784,21 +763,19 @@ antenna_influence_gpu (const double tx_east_coord,
     //
     // ... and execute it
     //
-    run_kernel_2D_blocking (&ocl_obj,
+    run_kernel_2D_blocking (gpu_params->ocl_obj,
                             0,
                             NULL,
                             global_sizes,
                             local_sizes);
-
+    //
     // sync memory
-    read_buffer_blocking (&ocl_obj,
+    //
+    read_buffer_blocking (gpu_params->ocl_obj,
                           0,
-                          &sect_out_dev,
-                          sect_out_size,
+                          gpu_params->m_loss_dev,
+                          buffer_size,
                           m_loss[0]);
-
-    // deactivate OpenCL
-    deactivate_opencl (&ocl_obj);
 }
 
 
@@ -836,6 +813,7 @@ calculate_antenna_influence (const char use_gpu,
                              const float  null_value,
                              const char *antenna_diagram_dir,
                              const char *antenna_diagram_file,
+                             GPU_parameters *gpu_params,
                              double **m_dem,          
                              double **m_loss)
 {
@@ -894,6 +872,7 @@ calculate_antenna_influence (const char use_gpu,
                                map_ew_res,  
                                map_ns_res,  
                                null_value,
+                               gpu_params,
                                m_dem,          
                                m_loss);
     else

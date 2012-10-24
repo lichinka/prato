@@ -171,6 +171,12 @@ void init_coverage (FILE       *ini_file,
     params->m_field_meas = NULL;
 
     //
+    // GPU-specific parameters are kept here
+    //
+    params->gpu_params = (GPU_parameters *) malloc (sizeof (GPU_parameters));
+    params->gpu_params->ocl_obj = NULL;
+
+    //
     // parse the INI file containing the common configuration values
     //
     rewind (ini_file);
@@ -506,6 +512,7 @@ void coverage (const Parameters     *params,
                               params->map_ew_res,  
                               params->map_ns_res,  
                               params->null_value,
+                              params->gpu_params,
                               mini_m_dem,          
                               mini_m_clut,
                               mini_m_loss);
@@ -564,6 +571,7 @@ void coverage (const Parameters     *params,
                                  params->null_value,
                                  params->antenna_diagram_dir,
                                  tx_params->antenna_diagram_file, 
+                                 params->gpu_params,
                                  mini_m_dem,          
                                  mini_m_loss);
 #ifdef _PERFORMANCE_METRICS_

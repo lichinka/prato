@@ -28,7 +28,6 @@
 
 #include "worker/eric.h"
 #include "worker/antenna.h"
-#include "worker/common_ocl.h"
 #include "performance/metric.h"
 
 
@@ -450,6 +449,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                       const double map_ew_res,  
                       const double map_ns_res,  
                       const float  null_value,
+                      GPU_parameters *gpu_params,
                       double **m_dem,          
                       double **m_clut,
                       double **m_loss)
@@ -457,7 +457,9 @@ eric_pathloss_on_gpu (const double tx_east_coord,
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("LOS");
 #endif
+    //
     // calculate the terrain profile (LOS)
+    // 
     DoProfile (1.0,
                m_dem,
                tx_east_idx,
@@ -469,82 +471,119 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                radius);
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
-    measure_time ("OpenCL startup and data transmission");
 #endif
     //
-    // start path loss calculation
+    // size of all buffers used in this function
     //
-    OCL_objects ocl_obj;
+    size_t buffer_size = nrows * 
+                         ncols * 
+                         sizeof (double);
+    //
+    // local buffers, used by this function
+    //
+    cl_mem m_obst_height_dev;
+    cl_mem m_obst_dist_dev;
 
-    // initialize the OpenCL platform
-    init_opencl (&ocl_obj, 1);
+    //
+    // initialize the OpenCL environment if we haven't already
+    //
+    if (gpu_params->ocl_obj == NULL)
+    {
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("OpenCL startup");
+#endif
+        //
+        // create the objects, that will be shared among different functions
+        // (to minize data transfers to the GPU)
+        //
+        gpu_params->ocl_obj    = (OCL_objects *) malloc (sizeof (OCL_objects));
+        gpu_params->m_dem_dev  = (cl_mem *) malloc (sizeof (cl_mem));
+        gpu_params->m_clut_dev = (cl_mem *) malloc (sizeof (cl_mem));
+        gpu_params->m_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
 
+        // initialize the OpenCL platform
+        init_opencl (gpu_params->ocl_obj, 1);
+
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+        measure_time ("OpenCL create common buffers");
+#endif
+        //
+        // create OpenCL buffers
+        //
+        *(gpu_params->m_dem_dev) = create_buffer (gpu_params->ocl_obj,
+                                                  CL_MEM_READ_ONLY, 
+                                                  buffer_size);
+        *(gpu_params->m_clut_dev) = create_buffer (gpu_params->ocl_obj,
+                                                   CL_MEM_READ_ONLY, 
+                                                   buffer_size);
+        *(gpu_params->m_loss_dev) = create_buffer (gpu_params->ocl_obj,
+                                                   CL_MEM_WRITE_ONLY, 
+                                                   buffer_size);
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+#endif
+        m_obst_height_dev = create_buffer (gpu_params->ocl_obj,
+                                           CL_MEM_READ_ONLY, 
+                                           buffer_size);
+        m_obst_dist_dev = create_buffer (gpu_params->ocl_obj,
+                                         CL_MEM_READ_ONLY, 
+                                         buffer_size);
+        //
+        // send input data to the device
+        // 
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("OpenCL data transfer to device");
+#endif
+        write_buffer_blocking (gpu_params->ocl_obj,
+                               0,
+                               &m_obst_height_dev,
+                               buffer_size,
+                               Obst_high[0]);
+        write_buffer_blocking (gpu_params->ocl_obj,
+                               0,
+                               &m_obst_dist_dev,
+                               buffer_size,
+                               Obst_dist[0]);
+        write_buffer_blocking (gpu_params->ocl_obj,
+                               0,
+                               gpu_params->m_dem_dev,
+                               buffer_size,
+                               m_dem[0]);
+        write_buffer_blocking (gpu_params->ocl_obj,
+                               0,
+                               gpu_params->m_clut_dev,
+                               buffer_size,
+                               m_clut[0]);
+        write_buffer_blocking (gpu_params->ocl_obj,
+                               0,
+                               gpu_params->m_loss_dev,
+                               buffer_size,
+                               m_loss[0]);
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+#endif
+    }
     // build and activate the kernel
-    build_kernel_from_file (&ocl_obj,
+    build_kernel_from_file (gpu_params->ocl_obj,
                             "eric_per_tx",
                             "r.coverage.cl",
-                            "-I. -w");
-
-    // create OpenCL buffers
-    size_t buffer_size = nrows * ncols * sizeof (double);
-
-    cl_mem obst_height_in_dev = create_buffer (&ocl_obj,
-                                               CL_MEM_READ_ONLY, 
-                                               buffer_size);
-    cl_mem obst_dist_in_dev = create_buffer (&ocl_obj,
-                                             CL_MEM_READ_ONLY, 
-                                             buffer_size);
-    cl_mem dem_in_dev = create_buffer (&ocl_obj,
-                                       CL_MEM_READ_ONLY, 
-                                       buffer_size);
-    cl_mem clut_in_dev = create_buffer (&ocl_obj,
-                                       CL_MEM_READ_ONLY, 
-                                       buffer_size);
-    cl_mem pl_out_dev = create_buffer (&ocl_obj,
-                                       CL_MEM_WRITE_ONLY, 
-                                       buffer_size);
-
-    // send input data to the device
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &obst_height_in_dev,
-                           buffer_size,
-                           Obst_high[0]);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &obst_dist_in_dev,
-                           buffer_size,
-                           Obst_dist[0]);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &dem_in_dev,
-                           buffer_size,
-                           m_dem[0]);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &clut_in_dev,
-                           buffer_size,
-                           m_clut[0]);
-    write_buffer_blocking (&ocl_obj,
-                           0,
-                           &pl_out_dev,
-                           buffer_size,
-                           m_loss[0]);
+                            "-I. -Werror");
 
     // kernel parameters 
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            0,
                            &map_ew_res);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            1,
                            &map_north);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            2,
                            &map_west);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            5,
                            &rx_height_AGL);
-    set_kernel_double_arg (&ocl_obj,
+    set_kernel_double_arg (gpu_params->ocl_obj,
                            6,
                            &frequency);
 
@@ -552,27 +591,27 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
                        _WORK_ITEMS_PER_DIMENSION_ *
                        sizeof (cl_float2);
-    set_local_mem (&ocl_obj,
+    set_local_mem (gpu_params->ocl_obj,
                    12,
                    lmem_size);
-
+    //
     // set the remaining parameters
-    set_kernel_mem_arg (&ocl_obj,
+    //
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         7,
-                        &obst_height_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+                        &m_obst_height_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         8,
-                        &obst_dist_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+                        &m_obst_dist_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         9,
-                        &dem_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+                        gpu_params->m_dem_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         10,
-                        &clut_in_dev);
-    set_kernel_mem_arg (&ocl_obj,
+                        gpu_params->m_clut_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
                         11,
-                        &pl_out_dev);
-
+                        gpu_params->m_loss_dev);
     //
     // calculation radius and diameter
     //
@@ -588,6 +627,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     tile_offset.s[0] /= map_ew_res;
     tile_offset.s[1]  = (int) ((map_north - tx_north_coord) - radius_in_meters);
     tile_offset.s[1] /= map_ns_res;
+
     //
     // transmitter data
     //
@@ -598,19 +638,20 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     tx_data.s[3] = (double) antenna_height_AGL; // antenna height above ground
 
     // set kernel parameters, specific for this transmitter
-    set_kernel_value_arg (&ocl_obj,
+    set_kernel_value_arg (gpu_params->ocl_obj,
                           3,
                           sizeof (cl_double4),
                           &tx_data);
-    set_kernel_value_arg (&ocl_obj,
+    set_kernel_value_arg (gpu_params->ocl_obj,
                           4,
                           sizeof (cl_int2),
                           &tile_offset);
 #ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-    measure_time ("Kernel run");
+    measure_time ("OpenCL kernel run");
 #endif
+    //
     // number of processing tiles needed around each transmitter 
+    //
     if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
     {
         fprintf (stderr, 
@@ -624,7 +665,6 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                  _WORK_ITEMS_PER_DIMENSION_);
         exit (1);
     }
-
     //
     // define a 2D execution range for the kernel ...
     //
@@ -636,26 +676,24 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     //
     // ... and execute it
     //
-    run_kernel_2D_blocking (&ocl_obj,
+    run_kernel_2D_blocking (gpu_params->ocl_obj,
                             0,
                             NULL,
                             global_sizes,
                             local_sizes);
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
-    measure_time ("Read data from GPU");
+    measure_time ("OpenCL read data from GPU");
 #endif
     // sync memory
-    read_buffer_blocking (&ocl_obj,
+    read_buffer_blocking (gpu_params->ocl_obj,
                           0,
-                          &pl_out_dev,
+                          gpu_params->m_loss_dev,
                           buffer_size,
                           m_loss[0]);
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
 #endif
-    // deactivate OpenCL
-    deactivate_opencl (&ocl_obj);
 }
 
 

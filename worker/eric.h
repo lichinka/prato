@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "worker/coverage.h"
+
 
 //
 // Parameters of the Ericsson 9999 radio propagation model
@@ -45,6 +47,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                       const double map_ew_res,  
                       const double map_ns_res,  
                       const float  null_value,
+                      GPU_parameters *gpu_params,
                       double **m_dem,          
                       double **m_clut,
                       double **m_loss);

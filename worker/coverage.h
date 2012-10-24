@@ -19,6 +19,7 @@
 #include <grass/glocale.h>
 
 #include "worker/ini.h"
+#include "worker/common_ocl.h"
 #include "performance/metric.h"
 
 
@@ -105,6 +106,19 @@ static int tx_params_handler (void *user_struct,
 }
 
 //
+// A structure to hold all GPU-specific data
+//
+struct GPU_parameters
+{
+    OCL_objects *ocl_obj;
+    cl_mem      *m_dem_dev;
+    cl_mem      *m_clut_dev;
+    cl_mem      *m_loss_dev;
+} __attribute__((__packed__));
+
+typedef struct GPU_parameters GPU_parameters;
+
+//
 // A structure to hold all common configuration parameters and
 // in-run data for the coverage-calculation process
 //
@@ -158,7 +172,9 @@ struct Parameters
     int     ini_file_content_size;
 
     // a flag to indicate the GPU should be used
-    char    use_gpu;
+    char            use_gpu;
+    // GPU-specific data is kept in this structure
+    GPU_parameters *gpu_params;
 } __attribute__((__packed__));
 
 typedef struct Parameters Parameters;

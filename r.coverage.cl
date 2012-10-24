@@ -400,24 +400,19 @@ __kernel void eric_per_tx (const real pixel_res,
 {
     double4 ericsson_params = {38.0, 32.0, -12.0, 0.1};
     real dist_Tx_Rx_in_km;
-    real2 dist;
 	double AntHeightBS;
 	double Lambda = 300.0 / frequency;			//	wave lenght
-	double ZoBS;					// BS and MS height about the sea level
 	double ZObs2LOS = 0;
 	double DistObs2BS = 0;
 	double ZoTransBS,ZoTransMS;
 	double log10Zeff;
 	double log10DistBS2MSKm;
-	double tiltBS2MS;				// (ZoBS-ZoMS)/distBS2MSNorm	
-	double PathLossFreq;			// path loss due to carrier frequency
-	double PathLossTmp = 0;				// tmp path loss
-	int ix; int iy;	
-	int DiffX, DiffY;
-    double Zeff;			// Difference in X and Y direction
+	double tiltBS2MS;
+	double PathLossFreq;
+	double PathLossTmp = 0;
+    double Zeff;
 	double PathLossAntHeightBS;
-	double DistBS2MSNorm, DistBS2MSKm;		// distance between MS and BS in Km sqrt(x2+y2+z2) * scale / 1000
-							// normalized distance between MS and BS in xy plan sqrt(x2+y2)
+	double DistBS2MSNorm, DistBS2MSKm;
 	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
     uint element_idx = get_global_id(1) * get_global_size(0) + 
                        get_global_id(0);
@@ -448,9 +443,6 @@ __kernel void eric_per_tx (const real pixel_res,
                         (199 - rx_coord_in_pixels.y);
     dist_Tx_Rx_in_km = sqrt (dist_Tx_Rx_in_km) * pixel_res / 1000;
     */
-
-    dist.x = rx_coord_in_meters.x - tx_coord_in_meters.x;
-    dist.y = rx_coord_in_meters.y - tx_coord_in_meters.y;
 
     //
     // path-loss calculation starts here

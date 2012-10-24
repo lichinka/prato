@@ -69,6 +69,7 @@ calculate_antenna_influence (const char use_gpu,
                              const float  null_value,
                              const char *antenna_diagram_dir,
                              const char *antenna_diagram_file,
+                             GPU_parameters *gpu_params,
                              double **m_dem,          
                              double **m_loss);
 
