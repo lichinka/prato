@@ -127,8 +127,8 @@ void measure_time_id (const char *message, const unsigned int clock_id)
                 double elapsed_time = PAPI_get_real_usec ( ) - last_clock[clock_id];
                 double current_time = elapsed_time + last_clock[clock_id];
                 elapsed_time /= 1000000.0;
-		current_time /= 1000000.0;
-                fprintf (stdout, "TIME:%.8f:\t%s\t%.8f sec\n", current_time,
+		        current_time /= 1000000.0;
+                fprintf (stderr, "TIME:%.8f:\t%s\t%.8f sec\n", current_time,
                                                                time_message[clock_id],
                                                                elapsed_time);
                 last_clock[clock_id] = 0;

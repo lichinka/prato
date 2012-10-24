@@ -362,8 +362,8 @@ __kernel void hata_urban_interference (const int pixel_res,
 
 
 /**
- * Calculates the path-loss matrix for one transmitter using Hata's model
- * for urban areas. All coordinates are expressed in raster cells.
+ * Calculates the path-loss matrix for one transmitter using 
+ * Ericsson 9999 model. All coordinates are expressed in raster cells.
  *
  * int pixel_res ......... size of one raster pixel (in meters).
  * real raster_north .... northern limit of the raster area (in meters).
@@ -384,28 +384,182 @@ __kernel void hata_urban_interference (const int pixel_res,
  *                        Intermediate numbers, like distance and height,
  *                        are saved here.
  */
-__kernel void hata_urban_pl_per_tx (const int pixel_res,
-									const real raster_north,
-									const real raster_west,
-                                    const int ncols, 
-                                    const real4 tx_data, const int2 tx_offset,
-                                    const real rx_height, const real frequency, 
-                                    const real ahr,
-                                    __global real *dem_in,
-                                    __global real *pl_out,
-                                    __local real2 *pblock)
+__kernel void eric_per_tx (const real pixel_res,
+                           const real raster_north,
+                           const real raster_west,
+                           const real4 tx_data, 
+                           const int2 tile_offset,
+                           const real rx_height,
+                           const real frequency,
+                           __global real *obst_height_in,
+                           __global real *obst_dist_in,
+                           __global real *dem_in,
+                           __global real *clut_in,
+                           __global real *pl_out,
+                           __local real2 *pblock)
 {
+    double4 ericsson_params = {38.0, 32.0, -12.0, 0.1};
+    real dist_Tx_Rx_in_km;
+    real2 dist;
+	double AntHeightBS;
+	double Lambda = 300.0 / frequency;			//	wave lenght
+	double ZoBS;					// BS and MS height about the sea level
+	double ZObs2LOS = 0;
+	double DistObs2BS = 0;
+	double ZoTransBS,ZoTransMS;
+	double log10Zeff;
+	double log10DistBS2MSKm;
+	double tiltBS2MS;				// (ZoBS-ZoMS)/distBS2MSNorm	
+	double PathLossFreq;			// path loss due to carrier frequency
+	double PathLossTmp = 0;				// tmp path loss
+	int ix; int iy;	
+	int DiffX, DiffY;
+    double Zeff;			// Difference in X and Y direction
+	double PathLossAntHeightBS;
+	double DistBS2MSNorm, DistBS2MSKm;		// distance between MS and BS in Km sqrt(x2+y2+z2) * scale / 1000
+							// normalized distance between MS and BS in xy plan sqrt(x2+y2)
+	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
     uint element_idx = get_global_id(1) * get_global_size(0) + 
                        get_global_id(0);
-    pl_out[element_idx] = (real) path_loss_hata_urban (pixel_res,
-													   raster_north,
-													   raster_west,
-													   ncols,
-													   tx_data, tx_offset,
-													   rx_height, frequency, 
-													   ahr,
-													   dem_in,
-													   pblock);
+ 
+    // receiver coordinates in pixels 
+    int2 rx_coord_in_pixels  = (int2) ((int)tile_offset.x + get_global_id (0),
+                                       (int)tile_offset.y + get_global_id (1));
+    
+    // receiver coordinates in meters
+    real2 rx_coord_in_meters = (real2) ((real) rx_coord_in_pixels.x * pixel_res + raster_west,
+    						   (real) raster_north - rx_coord_in_pixels.y * pixel_res); 
+    real2 tx_coord_in_meters = (real2) ((real) tx_data.x,
+    						            (real) tx_data.y);
+    //
+    // calculate the distance between the Tx and Rx
+    //
+    dist_Tx_Rx_in_km  = distance (tx_coord_in_meters, 
+                                  rx_coord_in_meters);
+    dist_Tx_Rx_in_km /= 1000;
+
+    /*
+    // this is the less accurate distance, as calculated in the CPU version,
+    // based on indices instead of actual coordinates in meters
+    //
+    dist_Tx_Rx_in_km = (199 - rx_coord_in_pixels.x) *
+                       (199 - rx_coord_in_pixels.x);
+    dist_Tx_Rx_in_km += (199 - rx_coord_in_pixels.y) *
+                        (199 - rx_coord_in_pixels.y);
+    dist_Tx_Rx_in_km = sqrt (dist_Tx_Rx_in_km) * pixel_res / 1000;
+    */
+
+    dist.x = rx_coord_in_meters.x - tx_coord_in_meters.x;
+    dist.y = rx_coord_in_meters.y - tx_coord_in_meters.y;
+
+    //
+    // path-loss calculation starts here
+    //
+    ZoTransBS = tx_data.z;
+    ZoTransMS = dem_in[element_idx] + rx_height;
+    AntHeightBS = tx_data.w;
+    Zeff = ZoTransBS - ZoTransMS;
+    DistBS2MSKm = dist_Tx_Rx_in_km;
+    DistBS2MSNorm = (dist_Tx_Rx_in_km * 1000) / pixel_res;
+    if (DistBS2MSKm < 0.01)
+        DistBS2MSKm = 0.01;
+
+    // height correction due to earth sphere
+    Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; 
+
+    // prevent Log10(Zeff) to go toward -inf
+    if (- AntHeightBS < Zeff && Zeff < AntHeightBS)
+        Zeff = AntHeightBS;		
+    
+    log10Zeff=log10(fabs(Zeff));
+
+    //log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
+    log10DistBS2MSKm=log10(DistBS2MSKm);			
+
+	PathLossAntHeightBS = 3.2 * pow (log10 (11.75 * AntHeightBS), 2);
+
+	// loss due to carrier frequency
+    PathLossFreq = 44.49 * log10(frequency) - 4.78 * pow (log10 (frequency), 2);
+
+    PathLossTmp = ericsson_params.x + ericsson_params.y * log10DistBS2MSKm; 
+    PathLossTmp += ericsson_params.z * log10Zeff;
+    PathLossTmp += ericsson_params.w * log10DistBS2MSKm*log10Zeff;
+    PathLossTmp -= PathLossAntHeightBS + PathLossFreq;
+
+    // Calc position of the height and position of the highest obstacle
+    tiltBS2MS = ZoTransBS - ZoTransMS;
+
+    if (DistBS2MSNorm > 0) 
+        tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+    else 
+        tiltBS2MS = 0; 
+    
+    ZObs2LOS = obst_height_in[element_idx];
+    DistObs2BS = obst_dist_in[element_idx];
+
+    // Calculate path loss due to NLOS conditions
+    ElevAngCos = cos ( atan (tiltBS2MS / pixel_res) );
+
+    Ddot = DistObs2BS; 
+    if (ElevAngCos != 0) 
+        Ddot = DistObs2BS/ElevAngCos;
+
+    Ddotdot = DistBS2MSNorm - Ddot;
+    if (ElevAngCos != 0)
+        Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
+
+    // Obstacle height korrection due to earth sphere
+    if (Ddot <= Ddotdot)
+        ZObs2LOS = ZObs2LOS + (Ddot*pixel_res/1000*Ddot*pixel_res/1000)/(2 * 4/3 * 6370)*1000;
+    else
+        ZObs2LOS = ZObs2LOS + (Ddotdot*pixel_res/1000*Ddotdot*pixel_res/1000)/(2 * 4/3 * 6370)*1000;
+
+    // Height correction due to BS2MS line angle
+    Hdot = ZObs2LOS*ElevAngCos;
+
+    PathLossDiff = 0;
+    KDFR = 0;
+    if (Ddot > 0 && Ddotdot > 0)
+    { 
+        // First Fresnel elipsoid radius
+        Fresnel=sqrt((Lambda*Ddot*Ddotdot*pixel_res)/(Ddot+Ddotdot));
+
+        PathLossDiff = Hdot/Fresnel;
+
+        // NLOS komponent calculation KDFR
+        if (PathLossDiff < -0.49 )
+            KDFR = 0; 
+        else if (-0.49 <= PathLossDiff && PathLossDiff < 0.5)
+            KDFR = 6 + 12.2 * PathLossDiff;
+        else if (0.5 <= PathLossDiff && PathLossDiff < 2)
+            KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
+        else if (2 <= PathLossDiff)
+            KDFR = 16 + 20 * log10(PathLossDiff);
+       
+        // Alfa correction factor
+        if (Hdot > Fresnel/2)
+            Alfa = 1;
+        else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2)
+            Alfa = 4 * Hdot/Fresnel - 1;
+        else if (Hdot < Fresnel/4)
+            Alfa = 0;
+    }
+
+    // Spherical earth diffraction komponent JDFR
+    if (Hdot > 0)
+    {
+        JDFR = 20 + 0.112 * pow(frequency/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
+    
+        if (JDFR < 0)
+            JDFR=0;
+    }
+    else
+        JDFR = 0;
+
+    PathLossTmp += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
+    
+    // write data to pathloss
+    pl_out[element_idx] = PathLossTmp + clut_in[element_idx];
 }
 
 
@@ -525,8 +679,7 @@ __kernel void sector_kern (const real pixel_res,
     vert_angle  = atan (height_diff / (dist_Tx_Rx_in_km * 1000));
     vert_angle  = vert_angle * 180 / PI;
 
-    // calculate the impact of mechanical tilt with respect
-    // to the horizontal angle
+    // impact of the mechanical tilt with respect to the horizontal angle
     real mech_tilt_impact;
 
     if (horiz_angle >= 0 && horiz_angle <= 180)
@@ -541,7 +694,7 @@ __kernel void sector_kern (const real pixel_res,
     vert_angle = vert_angle - mech_tilt_impact;
     vert_angle += (vert_angle < 0) ? 360 : 0;
 
-    // to prevent reading unallocated data (antenna diagram comprises 0 to 359 deg.)
+    // prevent reading unallocated data (antenna diagram comprises 0 to 359 deg.)
     angle = ceil (vert_angle);
     angle = (angle == 360) ? 0 : angle;
 

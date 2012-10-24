@@ -511,6 +511,7 @@ antenna_influence_cpu (const double tx_east_coord,
                        const int beam_direction,
                        const int mechanical_tilt,
                        const double frequency,
+                       const double radius,  
                        const double rx_height_AGL,
                        const int nrows,       
                        const int ncols,      
@@ -558,20 +559,25 @@ antenna_influence_cpu (const double tx_east_coord,
             double dist_Tx_Rx = sqrt (pow (d_east, 2) + 
                                       pow (d_north, 2));
             dist_Tx_Rx = dist_Tx_Rx / 1000;
-           
+        
+            // ignore pixels exceeding radius distance between Rx and Tx
+            if (dist_Tx_Rx > radius)
+                f_out = null_value;
+            else
+                f_out = antenna_influence_on_point (d_east,
+                                                    d_north,
+                                                    total_tx_height,
+                                                    beam_direction,
+                                                    mechanical_tilt,
+                                                    f_in_dem,
+                                                    rx_height_AGL,
+                                                    dist_Tx_Rx,
+                                                    f_in,
+                                                    diagram);
             // 
             // save the result in the output matrix
             //
-            m_loss[r][c] = (double) antenna_influence_on_point (d_east,
-                                                                d_north,
-                                                                total_tx_height,
-                                                                beam_direction,
-                                                                mechanical_tilt,
-                                                                f_in_dem,
-                                                                rx_height_AGL,
-                                                                dist_Tx_Rx,
-                                                                f_in,
-                                                                diagram);
+            m_loss[r][c] = (double) f_out;
         }
     }
 }
@@ -898,6 +904,7 @@ calculate_antenna_influence (const char use_gpu,
                                beam_direction,
                                mechanical_tilt,
                                frequency,
+                               radius,  
                                rx_height_AGL,
                                nrows,       
                                ncols,      

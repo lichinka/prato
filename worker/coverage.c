@@ -466,42 +466,6 @@ void coverage (const Parameters     *params,
         }
     }
 
-    /*
-    // DEBUG memory
-    //
-    if (params->use_gpu)
-    {
-        for (r=0;r<mini_nrows;r++)
-        {
-            for (c=0;c<mini_ncols;c++)
-            {
-                printf ("%.5f\t", mini_m_loss[r][c]);
-            }
-            printf ("\n");
-        }
-    }
-    else
-    {
-        mini_r = 0;
-        for (r = 0; r < params->nrows; r ++)
-        {
-            if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
-            {
-                mini_c = 0;
-                for (c = 0; c < params->ncols; c ++)
-                {
-                    if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
-                    {
-                        printf ("%.5f\t", params->m_loss[r][c]);
-                        mini_c ++;
-                    }
-                }
-                mini_r ++;
-                printf ("\n");
-            }
-        }
-    }*/
-
     //
     // initialize the structure variables for Ericsson 9999 model
     //
@@ -519,16 +483,60 @@ void coverage (const Parameters     *params,
                                  (double) eric_params[3], 
                                  1, 
                                  params->radius};
-
+    //
+    // execute the path-loss calculation on CPU or GPU?
+    //
+    if (params->use_gpu)
+    {
+        eric_pathloss_on_gpu (tx_params->tx_east_coord,
+                              tx_params->tx_north_coord,
+                              tx_east_coord_index,
+                              tx_north_coord_index,
+                              tx_params->antenna_height_AGL,
+                              tx_params->total_tx_height,
+                              tx_params->beam_direction,
+                              tx_params->mechanical_tilt,
+                              params->frequency,
+                              params->radius,  
+                              params->rx_height_AGL,
+                              mini_nrows,       
+                              mini_ncols,      
+                              mini_west_border,
+                              mini_north_border,
+                              params->map_ew_res,  
+                              params->map_ns_res,  
+                              params->null_value,
+                              mini_m_dem,          
+                              mini_m_clut,
+                              mini_m_loss);
+    }
+    else
+    {
 #ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Ericsson", 1);
+        measure_time ("E/// on CPU");
 #endif
-
-    EricPathLossSub (mini_m_dem, mini_m_clut, mini_m_loss, &IniEric);
-
+        EricPathLossSub (mini_m_dem, 
+                         mini_m_clut, 
+                         mini_m_loss, 
+                         &IniEric);
 #ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Ericsson", 0);
+        measure_time (NULL);
 #endif
+    }
+
+    /*
+    // DEBUG memory
+    //
+    for (r=0;r<mini_nrows;r++)
+    {
+        for (c=0;c<mini_ncols;c++)
+        {
+            printf ("%.5f\t", mini_m_loss[r][c]);
+        }
+        printf ("\n");
+    }
+    exit (1);
+    */
 
     //
     // calculate the antenna influence, 
@@ -537,7 +545,6 @@ void coverage (const Parameters     *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 1);
 #endif
-
     calculate_antenna_influence (params->use_gpu,
                                  tx_params->tx_east_coord,
                                  tx_params->tx_north_coord,
@@ -559,7 +566,6 @@ void coverage (const Parameters     *params,
                                  tx_params->antenna_diagram_file, 
                                  mini_m_dem,          
                                  mini_m_loss);
-
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 0);
 #endif
@@ -583,10 +589,25 @@ void coverage (const Parameters     *params,
                 }
                 else
                 {
+                    //
+                    // this point is outside the mini matrix (i.e. calculation 
+                    // within radius), write null to it
+                    //
                     params->m_loss[r][c] = params->null_value;
                 }
             }
             mini_r ++;
+        }
+        else
+        {
+            //
+            // this row is outside the mini matrix (i.e. calculation 
+            // within radius), write nulls to it
+            //
+            for (c = 0; c < params->ncols; c ++)
+            {
+                params->m_loss[r][c] = params->null_value;
+            }
         }
     }
     

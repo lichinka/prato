@@ -7,7 +7,7 @@ INCS 	= $(PRJINCS)
 LIBS 	= $(PRJLIBS) -L. -lworker -lperformance -lOpenCL
 SRCS    = $(wildcard *.c) $(wildcard master/*.c)
 OBJS    = $(SRCS:.c=.o)
-OBJLIBS = libworker.so libperformance.so
+OBJLIBS = libperformance.so libworker.so
 
 all: $(BIN)
 

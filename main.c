@@ -128,9 +128,6 @@ int main (int argc, char *argv [])
     //
     double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
 
-#ifdef _PERFORMANCE_METRICS_
-    for (i = 0; i < 3; i ++)
-#endif
     if (use_mpi->answer)
     {
         coverage_mpi (argc,
