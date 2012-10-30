@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0 EPSF-2.0
-%%Title: strong_scaling/strong_scaling-relative_time_plot_64.eps
-%%Creator: gnuplot 4.6 patchlevel 0
-%%CreationDate: Sun Oct 28 07:25:03 2012
+%%Title: strong_scaling/per_worker_times-128_NTX.eps
+%%Creator: gnuplot 4.6 patchlevel 1
+%%CreationDate: Mon Oct 29 19:16:08 2012
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 410 302
 %%EndComments
@@ -47,7 +47,7 @@ gnudict begin
   } if
 } def
 %
-% Gnuplot Prolog Version 4.4 (August 2010)
+% Gnuplot Prolog Version 4.6 (September 2012)
 %
 %/SuppressPDFMark true def
 %
@@ -314,7 +314,8 @@ gnudict begin
 /PatternFill {gsave /PFa [ 9 2 roll ] def
   PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
   PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-  gsave 1 setgray fill grestore clip
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+  clip
   currentlinewidth 0.5 mul setlinewidth
   /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
   0 0 M PFa 5 get rotate PFs -2 div dup translate
@@ -454,13 +455,13 @@ systemdict /pdfmark known not {
   userdict /pdfmark systemdict /cleartomark get put
 } if
 SDict begin [
-  /Title (strong_scaling/strong_scaling-relative_time_plot_64.eps)
+  /Title (strong_scaling/per_worker_times-128_NTX.eps)
   /Subject (gnuplot plot)
-  /Creator (gnuplot 4.6 patchlevel 0)
+  /Creator (gnuplot 4.6 patchlevel 1)
   /Author (luka)
 %  /Producer (gnuplot)
 %  /Keywords ()
-  /CreationDate (Sun Oct 28 07:25:03 2012)
+  /CreationDate (Mon Oct 29 19:16:08 2012)
   /DOCINFO pdfmark
 end
 } ifelse
@@ -478,503 +479,980 @@ newpath
 BackgroundColor 0 lt 3 1 roll 0 lt exch 0 lt or or not {BackgroundColor C 1.000 0 0 7200.00 5040.00 BoxColFill} if
 1.000 UL
 LTb
-686 448 M
+602 448 M
 63 0 V
-6198 0 R
+6282 0 R
 -63 0 V
 stroke
-602 448 M
+518 448 M
 [ [(Helvetica) 140.0 0.0 true true 0 ( 0)]
 ] -46.7 MRshow
 1.000 UL
 LTb
-686 796 M
+602 746 M
 63 0 V
-6198 0 R
+6282 0 R
 -63 0 V
 stroke
-602 796 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.1)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 1143 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 1143 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.2)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 1491 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 1491 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.3)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 1838 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 1838 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.4)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 2186 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 2186 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.5)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 2534 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 2534 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.6)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 2881 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 2881 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.7)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 3229 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 3229 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.8)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 3576 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 3576 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 0.9)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 3924 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 3924 M
+518 746 M
 [ [(Helvetica) 140.0 0.0 true true 0 ( 1)]
 ] -46.7 MRshow
 1.000 UL
 LTb
-686 4271 M
+602 1044 M
 63 0 V
-6198 0 R
+6282 0 R
 -63 0 V
 stroke
-602 4271 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 1.1)]
+518 1044 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 2)]
 ] -46.7 MRshow
 1.000 UL
 LTb
-686 4619 M
+602 1342 M
 63 0 V
-6198 0 R
+6282 0 R
 -63 0 V
 stroke
+518 1342 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 3)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 1640 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 1640 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 4)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 1938 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 1938 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 5)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 2236 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 2236 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 6)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 2534 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 2534 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 7)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 2831 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 2831 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 8)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 3129 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 3129 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 9)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 3427 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 3427 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 10)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 3725 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 3725 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 11)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 4023 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 4023 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 12)]
+] -46.7 MRshow
+1.000 UL
+LTb
+602 4321 M
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 4321 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 13)]
+] -46.7 MRshow
+1.000 UL
+LTb
 602 4619 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 1.2)]
+63 0 V
+6282 0 R
+-63 0 V
+stroke
+518 4619 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 14)]
 ] -46.7 MRshow
 1.000 UL
 LTb
-1469 448 M
+602 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-1469 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (1)]
+602 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 0)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-2251 448 M
+701 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-2251 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (2)]
+701 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 2)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-3034 448 M
+800 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-3034 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (4)]
+800 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 4)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-3817 448 M
+899 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-3817 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (8)]
+899 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 6)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-4599 448 M
+999 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-4599 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (16)]
+999 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 8)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-5382 448 M
+1098 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-5382 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (32)]
+1098 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 10)]
 ] -46.7 MCshow
 1.000 UL
 LTb
-6164 448 M
+1197 448 M
 0 63 V
 0 4108 R
 0 -63 V
 stroke
-6164 308 M
-[ [(Helvetica) 140.0 0.0 true true 0 (64)]
+1197 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 12)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1296 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1296 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 14)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1395 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1395 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 16)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1494 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1494 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 18)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1593 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1593 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 20)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1693 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1693 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 22)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1792 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1792 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 24)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1891 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1891 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 26)]
+] -46.7 MCshow
+1.000 UL
+LTb
+1990 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+1990 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 28)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2089 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2089 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 30)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2188 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2188 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 32)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2287 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2287 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 34)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2387 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2387 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 36)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2486 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2486 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 38)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2585 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2585 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 40)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2684 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2684 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 42)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2783 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2783 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 44)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2882 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2882 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 46)]
+] -46.7 MCshow
+1.000 UL
+LTb
+2981 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+2981 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 48)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3081 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3081 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 50)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3180 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3180 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 52)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3279 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3279 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 54)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3378 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3378 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 56)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3477 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3477 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 58)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3576 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3576 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 60)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3675 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3675 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 62)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3775 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3775 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 64)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3874 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3874 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 66)]
+] -46.7 MCshow
+1.000 UL
+LTb
+3973 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+3973 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 68)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4072 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4072 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 70)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4171 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4171 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 72)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4270 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4270 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 74)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4369 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4369 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 76)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4468 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4468 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 78)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4568 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4568 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 80)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4667 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4667 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 82)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4766 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4766 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 84)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4865 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4865 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 86)]
+] -46.7 MCshow
+1.000 UL
+LTb
+4964 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+4964 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 88)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5063 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5063 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 90)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5162 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5162 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 92)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5262 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5262 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 94)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5361 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5361 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 96)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5460 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5460 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 98)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5559 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5559 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 100)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5658 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5658 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 102)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5757 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5757 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 104)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5856 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5856 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 106)]
+] -46.7 MCshow
+1.000 UL
+LTb
+5956 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+5956 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 108)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6055 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6055 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 110)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6154 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6154 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 112)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6253 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6253 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 114)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6352 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6352 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 116)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6451 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6451 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 118)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6550 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6550 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 120)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6650 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6650 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 122)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6749 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6749 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 124)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6848 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6848 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 126)]
+] -46.7 MCshow
+1.000 UL
+LTb
+6947 448 M
+0 63 V
+0 4108 R
+0 -63 V
+stroke
+6947 308 M
+[ [(Helvetica) 140.0 0.0 true true 0 ( 128)]
 ] -46.7 MCshow
 1.000 UL
 LTb
 1.000 UL
 LTb
-686 4619 N
-686 448 L
-6261 0 V
+602 4619 N
+602 448 L
+6345 0 V
 0 4171 V
--6261 0 V
+-6345 0 V
 Z stroke
 LCb setrgbcolor
 112 2533 M
 currentpoint gsave translate -270 rotate 0 0 moveto
-[ [(Helvetica) 140.0 0.0 true true 0 (Relative processing time)]
+[ [(Helvetica) 140.0 0.0 true true 0 (Wall clock time \(sec\))]
 ] -46.7 MCshow
 grestore
 LTb
 LCb setrgbcolor
-3816 98 M
-[ [(Helvetica) 140.0 0.0 true true 0 (Number of cores)]
+3774 98 M
+[ [(Helvetica) 140.0 0.0 true true 0 (Worker process ID)]
 ] -46.7 MCshow
 LTb
-3816 4829 M
-[ [(Helvetica) 140.0 0.0 true true 0 (.:. Strong scalability -- 64 Transmitters .:.)]
+3774 4829 M
+[ [(Helvetica) 140.0 0.0 true true 0 (.:. Processing times per worker .:.)]
 ] -46.7 MCshow
 1.000 UP
 1.000 UL
 LTb
 % Begin plot #1
-1.000 UL
+3.000 UL
 LT0
 LCb setrgbcolor
-6296 4486 M
-[ [(Helvetica) 140.0 0.0 true true 0 (Dynamic worker-process spawning)]
+6296 581 M
+[ [(Helvetica) 140.0 0.0 true true 0 (128 Transmitters per core)]
 ] -46.7 MRshow
 LT0
-1 6380 4451 399 70 BoxColFill
-6380 4451 N
+6380 581 M
 399 0 V
-0 70 V
--399 0 V
-0 -70 V
-Z stroke
-LT0
-1 1077 448 784 4 BoxColFill
-1077 448 N
-0 3 V
-783 0 V
-0 -3 V
--783 0 V
-Z stroke
-1 1860 448 784 20 BoxColFill
-1860 448 N
-0 19 V
-783 0 V
-0 -19 V
--783 0 V
-Z stroke
-1 2643 448 783 31 BoxColFill
-2643 448 N
-0 30 V
-782 0 V
-0 -30 V
--782 0 V
-Z stroke
-1 3425 448 784 43 BoxColFill
-3425 448 N
-0 42 V
-783 0 V
-0 -42 V
--783 0 V
-Z stroke
-1 4208 448 783 58 BoxColFill
-4208 448 N
-0 57 V
-782 0 V
-0 -57 V
--782 0 V
-Z stroke
-1 4990 448 784 71 BoxColFill
-4990 448 N
-0 70 V
-783 0 V
-0 -70 V
--783 0 V
-Z stroke
-1 5773 448 784 83 BoxColFill
-5773 448 N
-0 82 V
-783 0 V
-0 -82 V
--783 0 V
-Z stroke
+602 3689 M
+50 -234 V
+49 8 V
+50 84 V
+49 -93 V
+50 21 V
+49 6 V
+50 -6 V
+50 -260 V
+49 440 V
+50 3 V
+49 -126 V
+50 -10 V
+49 -54 V
+50 -10 V
+50 21 V
+49 -27 V
+50 0 V
+49 -239 V
+50 442 V
+49 27 V
+50 -132 V
+50 -89 V
+49 -3 V
+50 -1 V
+49 17 V
+50 8 V
+49 -8 V
+50 -260 V
+50 443 V
+49 0 V
+50 -130 V
+49 -69 V
+50 1 V
+49 1 V
+50 14 V
+50 -20 V
+49 7 V
+50 -251 V
+49 443 V
+50 30 V
+49 -130 V
+50 -94 V
+50 13 V
+49 -10 V
+50 12 V
+49 -1 V
+50 -1 V
+49 -260 V
+50 501 V
+50 -55 V
+49 -131 V
+50 -67 V
+49 10 V
+50 -10 V
+49 22 V
+50 -25 V
+50 -7 V
+49 -240 V
+50 446 V
+49 26 V
+50 -132 V
+49 -92 V
+50 0 V
+50 0 V
+49 21 V
+50 -6 V
+49 -1 V
+50 -261 V
+49 444 V
+50 10 V
+49 -139 V
+50 -65 V
+50 -2 V
+49 2 V
+50 13 V
+49 -17 V
+50 -4 V
+49 -221 V
+50 434 V
+50 23 V
+49 -141 V
+50 -89 V
+49 -9 V
+50 4 V
+49 21 V
+50 2 V
+50 -2 V
+49 -263 V
+50 448 V
+49 21 V
+50 -155 V
+49 -63 V
+50 -5 V
+50 -3 V
+49 19 V
+50 -19 V
+49 -4 V
+50 -241 V
+49 446 V
+50 27 V
+50 -107 V
+49 -100 V
+stroke 5658 3476 M
+50 -15 V
+49 -7 V
+50 23 V
+49 2 V
+50 -5 V
+50 -255 V
+49 435 V
+50 4 V
+49 -131 V
+50 -68 V
+49 1 V
+50 0 V
+50 14 V
+49 -23 V
+50 1 V
+49 -240 V
+50 445 V
+49 25 V
+50 -132 V
+50 -88 V
+49 -2 V
+50 17 V
+49 -4 V
+50 -1 V
+49 -13 V
 % End plot #1
-% Begin plot #2
-1.000 UL
-LT1
-LCb setrgbcolor
-6296 4346 M
-[ [(Helvetica) 140.0 0.0 true true 0 (Input data broadcasting)]
-] -46.7 MRshow
-LT1
-6380 4311 399 70 80 45 0 PatternFill
-6380 4311 N
-399 0 V
-0 70 V
--399 0 V
-0 -70 V
-Z stroke
-LT1
-1077 451 784 134 80 45 0 PatternFill
-1077 451 N
-0 133 V
-783 0 V
-0 -133 V
--783 0 V
-Z stroke
-1860 467 784 253 80 45 0 PatternFill
-1860 467 N
-0 252 V
-783 0 V
-0 -252 V
--783 0 V
-Z stroke
-2643 478 783 423 80 45 0 PatternFill
-2643 478 N
-0 422 V
-782 0 V
-0 -422 V
--782 0 V
-Z stroke
-3425 490 784 1145 80 45 0 PatternFill
-3425 490 N
-0 1144 V
-783 0 V
-0 -1144 V
--783 0 V
-Z stroke
-4208 505 783 1643 80 45 0 PatternFill
-4208 505 N
-0 1642 V
-782 0 V
-0 -1642 V
--782 0 V
-Z stroke
-4990 518 784 2069 80 45 0 PatternFill
-4990 518 N
-0 2068 V
-783 0 V
-0 -2068 V
--783 0 V
-Z stroke
-5773 530 784 2313 80 45 0 PatternFill
-5773 530 N
-0 2312 V
-783 0 V
-0 -2312 V
--783 0 V
-Z stroke
-% End plot #2
-% Begin plot #3
-1.000 UL
-LT2
-LCb setrgbcolor
-6296 4206 M
-[ [(Helvetica) 140.0 0.0 true true 0 (Processing loop)]
-] -46.7 MRshow
-LT2
-6380 4171 399 70 80 -45 0 PatternFill
-6380 4171 N
-399 0 V
-0 70 V
--399 0 V
-0 -70 V
-Z stroke
-LT2
-1077 584 784 3273 80 -45 0 PatternFill
-1077 584 N
-0 3272 V
-783 0 V
-0 -3272 V
--783 0 V
-Z stroke
-1860 719 784 3062 80 -45 0 PatternFill
-1860 719 N
-0 3061 V
-783 0 V
-0 -3061 V
--783 0 V
-Z stroke
-2643 900 783 2821 80 -45 0 PatternFill
-2643 900 N
-0 2820 V
-782 0 V
-0 -2820 V
--782 0 V
-Z stroke
-3425 1634 784 2028 80 -45 0 PatternFill
-3425 1634 N
-0 2027 V
-783 0 V
-0 -2027 V
--783 0 V
-Z stroke
-4208 2147 783 1390 80 -45 0 PatternFill
-4208 2147 N
-0 1389 V
-782 0 V
-0 -1389 V
--782 0 V
-Z stroke
-4990 2586 784 864 80 -45 0 PatternFill
-4990 2586 N
-0 863 V
-783 0 V
-0 -863 V
--783 0 V
-Z stroke
-5773 2842 784 539 80 -45 0 PatternFill
-5773 2842 N
-0 538 V
-783 0 V
-0 -538 V
--783 0 V
-Z stroke
-% End plot #3
-% Begin plot #4
-1.000 UL
-LT3
-LCb setrgbcolor
-6296 4066 M
-[ [(Helvetica) 140.0 0.0 true true 0 (Create final coverage prediction)]
-] -46.7 MRshow
-LT3
-6380 4031 399 70 40 30 0 PatternFill
-6380 4031 N
-399 0 V
-0 70 V
--399 0 V
-0 -70 V
-Z stroke
-LT3
-1077 3856 784 69 40 30 0 PatternFill
-1077 3856 N
-0 68 V
-783 0 V
-0 -68 V
--783 0 V
-Z stroke
-1860 3780 784 145 40 30 0 PatternFill
-1860 3780 N
-0 144 V
-783 0 V
-0 -144 V
--783 0 V
-Z stroke
-2643 3720 783 205 40 30 0 PatternFill
-2643 3720 N
-0 204 V
-782 0 V
-0 -204 V
--782 0 V
-Z stroke
-3425 3661 784 264 40 30 0 PatternFill
-3425 3661 N
-0 263 V
-783 0 V
-0 -263 V
--783 0 V
-Z stroke
-4208 3536 783 389 40 30 0 PatternFill
-4208 3536 N
-0 388 V
-782 0 V
-0 -388 V
--782 0 V
-Z stroke
-4990 3449 784 476 40 30 0 PatternFill
-4990 3449 N
-0 475 V
-783 0 V
-0 -475 V
--783 0 V
-Z stroke
-5773 3380 784 545 40 30 0 PatternFill
-5773 3380 N
-0 544 V
-783 0 V
-0 -544 V
--783 0 V
-Z stroke
-% End plot #4
+stroke
 1.000 UL
 LTb
-686 4619 N
-686 448 L
-6261 0 V
+602 4619 N
+602 448 L
+6345 0 V
 0 4171 V
--6261 0 V
+-6345 0 V
 Z stroke
 1.000 UP
 1.000 UL
