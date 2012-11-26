@@ -1,7 +1,7 @@
 %!PS-Adobe-2.0 EPSF-2.0
 %%Title: strong_scaling/strong_scaling-relative_time_plot_256.eps
-%%Creator: gnuplot 4.6 patchlevel 0
-%%CreationDate: Sun Oct 28 07:25:03 2012
+%%Creator: gnuplot 4.6 patchlevel 1
+%%CreationDate: Fri Nov 16 12:42:25 2012
 %%DocumentFonts: (atend)
 %%BoundingBox: 50 50 410 302
 %%EndComments
@@ -47,7 +47,7 @@ gnudict begin
   } if
 } def
 %
-% Gnuplot Prolog Version 4.4 (August 2010)
+% Gnuplot Prolog Version 4.6 (September 2012)
 %
 %/SuppressPDFMark true def
 %
@@ -314,7 +314,8 @@ gnudict begin
 /PatternFill {gsave /PFa [ 9 2 roll ] def
   PFa 0 get PFa 2 get 2 div add PFa 1 get PFa 3 get 2 div add translate
   PFa 2 get -2 div PFa 3 get -2 div PFa 2 get PFa 3 get Rec
-  gsave 1 setgray fill grestore clip
+  TransparentPatterns {} {gsave 1 setgray fill grestore} ifelse
+  clip
   currentlinewidth 0.5 mul setlinewidth
   /PFs PFa 2 get dup mul PFa 3 get dup mul add sqrt def
   0 0 M PFa 5 get rotate PFs -2 div dup translate
@@ -456,11 +457,11 @@ systemdict /pdfmark known not {
 SDict begin [
   /Title (strong_scaling/strong_scaling-relative_time_plot_256.eps)
   /Subject (gnuplot plot)
-  /Creator (gnuplot 4.6 patchlevel 0)
+  /Creator (gnuplot 4.6 patchlevel 1)
   /Author (luka)
 %  /Producer (gnuplot)
 %  /Keywords ()
-  /CreationDate (Sun Oct 28 07:25:03 2012)
+  /CreationDate (Fri Nov 16 12:42:25 2012)
   /DOCINFO pdfmark
 end
 } ifelse
@@ -588,26 +589,6 @@ stroke
 ] -46.7 MRshow
 1.000 UL
 LTb
-686 4271 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 4271 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 1.1)]
-] -46.7 MRshow
-1.000 UL
-LTb
-686 4619 M
-63 0 V
-6198 0 R
--63 0 V
-stroke
-602 4619 M
-[ [(Helvetica) 140.0 0.0 true true 0 ( 1.2)]
-] -46.7 MRshow
-1.000 UL
-LTb
 1382 448 M
 0 63 V
 0 4108 R
@@ -709,7 +690,7 @@ LCb setrgbcolor
 ] -46.7 MCshow
 LTb
 3816 4829 M
-[ [(Helvetica) 140.0 0.0 true true 0 (.:. Strong scalability -- 256 Transmitters .:.)]
+[ [(Helvetica) 140.0 0.0 true true 0 (.:. Strong scalability -- 256 transmitters .:.)]
 ] -46.7 MCshow
 1.000 UP
 1.000 UL
@@ -824,18 +805,18 @@ Z stroke
 0 -123 V
 -696 0 V
 Z stroke
-3121 464 697 416 80 45 0 PatternFill
+3121 464 697 422 80 45 0 PatternFill
 3121 464 N
-0 415 V
+0 421 V
 696 0 V
-0 -415 V
+0 -421 V
 -696 0 V
 Z stroke
-3817 475 696 765 80 45 0 PatternFill
+3817 475 696 776 80 45 0 PatternFill
 3817 475 N
-0 764 V
+0 775 V
 695 0 V
-0 -764 V
+0 -775 V
 -695 0 V
 Z stroke
 4512 490 697 1250 80 45 0 PatternFill
@@ -876,11 +857,11 @@ LT2
 0 -70 V
 Z stroke
 LT2
-1034 484 697 3423 80 -45 0 PatternFill
+1034 484 697 3422 80 -45 0 PatternFill
 1034 484 N
-0 3422 V
+0 3421 V
 696 0 V
-0 -3422 V
+0 -3421 V
 -696 0 V
 Z stroke
 1730 523 696 3352 80 -45 0 PatternFill
@@ -897,18 +878,18 @@ Z stroke
 0 -3265 V
 -696 0 V
 Z stroke
-3121 879 697 2914 80 -45 0 PatternFill
-3121 879 N
-0 2913 V
+3121 885 697 2912 80 -45 0 PatternFill
+3121 885 N
+0 2911 V
 696 0 V
-0 -2913 V
+0 -2911 V
 -696 0 V
 Z stroke
-3817 1239 696 2473 80 -45 0 PatternFill
-3817 1239 N
-0 2472 V
+3817 1250 696 2474 80 -45 0 PatternFill
+3817 1250 N
+0 2473 V
 695 0 V
-0 -2472 V
+0 -2473 V
 -695 0 V
 Z stroke
 4512 1739 697 1908 80 -45 0 PatternFill
@@ -949,11 +930,11 @@ LT3
 0 -70 V
 Z stroke
 LT3
-1034 3906 697 19 40 30 0 PatternFill
-1034 3906 N
-0 18 V
+1034 3905 697 20 40 30 0 PatternFill
+1034 3905 N
+0 19 V
 696 0 V
-0 -18 V
+0 -19 V
 -696 0 V
 Z stroke
 1730 3874 696 51 40 30 0 PatternFill
@@ -970,18 +951,18 @@ Z stroke
 0 -79 V
 -696 0 V
 Z stroke
-3121 3792 697 133 40 30 0 PatternFill
-3121 3792 N
-0 132 V
+3121 3796 697 129 40 30 0 PatternFill
+3121 3796 N
+0 128 V
 696 0 V
-0 -132 V
+0 -128 V
 -696 0 V
 Z stroke
-3817 3711 696 214 40 30 0 PatternFill
-3817 3711 N
-0 213 V
+3817 3723 696 202 40 30 0 PatternFill
+3817 3723 N
+0 201 V
 695 0 V
-0 -213 V
+0 -201 V
 -695 0 V
 Z stroke
 4512 3646 697 279 40 30 0 PatternFill

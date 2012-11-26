@@ -68,7 +68,7 @@ for ntx in ${NTX}; do
     CMD=$( cat <<EOF
 set term postscript eps enhanced; 
 set output "strong_scaling/strong_scaling-relative_time_plot_${ntx}.eps";
-set title ".:. Strong scalability -- ${ntx} Transmitters .:.";
+set title ".:. Strong scalability -- ${ntx} transmitters .:.";
 set style data histograms;
 set style histogram rowstacked;
 set boxwidth 1 relative;
@@ -76,7 +76,7 @@ set style fill pattern 3 border;
 set xlabel "Number of cores";
 set nolog x; 
 set ylabel "Relative processing time";
-set ytics 0.1;
+set ytics (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0);
 set yrange [0:1.20];
 set nolog y;
 EOF
@@ -111,7 +111,7 @@ set xtics 2;
 set grid xtics;
 set xrange [1:140];
 set log x; 
-set ylabel "Wall clock time (sec)";
+set ylabel "Wall-clock time [s]";
 set format y "10^%T";
 set ytics 10;
 set yrange [60:50000];
