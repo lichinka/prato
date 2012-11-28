@@ -11,7 +11,8 @@ if [ -n "${TX}" ]; then
         CMD="${CMD} output_raster=${OUT}"
     fi
     echo ${CMD} >&2 
-    ${CMD} | psql -h ${PSQL_SERVER} -U garufa grass_backend
+    #${CMD} | psql -h ${PSQL_SERVER} -U garufa grass_backend
+    ${CMD} 
 else
     echo "Usage"
     echo "  $0 [transmitter's section name in the INI file] [output raster name]"

@@ -614,13 +614,16 @@ void output_to_stdout (const Parameters *params,
     int r, c;
     
     // 
-    // tell the DB server to get ready before sending the data
+    // prepare the DB server before sending the data
     //
     fprintf (stdout, 
-             "CREATE TABLE IF NOT EXISTS coverage_%s (east int, north int, rscp float);\n",
+             "CREATE TABLE IF NOT EXISTS coverage_%s (east int, north int, pl float);\n",
+             tx_params->tx_name);
+    fprintf (stdout, 
+             "TRUNCATE TABLE coverage_%s;\n",
              tx_params->tx_name);
     fprintf (stdout,
-             "\\COPY coverage_%s (east, north, rscp) FROM STDIN WITH DELIMITER ' '\n",
+             "\\COPY coverage_%s (east, north, pl) FROM STDIN WITH DELIMITER ' '\n",
              tx_params->tx_name);
     //
     // output the data
@@ -629,17 +632,21 @@ void output_to_stdout (const Parameters *params,
     {
         for (c = 0; c < params->ncols; c ++)
         {
-            float rscp = (float) params->m_loss[r][c];
-            if ((!isnan (rscp)) && (rscp != params->null_value))
+            float pl = (float) params->m_loss[r][c];
+            if ((!isnan (pl)) && (pl != params->null_value))
             {
                 float east_coord  = params->map_west + c * params->map_ew_res;
                 float north_coord = params->map_north - r * params->map_ns_res;
 
                 fprintf (stdout, "%.f %.f %.5f\n", east_coord,
                                                    north_coord,
-                                                   rscp);
+                                                   pl);
             }
         }
     }
+    //
+    // mark end-of transmitter data
+    //
+    fprintf (stdout, "\\.\n");
 }
 
