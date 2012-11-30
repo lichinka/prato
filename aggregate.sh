@@ -2,9 +2,10 @@
 
 TX=$1
 INI=$2
+RAST=$3
 PSQL_SERVER=localhost
 
-if [ -n "${TX}" ] && [ -n "${INI}" ]; then
+if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     echo "*** INFO: Aggregating partial predictions for ${TX} ..."
     SQL="SELECT east, north, rscp FROM ( SELECT east, north, MAX(rscp) AS rscp FROM ("
     TX="$( echo "${TX}" | tr ',' ' ' )"
@@ -17,10 +18,10 @@ if [ -n "${TX}" ] && [ -n "${INI}" ]; then
     SQL="${SQL} WHERE rscp < 0"
     echo "${SQL}" | psql -q -t -h ${PSQL_SERVER} -U garufa grass_backend | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
     v.to.rast input=temp type=point output=temp use=z --overwrite
-    r.resamp.rst input=temp ew_res=25 ns_res=25 elev=final_coverage --overwrite
-    r.colors -n map=final_coverage color=elevation
+    r.resamp.rst input=temp ew_res=25 ns_res=25 elev=${RAST} --overwrite
+    r.colors -n map=${RAST} color=elevation
 else
-    echo -e "Usage:\t$0 [comma-separated transmitter's section names] [INI file]"
-    echo "Aggregates individual path-loss predictions for the given transmitters."
+    echo -e "Usage:\t$0 [comma-separated transmitter's section names] [INI file] [raster name]"
+    echo "Aggregates individual path-loss predictions for the given transmitters into a raster map."
     echo
 fi
