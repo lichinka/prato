@@ -617,7 +617,7 @@ void output_to_stdout (const Parameters *params,
     // prepare the DB server before sending the data
     //
     fprintf (stdout, 
-             "CREATE TABLE IF NOT EXISTS coverage_%s (east int, north int, pl float);\n",
+             "CREATE TABLE IF NOT EXISTS coverage_%s (east float, north float, pl float);\n",
              tx_params->tx_name);
     fprintf (stdout, 
              "TRUNCATE TABLE coverage_%s;\n",
@@ -638,9 +638,9 @@ void output_to_stdout (const Parameters *params,
                 float east_coord  = params->map_west + c * params->map_ew_res;
                 float north_coord = params->map_north - r * params->map_ns_res;
 
-                fprintf (stdout, "%.f %.f %.5f\n", east_coord,
-                                                   north_coord,
-                                                   pl);
+                fprintf (stdout, "%.2f %.2f %.5f\n", east_coord,
+                                                     north_coord,
+                                                     pl);
             }
         }
     }
