@@ -28,8 +28,6 @@ typedef double	real;
 typedef double2	real2;
 typedef double4 real4;
 
-#pragma OPENCL EXTENSION cl_amd_printf : enable
-
 /**
  * A simple random number number generator as defined in Benedičič et. al. !ref!.-
  */
