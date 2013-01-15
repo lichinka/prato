@@ -490,7 +490,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     if (gpu_params->ocl_obj == NULL)
     {
 #ifdef _PERFORMANCE_METRICS_
-        measure_time ("OpenCL startup");
+        measure_time ("E///: OpenCL startup");
 #endif
         //
         // create the objects, that will be shared among different functions
@@ -506,7 +506,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
 
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
-        measure_time ("OpenCL create common buffers");
+        measure_time ("E///: OpenCL create common buffers");
 #endif
         //
         // create OpenCL buffers
@@ -533,7 +533,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
         // send input data to the device
         // 
 #ifdef _PERFORMANCE_METRICS_
-        measure_time ("OpenCL data transfer to device");
+        measure_time ("E///: OpenCL data transfer to device");
 #endif
         cl_event *event;
         write_buffer (gpu_params->ocl_obj,
@@ -649,7 +649,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                           sizeof (cl_int2),
                           &tile_offset);
 #ifdef _PERFORMANCE_METRICS_
-    measure_time ("OpenCL kernel run");
+    measure_time ("E///: OpenCL kernel run");
 #endif
     //
     // number of processing tiles needed around each transmitter 
@@ -685,7 +685,7 @@ eric_pathloss_on_gpu (const double tx_east_coord,
                             local_sizes);
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
-    measure_time ("OpenCL read data from GPU");
+    measure_time ("E///: OpenCL read data from GPU");
 #endif
     // sync memory
     read_buffer_blocking (gpu_params->ocl_obj,
