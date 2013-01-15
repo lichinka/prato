@@ -1,4 +1,4 @@
-#include "worker/common_ocl.h"
+#include "ocl_common.h"
 
 
 
@@ -209,7 +209,7 @@ void init_opencl (OCL_objects *ocl_obj, int number_of_queues)
                  "WARNING OpenCL has already been initialized [%d]\n",
                  ocl_obj->is_initialized);
 
-    get_amd_platform (&(ocl_obj->platform_id));
+    get_platform (&(ocl_obj->platform_id));
     set_device_and_context (&(ocl_obj->platform_id),
                             &(ocl_obj->device_id),
                             &(ocl_obj->context));
@@ -243,7 +243,7 @@ void init_platform (cl_platform_id *platform,
                     cl_command_queue *queue)
 {
     cl_int status;
-    get_amd_platform (platform);
+    get_platform (platform);
     set_device_and_context (platform,
                             device,
                             context);
@@ -256,39 +256,47 @@ void init_platform (cl_platform_id *platform,
 
 
 
-void get_amd_platform (cl_platform_id *platform)
+/**
+ * Queries the system for a OpenCL platform, returning it
+ * in the input parameter.-
+ */
+void get_platform (cl_platform_id *platform)
 {
-  int  i;
-  int  status;
-  char vendor_buffer[100];
-  char amd_vendor[] = "Advanced Micro Devices, Inc.";  
+	int  i;
+	int  status;
+	char vendor_buffer [512];
 
-  cl_platform_id *list_platforms;
+	cl_platform_id *list_platforms;
 
-  uint num_platforms;
-  status = clGetPlatformIDs(0, NULL, &num_platforms);
-  check_error(status, "Get platform ID");
+	uint num_platforms;
+	status = clGetPlatformIDs(0, NULL, &num_platforms);
+	check_error (status, "Get platform ID");
 
-  if (num_platforms > 0)
-  {
-    list_platforms = malloc(num_platforms * sizeof(cl_platform_id));
-    status = clGetPlatformIDs(num_platforms, list_platforms, NULL);
-    check_error(status, "Get platform ID");
+	if (num_platforms > 0)
+	{
+		list_platforms = malloc (num_platforms * sizeof (cl_platform_id));
+		status = clGetPlatformIDs (num_platforms, list_platforms, NULL);
+		check_error (status, "Get platform ID");
 
-    for (i = 0; i < num_platforms; i++)
-    {
-      status = clGetPlatformInfo(list_platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor_buffer), vendor_buffer, NULL);
-      check_error(status, "Get platform info");
+		for (i = 0; i < num_platforms; i++)
+		{
+			status = clGetPlatformInfo (list_platforms[i], 
+				  						CL_PLATFORM_VENDOR, 
+				  						sizeof (vendor_buffer), 
+				  						vendor_buffer, 
+				  						NULL);
+			check_error (status, "Get platform info");
 
-      if (strcmp(vendor_buffer, amd_vendor) == 0)
-      {
-        *platform = list_platforms[i];
-        break;
-      }
-    }
-
-    free(list_platforms);
-  } 
+			//
+			// save the first valid platform
+			//
+			*platform = list_platforms[i];
+			break;
+		}
+		free (list_platforms);
+	}
+	else
+		fprintf (stderr, "*** ERROR: No OpenCL platforms found\n");
 }
 
 
@@ -369,7 +377,7 @@ void set_opencl_env_multiple_queues(int num_queues, cl_command_queue **list_queu
   cl_platform_id platform;
   cl_device_id   device;
 
-  get_amd_platform(&platform);
+  get_platform (&platform);
 
   set_device_and_context(&platform, &device, context);
 

@@ -257,9 +257,11 @@ void run_kernel_2D_blocking (OCL_objects *ocl_obj,
  */
 void check_error (int status, char *msg);
 
-/* Internal helper functions not meant to be directly used within an application */
+/**
+ * Internal helper functions not meant to be directly used within an application 
+ */
 void print_device_information(cl_device_id *device);
-void get_amd_platform(cl_platform_id *platform);
+void get_platform (cl_platform_id *platform);
 int  set_device_and_context(cl_platform_id *platform, cl_device_id *device, cl_context *context);
 
 #endif /* COMMON_OCL */

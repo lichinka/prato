@@ -1,7 +1,7 @@
 #include <assert.h>
 
 #include "worker/antenna.h"
-#include "worker/common_ocl.h"
+#include "worker/ocl_common.h"
 #include "performance/metric.h"
 
 

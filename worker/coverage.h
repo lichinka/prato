@@ -19,7 +19,7 @@
 #include <grass/glocale.h>
 
 #include "worker/ini.h"
-#include "worker/common_ocl.h"
+#include "worker/ocl_common.h"
 #include "performance/metric.h"
 
 
