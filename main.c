@@ -6,8 +6,8 @@
 
 
 /**
- * Reads the received file into memory, returning the number of bytes saved to
- * the buffer.
+ * Reads the received file into memory, returning the number of bytes 
+ * saved into the buffer.
  *
  * file_name        The file to be read;
  * content_buffer   the buffer to which the read data is saved.-
@@ -42,7 +42,7 @@ int main (int argc, char *argv [])
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output;
-    struct Flag    *use_mpi;
+    struct Flag    *use_mpi, *use_gpu;
 
     //
     // initialize the GIS environment
@@ -53,8 +53,8 @@ int main (int argc, char *argv [])
     // initialize the module itself
     //
     module = G_define_module ( );
-    module->keywords = _("raster, coverage, E/// 9999, directional antennas");
-    module->description = _("Coverage module using the E/// 9999 model and antenna diagrams.-");
+    module->keywords = "raster, coverage, E/// 9999, directional antennas";
+    module->description = "Coverage module using the E/// 9999 model and antenna diagrams.-";
   
     //
     // define the module options ...
@@ -63,23 +63,27 @@ int main (int argc, char *argv [])
     ini_file->key = "ini_file";
     ini_file->type = TYPE_STRING;
     ini_file->required = YES;
-    ini_file->label = _("Full path to the parameters INI file");	
+    ini_file->label = "Full path to the parameters INI file";
 
     tx_ini_sections = G_define_option ( );
     tx_ini_sections->key = "tx_ini_sections";
     tx_ini_sections->type = TYPE_STRING;
     tx_ini_sections->required = YES;
-    tx_ini_sections->label = _("A comma-separated list of the names of the INI-file sections containing the transmitters' configuration to be used");
+    tx_ini_sections->label = "A comma-separated list of the names of the INI-file sections containing the transmitters' configuration to be used";
 
     output = G_define_option ( );
     output->key = "output_raster";
     output->type = TYPE_STRING;
     output->required = NO;
-    output->label = _("Output raster name. Without it, output is given in standard output.");
+    output->label = "Output raster name. Without it, output is given in standard output.";
 
     use_mpi = G_define_flag ( );
     use_mpi->key = 'p';
-    use_mpi->description = _("Whether to use the MPI implementation");
+    use_mpi->description = "Whether to use the MPI implementation";
+
+    use_gpu = G_define_flag ( );
+    use_gpu->key = 'g';
+    use_gpu->description = "Whether to use the GPU implementation";
 
     //
     // ... and parse them
@@ -105,12 +109,17 @@ int main (int argc, char *argv [])
                                       params->ini_file_content_size,
                                       "r");
     //
-    // initialize the coverage calculation ...
+    // initialize the coverage calculation
     //
     init_coverage (ini_file_stream,
                    tx_ini_sections->answer,
                    params);
     fclose (ini_file_stream);
+
+    //
+    // flag to turn the GPU implementations on/off
+    //
+    params->use_gpu = use_gpu->answer;
 
     measure_time (NULL);
 
@@ -119,9 +128,6 @@ int main (int argc, char *argv [])
     //
     double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
 
-#ifdef _PERFORMANCE_METRICS_
-    for (i = 0; i < 3; i ++)
-#endif
     if (use_mpi->answer)
     {
         coverage_mpi (argc,
@@ -131,7 +137,8 @@ int main (int argc, char *argv [])
     else
     {
         if (params->ntx > 1)
-            fprintf (stderr, "WARNING Only the first transmitter will be processed\n");
+            fprintf (stderr, 
+                     "WARNING Only the first transmitter will be processed\n");
         coverage (params,
                   params->tx_params,
                   ericsson_params,
@@ -152,7 +159,8 @@ int main (int argc, char *argv [])
 
             // controlling, if we can write the raster 
             if ((outfd = G_open_raster_new (output->answer, FCELL_TYPE)) < 0)
-                G_fatal_error(_("Unable to create raster map <%s>"), output->answer);
+                G_fatal_error ("Unable to create raster map <%s>", 
+			       output->answer);
 
             for (row = 0; row < params->nrows; row++)
             {
@@ -167,7 +175,8 @@ int main (int argc, char *argv [])
                 }
                 // write raster row to output raster map
                 if (G_put_raster_row (outfd, outrast, FCELL_TYPE) < 0)
-                    G_fatal_error (_("Failed writing raster map <%s>"), output->answer);
+                    G_fatal_error ("Failed writing raster map <%s>", 
+				   output->answer);
             }
             G_close_cell (outfd);
             G_free (outrast);

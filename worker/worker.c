@@ -127,6 +127,7 @@ void worker (const int rank,
     MPI_Barrier (*comm);
     receive_common_data (params, comm);
     params->tx_params = NULL;
+
     //
     // sync point: common data passing finished, 
     // starting coverage processing

@@ -28,6 +28,7 @@
 
 #include "worker/eric.h"
 #include "worker/antenna.h"
+#include "performance/metric.h"
 
 
 
@@ -109,10 +110,14 @@ static void calc_profile (double** Obst_high,
 		//Patrik temp_dist = sqrt(pow(floor(xBS) + 0.5 - x_tmp,2)+pow(floor(yBS) + 0.5 - y_tmp,2));
 		temp_dist = sqrt(pow(floor(xBS) - floor(x_tmp),2)+pow(floor(yBS) - floor(y_tmp),2));	//zaokorzena razdalja na bin - pravilno za racun
 		offset_dist = sqrt(pow(floor(xBS) + 0.5 - x_tmp,2)+pow(floor(yBS) + 0.5 - y_tmp,2));	//natancna razdalja potrebna za izracun offseta pri dolocanju bina
-		
+	
+        /*
+         * Process the whole area, without the radius restriction
+         *
 		if (temp_dist*scale > radius*1000){
 			break;
 		}
+        */
 			
 // interpolacija DEM-a za natancnejso visino
 			if ((x_tmp - (floor(x_tmp) + 0.5)) <= 0){
@@ -263,25 +268,52 @@ static void calc_profile (double** Obst_high,
 
 
 
-static int DoProfile (double** Obst_high, 
-                      double** Obst_dist, 
-                      double** Offset, 
-                      double ResDist, 
+static int DoProfile (double ResDist, 
                       double** Raster, 
                       double xBS, 
                       double yBS, 
                       double ZoTransBS, 
                       int xN, 
                       int yN, 
-                      double tiltBS2MS, 
                       double scale, 
                       double radius)
 
 {
 	double AZI;
-	int ix, iy;
+	int i, ix, iy;
 	double dx, dy;
 	
+    //
+    // LOS and obstacle height calculation is executed only once, 
+    // because its results are constant throughout the optimization
+    //
+    if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
+    {
+        // Obstacle height
+        double *Obst_high_data = (double *) calloc (xN * yN, 
+                                                    sizeof (double));
+        Obst_high = (double **) calloc (xN, 
+                                        sizeof (double *));
+        for (i = 0; i < xN; i ++)
+            Obst_high[i] = &(Obst_high_data[i * yN]);
+
+        // Obstacle distance 
+        double *Obst_dist_data = (double *) calloc (xN * yN,
+                                                    sizeof (double));
+        Obst_dist = (double **) calloc (xN, 
+                                        sizeof(double *));
+        for (i = 0; i < xN; i ++)
+            Obst_dist[i] = &(Obst_dist_data[i * yN]);
+    
+        // do_profile offset 
+        double *Offset_data = (double *) calloc (xN * yN,
+                                                 sizeof (double));
+        Offset = (double **) calloc (xN, 
+                                     sizeof(double *));
+        for (i = 0; i < xN; i ++)
+            Offset[i] = &(Offset_data[i * yN]);
+    }
+
     // Offset ini
 	for (ix = 0; ix < xN; ix++)
     {
@@ -291,10 +323,7 @@ static int DoProfile (double** Obst_high,
 		}
 	}
 	
-	
-	
 	// Kvadrant I
-		
 	for (ix = 0; ix < xN; ix++)
 	{
 		//Patrik AZI = atan((ix - xBS) / yBS);
@@ -397,11 +426,286 @@ static int DoProfile (double** Obst_high,
 
 
 
+/**
+ * Calculates the path loss using E/// 9999 model implementation on GPU.
+ *
+ */
+void 
+eric_pathloss_on_gpu (const double tx_east_coord,
+                      const double tx_north_coord,
+                      const int tx_east_idx,
+                      const int tx_north_idx,
+                      const double antenna_height_AGL,
+                      const double total_tx_height,
+                      const int beam_direction,
+                      const int mechanical_tilt,
+                      const double frequency,
+                      const double radius,  
+                      const double rx_height_AGL,
+                      const int nrows,       
+                      const int ncols,      
+                      const double map_west,
+                      const double map_north,
+                      const double map_ew_res,  
+                      const double map_ns_res,  
+                      const float  null_value,
+                      GPU_parameters *gpu_params,
+                      double **m_dem,          
+                      double **m_clut,
+                      double **m_loss)
+{
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("LOS");
+#endif
+    //
+    // calculate the terrain profile (LOS)
+    // 
+    DoProfile (1.0,
+               m_dem,
+               tx_east_idx,
+               tx_north_idx,
+               total_tx_height,
+               ncols,
+               nrows,
+               map_ew_res,
+               radius);
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
+    //
+    // size of all buffers used in this function
+    //
+    size_t buffer_size = nrows * 
+                         ncols * 
+                         sizeof (double);
+    //
+    // local buffers, used by this function
+    //
+    cl_mem m_obst_height_dev;
+    cl_mem m_obst_dist_dev;
+
+    //
+    // initialize the OpenCL environment if we haven't already
+    //
+    if (gpu_params->ocl_obj == NULL)
+    {
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("E///: OpenCL startup");
+#endif
+        //
+        // create the objects, that will be shared among different functions
+        // (to minize data transfers to the GPU)
+        //
+        gpu_params->ocl_obj    = (OCL_objects *) malloc (sizeof (OCL_objects));
+        gpu_params->m_dem_dev  = (cl_mem *) malloc (sizeof (cl_mem));
+        gpu_params->m_clut_dev = (cl_mem *) malloc (sizeof (cl_mem));
+        gpu_params->m_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
+
+        // initialize the OpenCL platform
+        init_opencl (gpu_params->ocl_obj, 1);
+
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+        measure_time ("E///: OpenCL create common buffers");
+#endif
+        //
+        // create OpenCL buffers
+        //
+        *(gpu_params->m_dem_dev) = create_buffer (gpu_params->ocl_obj,
+                                                  CL_MEM_READ_ONLY, 
+                                                  buffer_size);
+        *(gpu_params->m_clut_dev) = create_buffer (gpu_params->ocl_obj,
+                                                   CL_MEM_READ_ONLY, 
+                                                   buffer_size);
+        *(gpu_params->m_loss_dev) = create_buffer (gpu_params->ocl_obj,
+                                                   CL_MEM_WRITE_ONLY, 
+                                                   buffer_size);
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+#endif
+        m_obst_height_dev = create_buffer (gpu_params->ocl_obj,
+                                           CL_MEM_READ_ONLY, 
+                                           buffer_size);
+        m_obst_dist_dev = create_buffer (gpu_params->ocl_obj,
+                                         CL_MEM_READ_ONLY, 
+                                         buffer_size);
+        //
+        // send input data to the device
+        // 
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("E///: OpenCL data transfer to device");
+#endif
+        cl_event *event;
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      &m_obst_height_dev,
+                      buffer_size,
+                      Obst_high[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      &m_obst_dist_dev,
+                      buffer_size,
+                      Obst_dist[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      gpu_params->m_dem_dev,
+                      buffer_size,
+                      m_dem[0]);
+        write_buffer (gpu_params->ocl_obj,
+                      0,
+                      gpu_params->m_clut_dev,
+                      buffer_size,
+                      m_clut[0]);
+        event = write_buffer (gpu_params->ocl_obj,
+                              0,
+                              gpu_params->m_loss_dev,
+                              buffer_size,
+                              m_loss[0]);
+        clWaitForEvents (1, event);
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+#endif
+    }
+    // build and activate the kernel
+    build_kernel_from_file (gpu_params->ocl_obj,
+                            "eric_per_tx",
+                            "r.coverage.cl",
+                            "-I. -Werror");
+
+    // kernel parameters 
+    set_kernel_double_arg (gpu_params->ocl_obj,
+                           0,
+                           &map_ew_res);
+    set_kernel_double_arg (gpu_params->ocl_obj,
+                           1,
+                           &map_north);
+    set_kernel_double_arg (gpu_params->ocl_obj,
+                           2,
+                           &map_west);
+    set_kernel_double_arg (gpu_params->ocl_obj,
+                           5,
+                           &rx_height_AGL);
+    set_kernel_double_arg (gpu_params->ocl_obj,
+                           6,
+                           &frequency);
+
+    // reserve local memory on the device
+    size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
+                       _WORK_ITEMS_PER_DIMENSION_ *
+                       sizeof (cl_float2);
+    set_local_mem (gpu_params->ocl_obj,
+                   12,
+                   lmem_size);
+    //
+    // set the remaining parameters
+    //
+    set_kernel_mem_arg (gpu_params->ocl_obj,
+                        7,
+                        &m_obst_height_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
+                        8,
+                        &m_obst_dist_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
+                        9,
+                        gpu_params->m_dem_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
+                        10,
+                        gpu_params->m_clut_dev);
+    set_kernel_mem_arg (gpu_params->ocl_obj,
+                        11,
+                        gpu_params->m_loss_dev);
+    //
+    // calculation radius and diameter
+    //
+    double radius_in_meters = radius * 1000;
+    int radius_in_pixels    = (int) (radius_in_meters / map_ew_res);
+    int diameter_in_pixels  = 2 * radius_in_pixels;
+
+    //
+    // calculation tile offset within the target area, given in pixel coordinates
+    //
+    cl_int2 tile_offset;
+    tile_offset.s[0]  = (int) ((tx_east_coord - map_west) - radius_in_meters);
+    tile_offset.s[0] /= map_ew_res;
+    tile_offset.s[1]  = (int) ((map_north - tx_north_coord) - radius_in_meters);
+    tile_offset.s[1] /= map_ns_res;
+
+    //
+    // transmitter data
+    //
+    cl_double4 tx_data;
+    tx_data.s[0] = (double) tx_east_coord;   // transmitter coordinate
+    tx_data.s[1] = (double) tx_north_coord;  // transmitter coordinate
+    tx_data.s[2] = (double) total_tx_height; // antenna height above sea level
+    tx_data.s[3] = (double) antenna_height_AGL; // antenna height above ground
+
+    // set kernel parameters, specific for this transmitter
+    set_kernel_value_arg (gpu_params->ocl_obj,
+                          3,
+                          sizeof (cl_double4),
+                          &tx_data);
+    set_kernel_value_arg (gpu_params->ocl_obj,
+                          4,
+                          sizeof (cl_int2),
+                          &tile_offset);
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("E///: OpenCL kernel run");
+#endif
+    //
+    // number of processing tiles needed around each transmitter 
+    //
+    if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
+    {
+        fprintf (stderr, 
+                 "ERROR Cannot execute on GPU. Increase the calculation radius and try again.\n");
+        exit (1);
+    }
+    if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
+    {
+        fprintf (stderr, 
+                 "ERROR Cannot execute on GPU. Try to set a calculation radius multiple of %d\n",
+                 _WORK_ITEMS_PER_DIMENSION_);
+        exit (1);
+    }
+    //
+    // define a 2D execution range for the kernel ...
+    //
+    size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
+    size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
+                              ntile * _WORK_ITEMS_PER_DIMENSION_};
+    size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
+                             _WORK_ITEMS_PER_DIMENSION_};
+    //
+    // ... and execute it
+    //
+    run_kernel_2D_blocking (gpu_params->ocl_obj,
+                            0,
+                            NULL,
+                            global_sizes,
+                            local_sizes);
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+    measure_time ("E///: OpenCL read data from GPU");
+#endif
+    // sync memory
+    read_buffer_blocking (gpu_params->ocl_obj,
+                          0,
+                          gpu_params->m_loss_dev,
+                          buffer_size,
+                          m_loss[0]);
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
+}
 
 
 
-//int EricPathLossSub(double** Raster, double** Clutter, double** PathLoss, double** Obst_high, double** Obst_dist, double** Offset, struct StructEric *IniEric)
-int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struct StructEric *IniEric)
+
+int 
+EricPathLossSub (double **Raster, 
+                 double **Clutter, 
+                 double **PathLoss, 
+                 struct StructEric *IniEric)
 
 /*************************************************************************************************
  *
@@ -422,8 +726,6 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
  *
  *************************************************************************************************/
 {
-    int i;
-
 	// Ericsson model constants and variables
 	int BSxIndex = IniEric->BSxIndex;		    //	normalized position of BS -> UTMx/resolution 
 	int BSyIndex = IniEric->BSyIndex;		    //	normalized position of BS -> UTMy/resolution
@@ -463,173 +765,157 @@ int EricPathLossSub (double** Raster, double** Clutter, double** PathLoss, struc
 
 	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
 									/*POPRAVJNEO (4.2.2010)*/	
-	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightMS),2);
+	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightBS),2);
 
+    // calculate the terrain profile
+    DoProfile (ResDist,
+               Raster,
+               BSxIndex,
+               BSyIndex,
+               ZoTransBS,
+               xN,
+               yN,
+               scale,
+               radi);
 
-    //
-    // LOS and obstacle height calculation is executed only once, 
-    // because its results are constant throughout the optimization
-    //
-    if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
+    for (ix = 0; ix < xN; ix++)
     {
-        // Obstacle height
-        Obst_high = (double **) calloc (xN, sizeof(double *));
-        for (i = 0; i < xN; i ++)
-            Obst_high[i] = (double *) calloc (yN, sizeof (double));
-
-        // Obstacle distance 
-        Obst_dist = (double **) calloc (xN, sizeof(double *));
-        for (i = 0; i < xN; i ++)
-            Obst_dist[i] = (double *) calloc (yN, sizeof (double));
-    
-        // do_profile offset 
-        Offset = (double **) calloc (xN, sizeof(double *));
-        for (i = 0; i < xN; i ++)
-            Offset[i] = (double *) calloc (yN, sizeof (double));
-
-        // calculate the terrain profile
-        DoProfile (Obst_high,Obst_dist,Offset,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,xN,yN,tiltBS2MS,scale, radi);
-    }
-
-	for (ix = 0; ix < xN; ix++)
-	{
-		for (iy = 0; iy < yN; iy++)
-		{
-			// Path Loss due to Hata model
-			DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
-			// ZoMS = Raster[ix][iy];
-			ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
-			Zeff = ZoTransBS - ZoTransMS;		// ??
-			DistBS2MSKm = sqrt (DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
-			DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
+        for (iy = 0; iy < yN; iy++)
+        {
+            // Path Loss due to Hata model
+            DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
+            // ZoMS = Raster[ix][iy];
+            ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
+            Zeff = ZoTransBS - ZoTransMS;		// ??
+            DistBS2MSKm = sqrt (DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
+            DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
 //			if(ZoBS <= Raster[ix][iy]) 
 //			{
 //				Zeff = AntHeightBS;  // ZoMS
 //			}
-			if (DistBS2MSKm < 0.01)
-			{
-				DistBS2MSKm = 0.01;
-			}
-
-			if (DistBS2MSKm > radi)
-		    {    
-			      	continue;
-		    }
-
-			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
-			
-			if (- AntHeightBS < Zeff && Zeff < AntHeightBS){
-				Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
-			}
-			
-			log10Zeff=log10(abs(Zeff));
-
-			//log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
-			log10DistBS2MSKm=log10(DistBS2MSKm);			
-
-			PathLossTmp = A0 + A1*log10DistBS2MSKm; 
-
-			PathLossTmp = PathLossTmp + A2*log10Zeff + A3*log10DistBS2MSKm*log10Zeff;
-			PathLossTmp = PathLossTmp - PathLossAntHeightBS + PathLossFreq;
-
-			// Calc position of the height and position of the highest obstacle
-
-		
-			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
-
-			if (DistBS2MSNorm > 0) 
+            if (DistBS2MSKm < 0.01)
             {
-				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+                DistBS2MSKm = 0.01;
             }
-			else 
-            {
-				tiltBS2MS = 0; 
-			}
-			
-			//DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
-			ZObs2LOS = Obst_high[ix][iy];
-			DistObs2BS = Obst_dist[ix][iy];
-			// Calc path loss due to NLOS conditions
-/*Patrik/scale*/	
-            ElevAngCos = cos(atan(tiltBS2MS/scale));
 
-			Ddot = DistObs2BS; 
-			if (ElevAngCos != 0) 
-			{	
-				Ddot = DistObs2BS/ElevAngCos;
-			}
-			Ddotdot = DistBS2MSNorm - Ddot;
-			if (ElevAngCos != 0) {
-				Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
-			}
+            /**
+             * 
+            if (DistBS2MSKm > radi)
+            {    
+                    continue;
+            }
+            */
+
+            Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
+            
+            if (- AntHeightBS < Zeff && Zeff < AntHeightBS){
+                Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
+            }
+            
+            log10Zeff=log10(fabs(Zeff));
+
+            //log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
+            log10DistBS2MSKm=log10(DistBS2MSKm);			
+
+            PathLossTmp = A0 + A1*log10DistBS2MSKm; 
+
+            PathLossTmp += A2*log10Zeff + A3*log10DistBS2MSKm*log10Zeff;
+            PathLossTmp -= PathLossAntHeightBS + PathLossFreq;
+
+            // Calc position of the height and position of the highest obstacle
+            tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena 
+
+            if (DistBS2MSNorm > 0) 
+            {
+                tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+            }
+            else 
+            {
+                tiltBS2MS = 0; 
+            }
+            
+            //DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
+            ZObs2LOS = Obst_high[ix][iy];
+            DistObs2BS = Obst_dist[ix][iy];
+
+            // Calculate path loss due to NLOS conditions
+            ElevAngCos = cos ( atan (tiltBS2MS / scale) );
+
+            Ddot = DistObs2BS; 
+            if (ElevAngCos != 0) 
+            {	
+                Ddot = DistObs2BS/ElevAngCos;
+            }
+
+            Ddotdot = DistBS2MSNorm - Ddot;
+            if (ElevAngCos != 0) {
+                Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
+            }
 
 //Obstacle height korrection due to earth sphere
-			if (Ddot <= Ddotdot){
-				ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
-			}
-			else{
-				ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
-			}
+            if (Ddot <= Ddotdot){
+                ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
+            }
+            else{
+                ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
+            }
 
 //Hight correction due to BS2MS line angle
-			Hdot = ZObs2LOS*ElevAngCos;
+            Hdot = ZObs2LOS*ElevAngCos;
 
-			PathLossDiff = 0;
-			KDFR = 0;
-			if (Ddot > 0 && Ddotdot > 0) {
-				Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
+            PathLossDiff = 0;
+            KDFR = 0;
+            if (Ddot > 0 && Ddotdot > 0) {
+                Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
 
-				PathLossDiff = Hdot/Fresnel;
+                PathLossDiff = Hdot/Fresnel;
 
 // NLOS komponent calculation KDFR
 
-				if (PathLossDiff < -0.49 ) {
-					KDFR = 0; 
-				}
-				else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
-					KDFR = 6 + 12.2 * PathLossDiff;
-				}
-				else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
-					KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
-				}
-				else if(2 <= PathLossDiff) {
-					KDFR = 16 + 20 * log10(PathLossDiff);
-				}
+                if (PathLossDiff < -0.49 ) {
+                    KDFR = 0; 
+                }
+                else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
+                    KDFR = 6 + 12.2 * PathLossDiff;
+                }
+                else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
+                    KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
+                }
+                else if(2 <= PathLossDiff) {
+                    KDFR = 16 + 20 * log10(PathLossDiff);
+                }
 
 // Alfa correction factor
-				
-				if (Hdot > Fresnel/2){
-					Alfa = 1;
-				}
-				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2){
-					Alfa = 4 * Hdot/Fresnel - 1;
-				}
-				else if (Hdot < Fresnel/4){
-					Alfa = 0;
-				}
-			
-			}
+                
+                if (Hdot > Fresnel/2){
+                    Alfa = 1;
+                }
+                else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2){
+                    Alfa = 4 * Hdot/Fresnel - 1;
+                }
+                else if (Hdot < Fresnel/4){
+                    Alfa = 0;
+                }
+            
+            }
 
 //Spherical earth diffraction komponent JDFR
-			if (Hdot > 0){
-				JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
-			
-				if (JDFR < 0){
-					JDFR=0;
-				}
-			}
-			else{
-				JDFR = 0;
-			}
+            if (Hdot > 0){
+                JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
+            
+                if (JDFR < 0){
+                    JDFR=0;
+                }
+            }
+            else{
+                JDFR = 0;
+            }
 
-
-			PathLossTmp = PathLossTmp + sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
-			
-			// write data to pathloss
-			
-			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
-		} // end irow
-	} // end icol
+            PathLossTmp = PathLossTmp + sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
+            // write data to pathloss
+            PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
+        } // end irow
+    } // end icol
 	return 0;
 }
 

@@ -1,9 +1,9 @@
 include ../Makefile.inc
 
 CFLAGS  = $(PRJCFLAGS) -fPIC
-INCS    = $(PRJINCS) -I..
-LIBS    = $(PRJLIBS)
-OBJS    = ini.o eric.o antenna.o coverage.o worker.o
+INCS    = $(PRJINCS) -I.. -I/usr/include
+LIBS    = $(PRJLIBS) -L.. -lperformance -lOpenCL
+OBJS    = ocl_common.o ini.o eric.o antenna.o coverage.o worker.o
 BIN		= worker
 DIR		= worker
 OBJLIBS = lib$(DIR).so

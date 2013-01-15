@@ -4,6 +4,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "worker/coverage.h"
+
 
 //
 // Parameters of the Ericsson 9999 radio propagation model
@@ -26,10 +28,35 @@ struct StructEric {
 };
 
 
-int EricPathLossSub (double** Raster, 
-                     double** Clutter, 
-                     double** PathLoss, 
-                     struct StructEric *IniEric);
+void 
+eric_pathloss_on_gpu (const double tx_east_coord,
+                      const double tx_north_coord,
+                      const int tx_east_idx,
+                      const int tx_north_idx,
+                      const double antenna_height_AGL,
+                      const double total_tx_height,
+                      const int beam_direction,
+                      const int mechanical_tilt,
+                      const double frequency,
+                      const double radius,  
+                      const double rx_height_AGL,
+                      const int nrows,       
+                      const int ncols,      
+                      const double map_west,
+                      const double map_north,
+                      const double map_ew_res,  
+                      const double map_ns_res,  
+                      const float  null_value,
+                      GPU_parameters *gpu_params,
+                      double **m_dem,          
+                      double **m_clut,
+                      double **m_loss);
+
+int 
+EricPathLossSub (double **Raster, 
+                 double **Clutter, 
+                 double **PathLoss, 
+                 struct StructEric *IniEric);
 
 #endif
 

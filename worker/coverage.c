@@ -47,13 +47,13 @@ static void init_coverage_for_tx (FILE          *ini_file,
     //
     mapset = G_find_cell2 (params->dem_map, "");
     if (mapset == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->dem_map);
+        G_fatal_error("Raster map <%s> not found", params->dem_map);
   
     //
     // G_open_cell_old - returns file descriptor
     //
     if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
 
     //
     // check if the specified transmitter location is inside the DEM map
@@ -62,7 +62,7 @@ static void init_coverage_for_tx (FILE          *ini_file,
         tx_params->tx_east_coord  > params->map_east ||
         tx_params->tx_north_coord > params->map_north || 
         tx_params->tx_north_coord < params->map_south)
-        G_fatal_error (_("Specified BS coordinates are outside current region bounds."));
+        G_fatal_error ("Specified BS coordinates are outside current region bounds.");
    
     //
     // map array coordinates for transmitter
@@ -79,15 +79,15 @@ static void init_coverage_for_tx (FILE          *ini_file,
     // total height of transmitter 
     // 
     if (G_get_raster_row (infd, inrast, tr_row, FCELL_TYPE) < 0)
-        G_fatal_error (_("Unable to read raster map <%s> row %d"), params->dem_map, 
-                                                                   tr_row);
+        G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, 
+                                                                tr_row);
     FCELL trans_elev = ((FCELL *) inrast)[tr_col];
 
     //
     // check if transmitter is on DEM
     //
     if (isnan ((double) trans_elev))							
-        G_fatal_error (_("Transmitter outside raster DEM map."));
+        G_fatal_error ("Transmitter outside raster DEM map.");
 
     tx_params->total_tx_height = (double) trans_elev + tx_params->antenna_height_AGL;
    
@@ -171,6 +171,12 @@ void init_coverage (FILE       *ini_file,
     params->m_field_meas = NULL;
 
     //
+    // GPU-specific parameters are kept here
+    //
+    params->gpu_params = (GPU_parameters *) malloc (sizeof (GPU_parameters));
+    params->gpu_params->ocl_obj = NULL;
+
+    //
     // parse the INI file containing the common configuration values
     //
     rewind (ini_file);
@@ -193,18 +199,18 @@ void init_coverage (FILE       *ini_file,
     //
     mapset = G_find_cell2 (params->dem_map, "");
     if (mapset == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->dem_map);
+        G_fatal_error("Raster map <%s> not found", params->dem_map);
    
     mapset2 = G_find_cell2 (params->clutter_map, "");
     if (mapset2 == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->clutter_map);
+        G_fatal_error("Raster map <%s> not found", params->clutter_map);
 
     // G_open_cell_old - returns file destriptor (>0) 
     if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
 
     if ((infd2 = G_open_cell_old (params->clutter_map, mapset2)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->clutter_map);
+        G_fatal_error("Unable to open raster map <%s>", params->clutter_map);
 
     //
     // read metadata of each map, making sure they match
@@ -232,7 +238,7 @@ void init_coverage (FILE       *ini_file,
         params->map_ns_res = metadata->ns_res;
     }
     else
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
         
     errno = G_get_cellhd (params->clutter_map,
                           mapset2,
@@ -245,10 +251,10 @@ void init_coverage (FILE       *ini_file,
             params->map_south != metadata->south ||
             params->map_ew_res != metadata->ew_res ||
             params->map_ns_res != metadata->ns_res)
-            G_fatal_error (_("Map metadata of input maps do not match."));
+            G_fatal_error ("Map metadata of input maps do not match.");
     }
     else
-        G_fatal_error (_("Unable to open raster map <%s>"), params->clutter_map);
+        G_fatal_error ("Unable to open raster map <%s>", params->clutter_map);
     //
     // check that the current active window matches the loaded data
     //
@@ -259,7 +265,7 @@ void init_coverage (FILE       *ini_file,
         params->map_south != window->south ||
         params->map_ew_res != window->ew_res ||
         params->map_ns_res != window->ns_res)
-        G_fatal_error (_("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings."));
+        G_fatal_error ("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings.");
 
     //
     // number of rows and columns within the maps
@@ -313,11 +319,11 @@ void init_coverage (FILE       *ini_file,
         {	
             // read DEM map data
             if (G_get_raster_row (infd, inrast, row, FCELL_TYPE) < 0)
-              G_fatal_error (_("Unable to read raster map <%s> row %d"), params->dem_map, row);
+              G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, row);
 
             // read Clutter map data
             if (G_get_raster_row (infd2, inrast2, row, FCELL_TYPE) < 0)
-              G_fatal_error (_("Unable to read raster map <%s> row %d"), params->clutter_map, row);
+              G_fatal_error ("Unable to read raster map <%s> row %d", params->clutter_map, row);
 
             // process the data
             for (col = 0; col < params->ncols; col ++) 
@@ -388,45 +394,60 @@ void coverage (const Parameters     *params,
 {
     //
     // calculate the subregion (within the area) where this transmitter is 
-    // located, accounting calculation radius and its location
+    // located, taking into account its location and the calculation radius
     //
-    double radius_in_meters = params->radius * 1000;
-    int radius_in_pixels = (int) (radius_in_meters / params->map_ew_res);
-    int diameter_in_pixels = 2 * radius_in_pixels;
-    double west_border = tx_params->tx_east_coord - radius_in_meters;
-    double east_border = tx_params->tx_east_coord + radius_in_meters;
-    double south_border = tx_params->tx_north_coord - radius_in_meters;
-    double north_border = tx_params->tx_north_coord + radius_in_meters;
-    int west_border_idx = (west_border - params->map_west) / params->map_ew_res;
-    int east_border_idx = (east_border - params->map_west) / params->map_ew_res;
-    int south_border_idx = (params->map_north - south_border) / params->map_ns_res;
-    int north_border_idx = (params->map_north - north_border) / params->map_ns_res;
+    double radius_in_meters     = params->radius * 1000;
+    int radius_in_pixels        = (int) (radius_in_meters / params->map_ew_res);
+    int diameter_in_pixels      = 2 * radius_in_pixels;
+    double mini_west_border     = tx_params->tx_east_coord - radius_in_meters;
+    double mini_east_border     = tx_params->tx_east_coord + radius_in_meters;
+    double mini_south_border    = tx_params->tx_north_coord - radius_in_meters;
+    double mini_north_border    = tx_params->tx_north_coord + radius_in_meters;
+    int mini_west_border_idx    = (mini_west_border - params->map_west) / 
+                                  params->map_ew_res;
+    int mini_east_border_idx    = (mini_east_border - params->map_west) / 
+                                   params->map_ew_res;
+    int mini_south_border_idx   = (params->map_north - mini_south_border) / 
+                                  params->map_ns_res;
+    int mini_north_border_idx   = (params->map_north - mini_north_border) / 
+                                  params->map_ns_res;
+    int mini_nrows              = 2 * radius_in_pixels;
+    int mini_ncols              = 2 * radius_in_pixels;
+    int tx_east_coord_index     = radius_in_pixels - 1;
+    int tx_north_coord_index    = radius_in_pixels - 1;
 
     //
     // allocate memory for the mini matrices, that contain strictly the data needed
     // for the calculation inside the transmition radius
     //
     int r, c, mini_r, mini_c;
-    double *m_mini_dem_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+    //
+    // digital elevation model
+    //
+    double *mini_m_dem_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                  sizeof (double));
-    double **m_mini_dem = (double **) calloc (diameter_in_pixels,
+    double **mini_m_dem = (double **) calloc (diameter_in_pixels,
                                               sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_dem[r] = &(m_mini_dem_data[r * diameter_in_pixels]);
-
-    double *m_mini_clut_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+        mini_m_dem[r] = &(mini_m_dem_data[r * diameter_in_pixels]);
+    //
+    // clutter data
+    //
+    double *mini_m_clut_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                   sizeof (double));
-    double **m_mini_clut = (double **) calloc (diameter_in_pixels,
+    double **mini_m_clut = (double **) calloc (diameter_in_pixels,
                                                sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_clut[r] = &(m_mini_clut_data[r * diameter_in_pixels]);
-
-    double *m_mini_loss_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
+        mini_m_clut[r] = &(mini_m_clut_data[r * diameter_in_pixels]);
+    //
+    // path loss
+    //
+    double *mini_m_loss_data = (double *) calloc (diameter_in_pixels * diameter_in_pixels, 
                                                   sizeof (double));
-    double **m_mini_loss = (double **) calloc (diameter_in_pixels,
+    double **mini_m_loss = (double **) calloc (diameter_in_pixels,
                                                sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
-        m_mini_loss[r] = &(m_mini_loss_data[r * diameter_in_pixels]);
+        mini_m_loss[r] = &(mini_m_loss_data[r * diameter_in_pixels]);
   
     //
     // copy data from the big matrices to the mini ones
@@ -434,16 +455,16 @@ void coverage (const Parameters     *params,
     mini_r = 0;
     for (r = 0; r < params->nrows; r ++)
     {
-        if ((r > north_border_idx) && (r <= south_border_idx))
+        if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
         {
             mini_c = 0;
             for (c = 0; c < params->ncols; c ++)
             {
-                if ((c > west_border_idx) && (c <= east_border_idx))
+                if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
                 {
-                    m_mini_dem[mini_r][mini_c] = params->m_dem[r][c];
-                    m_mini_clut[mini_r][mini_c] = params->m_clut[r][c];
-                    m_mini_loss[mini_r][mini_c] = params->m_loss[r][c];
+                    mini_m_dem[mini_r][mini_c]  = params->m_dem[r][c];
+                    mini_m_clut[mini_r][mini_c] = params->m_clut[r][c];
+                    mini_m_loss[mini_r][mini_c] = params->m_loss[r][c];
                     mini_c ++;
                 }
             }
@@ -452,71 +473,80 @@ void coverage (const Parameters     *params,
     }
 
     //
-    // define structure variables for Ericsson 9999 model
+    // initialize the structure variables for Ericsson 9999 model
     //
-    double BSAntHeight = tx_params->antenna_height_AGL;
-    double MSAntHeight = params->rx_height_AGL;
-    double scale = params->map_ew_res;
-    double A0 = (double) eric_params[0];
-    double A1 = (double) eric_params[1];
-    double A2 = (double) eric_params[2];
-    double A3 = (double) eric_params[3];
-    double ResDist = 1;
-    double radi = params->radius;
-
-    int xN = 2*radius_in_pixels;
-    int yN = 2*radius_in_pixels;
-    int BSyIndex = radius_in_pixels - 1;
-    int BSxIndex = radius_in_pixels - 1;
-
-    struct StructEric IniEric = {BSxIndex, BSyIndex, 
-                                 BSAntHeight, MSAntHeight,
-                                 xN, yN, 
-                                 scale, params->frequency, 
-                                 A0, A1, A2, A3, 
-                                 ResDist, radi};
-
-#ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Ericsson", 1);
-#endif
-
-    EricPathLossSub (m_mini_dem, m_mini_clut, m_mini_loss, &IniEric);
-
+    struct StructEric IniEric = {tx_east_coord_index, 
+                                 tx_north_coord_index,
+                                 tx_params->antenna_height_AGL, 
+                                 params->rx_height_AGL,
+                                 mini_ncols,
+                                 mini_nrows,
+                                 params->map_ew_res,
+                                 params->frequency, 
+                                 (double) eric_params[0],
+                                 (double) eric_params[1],
+                                 (double) eric_params[2], 
+                                 (double) eric_params[3], 
+                                 1, 
+                                 params->radius};
     //
-    // copy the PathLoss mini matrix back into the big one;
-    // we ignore the other ones, because they are used only as input
+    // execute the path-loss calculation on CPU or GPU?
     //
-    mini_r = 0;
-    for (r = 0; r < params->nrows; r ++)
+    if (params->use_gpu)
     {
-        if ((r > north_border_idx) && (r <= south_border_idx))
-        {
-            mini_c = 0;
-            for (c = 0; c < params->ncols; c ++)
-            {
-                if ((c > west_border_idx) && (c <= east_border_idx))
-                {
-                    params->m_loss[r][c] = m_mini_loss[mini_r][mini_c];
-                    mini_c ++;
-                }
-            }
-            mini_r ++;
-        }
-    }
-    
-    //
-    // deallocate the mini matrices
-    //
-    free (m_mini_dem[0]);
-    free (m_mini_dem);
-    free (m_mini_clut[0]);
-    free (m_mini_clut);
-    free (m_mini_loss[0]);
-    free (m_mini_loss);
-
 #ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Ericsson", 0);
+        measure_time ("E/// on GPU");
 #endif
+        eric_pathloss_on_gpu (tx_params->tx_east_coord,
+                              tx_params->tx_north_coord,
+                              tx_east_coord_index,
+                              tx_north_coord_index,
+                              tx_params->antenna_height_AGL,
+                              tx_params->total_tx_height,
+                              tx_params->beam_direction,
+                              tx_params->mechanical_tilt,
+                              params->frequency,
+                              params->radius,  
+                              params->rx_height_AGL,
+                              mini_nrows,       
+                              mini_ncols,      
+                              mini_west_border,
+                              mini_north_border,
+                              params->map_ew_res,  
+                              params->map_ns_res,  
+                              params->null_value,
+                              params->gpu_params,
+                              mini_m_dem,          
+                              mini_m_clut,
+                              mini_m_loss);
+    }
+    else
+    {
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("E/// on CPU");
+#endif
+        EricPathLossSub (mini_m_dem, 
+                         mini_m_clut, 
+                         mini_m_loss, 
+                         &IniEric);
+    }
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
+
+    /*
+    // DEBUG memory
+    //
+    for (r=0;r<mini_nrows;r++)
+    {
+        for (c=0;c<mini_ncols;c++)
+        {
+            printf ("%.5f\t", mini_m_loss[r][c]);
+        }
+        printf ("\n");
+    }
+    exit (1);
+    */
 
     //
     // calculate the antenna influence, 
@@ -525,27 +555,82 @@ void coverage (const Parameters     *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 1);
 #endif
-    calculate_antenna_influence (params->antenna_diagram_dir,
-                                 tx_params->antenna_diagram_file,
+    calculate_antenna_influence (params->use_gpu,
                                  tx_params->tx_east_coord,
                                  tx_params->tx_north_coord,
+                                 tx_params->antenna_height_AGL,
                                  tx_params->total_tx_height,
                                  tx_params->beam_direction,
                                  tx_params->mechanical_tilt,
-                                 params->radius,
+                                 params->frequency,
+                                 params->radius,  
                                  params->rx_height_AGL,
-                                 params->nrows,
-                                 params->ncols,
-                                 params->map_west,
-                                 params->map_north,
-                                 params->map_ew_res,
-                                 params->map_ns_res,
+                                 mini_nrows,       
+                                 mini_ncols,      
+                                 mini_west_border,
+                                 mini_north_border,
+                                 params->map_ew_res,  
+                                 params->map_ns_res,  
                                  params->null_value,
-                                 params->m_dem,
-                                 params->m_loss);
+                                 params->antenna_diagram_dir,
+                                 tx_params->antenna_diagram_file, 
+                                 params->gpu_params,
+                                 mini_m_dem,          
+                                 mini_m_loss);
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 0);
 #endif
+
+    //
+    // copy the PathLoss mini matrix back into the big one;
+    // we ignore the other ones, because they are used only as input
+    //
+    mini_r = 0;
+    for (r = 0; r < params->nrows; r ++)
+    {
+        if ((r > mini_north_border_idx) && (r <= mini_south_border_idx))
+        {
+            mini_c = 0;
+            for (c = 0; c < params->ncols; c ++)
+            {
+                if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
+                {
+                    params->m_loss[r][c] = mini_m_loss[mini_r][mini_c];
+                    mini_c ++;
+                }
+                else
+                {
+                    //
+                    // this point is outside the mini matrix (i.e. calculation 
+                    // within radius), write null to it
+                    //
+                    params->m_loss[r][c] = params->null_value;
+                }
+            }
+            mini_r ++;
+        }
+        else
+        {
+            //
+            // this row is outside the mini matrix (i.e. calculation 
+            // within radius), write nulls to it
+            //
+            for (c = 0; c < params->ncols; c ++)
+            {
+                params->m_loss[r][c] = params->null_value;
+            }
+        }
+    }
+    
+    //
+    // deallocate the mini matrices
+    //
+    free (mini_m_dem[0]);
+    free (mini_m_dem);
+    free (mini_m_clut[0]);
+    free (mini_m_clut);
+    free (mini_m_loss[0]);
+    free (mini_m_loss);
 
     /*
      * This part is only used when using this module as the objective
