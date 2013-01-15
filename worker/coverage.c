@@ -47,13 +47,13 @@ static void init_coverage_for_tx (FILE          *ini_file,
     //
     mapset = G_find_cell2 (params->dem_map, "");
     if (mapset == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->dem_map);
+        G_fatal_error("Raster map <%s> not found", params->dem_map);
   
     //
     // G_open_cell_old - returns file descriptor
     //
     if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
 
     //
     // check if the specified transmitter location is inside the DEM map
@@ -62,7 +62,7 @@ static void init_coverage_for_tx (FILE          *ini_file,
         tx_params->tx_east_coord  > params->map_east ||
         tx_params->tx_north_coord > params->map_north || 
         tx_params->tx_north_coord < params->map_south)
-        G_fatal_error (_("Specified BS coordinates are outside current region bounds."));
+        G_fatal_error ("Specified BS coordinates are outside current region bounds.");
    
     //
     // map array coordinates for transmitter
@@ -79,15 +79,15 @@ static void init_coverage_for_tx (FILE          *ini_file,
     // total height of transmitter 
     // 
     if (G_get_raster_row (infd, inrast, tr_row, FCELL_TYPE) < 0)
-        G_fatal_error (_("Unable to read raster map <%s> row %d"), params->dem_map, 
-                                                                   tr_row);
+        G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, 
+                                                                tr_row);
     FCELL trans_elev = ((FCELL *) inrast)[tr_col];
 
     //
     // check if transmitter is on DEM
     //
     if (isnan ((double) trans_elev))							
-        G_fatal_error (_("Transmitter outside raster DEM map."));
+        G_fatal_error ("Transmitter outside raster DEM map.");
 
     tx_params->total_tx_height = (double) trans_elev + tx_params->antenna_height_AGL;
    
@@ -199,18 +199,18 @@ void init_coverage (FILE       *ini_file,
     //
     mapset = G_find_cell2 (params->dem_map, "");
     if (mapset == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->dem_map);
+        G_fatal_error("Raster map <%s> not found", params->dem_map);
    
     mapset2 = G_find_cell2 (params->clutter_map, "");
     if (mapset2 == NULL)
-        G_fatal_error(_("Raster map <%s> not found"), params->clutter_map);
+        G_fatal_error("Raster map <%s> not found", params->clutter_map);
 
     // G_open_cell_old - returns file destriptor (>0) 
     if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
 
     if ((infd2 = G_open_cell_old (params->clutter_map, mapset2)) < 0)
-        G_fatal_error(_("Unable to open raster map <%s>"), params->clutter_map);
+        G_fatal_error("Unable to open raster map <%s>", params->clutter_map);
 
     //
     // read metadata of each map, making sure they match
@@ -238,7 +238,7 @@ void init_coverage (FILE       *ini_file,
         params->map_ns_res = metadata->ns_res;
     }
     else
-        G_fatal_error(_("Unable to open raster map <%s>"), params->dem_map);
+        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
         
     errno = G_get_cellhd (params->clutter_map,
                           mapset2,
@@ -251,10 +251,10 @@ void init_coverage (FILE       *ini_file,
             params->map_south != metadata->south ||
             params->map_ew_res != metadata->ew_res ||
             params->map_ns_res != metadata->ns_res)
-            G_fatal_error (_("Map metadata of input maps do not match."));
+            G_fatal_error ("Map metadata of input maps do not match.");
     }
     else
-        G_fatal_error (_("Unable to open raster map <%s>"), params->clutter_map);
+        G_fatal_error ("Unable to open raster map <%s>", params->clutter_map);
     //
     // check that the current active window matches the loaded data
     //
@@ -265,7 +265,7 @@ void init_coverage (FILE       *ini_file,
         params->map_south != window->south ||
         params->map_ew_res != window->ew_res ||
         params->map_ns_res != window->ns_res)
-        G_fatal_error (_("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings."));
+        G_fatal_error ("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings.");
 
     //
     // number of rows and columns within the maps
@@ -319,11 +319,11 @@ void init_coverage (FILE       *ini_file,
         {	
             // read DEM map data
             if (G_get_raster_row (infd, inrast, row, FCELL_TYPE) < 0)
-              G_fatal_error (_("Unable to read raster map <%s> row %d"), params->dem_map, row);
+              G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, row);
 
             // read Clutter map data
             if (G_get_raster_row (infd2, inrast2, row, FCELL_TYPE) < 0)
-              G_fatal_error (_("Unable to read raster map <%s> row %d"), params->clutter_map, row);
+              G_fatal_error ("Unable to read raster map <%s> row %d", params->clutter_map, row);
 
             // process the data
             for (col = 0; col < params->ncols; col ++) 
@@ -494,6 +494,9 @@ void coverage (const Parameters     *params,
     //
     if (params->use_gpu)
     {
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("E/// on GPU");
+#endif
         eric_pathloss_on_gpu (tx_params->tx_east_coord,
                               tx_params->tx_north_coord,
                               tx_east_coord_index,
@@ -526,10 +529,10 @@ void coverage (const Parameters     *params,
                          mini_m_clut, 
                          mini_m_loss, 
                          &IniEric);
-#ifdef _PERFORMANCE_METRICS_
-        measure_time (NULL);
-#endif
     }
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
 
     /*
     // DEBUG memory

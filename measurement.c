@@ -140,7 +140,7 @@ void load_field_measurements_from_db (const char *tx_name,
     driver = db_start_driver_open_database (_GRASS_DB_DRIVER_,
                                             _GRASS_DB_STRING_);
     if (driver == NULL)
-        G_fatal_error (_("Unable to open database"));
+        G_fatal_error ("Unable to open database");
     //
     // First we need the record ID of the transmitter used. 
     // This little step improves the speed of the long query by more
@@ -155,7 +155,8 @@ void load_field_measurements_from_db (const char *tx_name,
     db_set_string  (&sql, buf);
     //printf ("\t*** DEBUG: Executing \n\t%s\n", db_get_string (&sql));
     if (db_open_select_cursor (driver, &sql, &cursor, DB_SEQUENTIAL) != DB_OK) 
-        G_fatal_error (_("Unable to open select cursor:\n\t%s"), db_get_string (&sql));
+        G_fatal_error ("Unable to open select cursor:\n\t%s",
+		       db_get_string (&sql));
 
     table = db_get_cursor_table (&cursor);
     //
@@ -167,14 +168,14 @@ void load_field_measurements_from_db (const char *tx_name,
         column = db_get_table_column (table, 0);
         int ctype = db_sqltype_to_Ctype (db_get_column_sqltype (column));
         if (ctype != DB_C_TYPE_INT)
-            G_fatal_error (_("Column type for 'id_cell' is not INT as expected."));
+            G_fatal_error ("Column type for 'id_cell' is not INT as expected.");
         value = db_get_column_value (column);
         tx_db_id = db_get_value_int (value);
         if (db_close_cursor (&cursor) != DB_OK)
-            G_fatal_error (_("Cannot close database cursor."));
+            G_fatal_error ("Cannot close database cursor.");
     }
     else
-        G_fatal_error (_("Cannot read the transmitter ID from the database."));
+        G_fatal_error ("Cannot read the transmitter ID from the database.");
 
     //
     // Select the needed field measurements from the database, e.g.
@@ -230,7 +231,7 @@ void load_field_measurements_from_db (const char *tx_name,
     db_set_string  (&sql, buf);
     // printf ("\t*** DEBUG: Executing \n\t%s\n", db_get_string (&sql));
     if (db_open_select_cursor (driver, &sql, &cursor, DB_SEQUENTIAL) != DB_OK) 
-        G_fatal_error (_("Unable to open select cursor:\n\t'%s'"), db_get_string (&sql));
+        G_fatal_error ("Unable to open select cursor:\n\t'%s'"), db_get_string (&sql);
 
     table = db_get_cursor_table (&cursor);
     //
@@ -242,7 +243,7 @@ void load_field_measurements_from_db (const char *tx_name,
         column = db_get_table_column (table, 2);
         int ctype = db_sqltype_to_Ctype (db_get_column_sqltype (column));
         if (ctype != DB_C_TYPE_DOUBLE)
-            G_fatal_error (_("Measurement (RSCP) column must be of type double"));
+            G_fatal_error ("Measurement (RSCP) column must be of type double");
         value = db_get_column_value (column);
         double m_rscp = db_get_value_double (value);
 
@@ -254,7 +255,7 @@ void load_field_measurements_from_db (const char *tx_name,
         column = db_get_table_column (table, 0);
         ctype = db_sqltype_to_Ctype (db_get_column_sqltype (column));
         if (ctype != DB_C_TYPE_INT && ctype != DB_C_TYPE_DOUBLE)
-            G_fatal_error (_("Coordinate column must be of type integer or double"));
+            G_fatal_error ("Coordinate column must be of type integer or double");
         value = db_get_column_value (column);
         if (ctype == DB_C_TYPE_INT)
             m_x = (double)db_get_value_int (value);
@@ -266,7 +267,7 @@ void load_field_measurements_from_db (const char *tx_name,
         column = db_get_table_column (table, 1);
         ctype = db_sqltype_to_Ctype (db_get_column_sqltype (column));
         if (ctype != DB_C_TYPE_INT && ctype != DB_C_TYPE_DOUBLE)
-            G_fatal_error (_("Coordinate column must be of type integer or double"));
+            G_fatal_error ("Coordinate column must be of type integer or double");
         value = db_get_column_value (column);
         if (ctype == DB_C_TYPE_INT)
             m_y = (double)db_get_value_int (value);
