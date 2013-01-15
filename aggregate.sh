@@ -16,8 +16,11 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     SQL="$( echo "${SQL}" | sed -e 's/UNION$//g' )"
     SQL="${SQL}) AS agg GROUP BY agg.east, agg.north ) AS sub "
     SQL="${SQL} WHERE rscp < 0"
-    echo "${SQL}" | psql -q -t -h ${PSQL_SERVER} -U garufa grass_backend | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
+    echo "*** INFO: Importing path-loss predictions from the database ..."
+    echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U garufa grass_backend | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
+    echo "*** INFO: Converting vector to raster map ..."
     v.to.rast input=temp type=point output=temp use=z --overwrite
+    echo "*** INFO: Changing resolution of the final raster map ..."
     r.resamp.rst input=temp ew_res=25 ns_res=25 elev=${RAST} --overwrite
     r.colors -n map=${RAST} color=elevation
 else
