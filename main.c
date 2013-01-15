@@ -1,4 +1,5 @@
-#include "performance/metric.h"
+#include <performance_metric.h>
+
 #include "worker/coverage.h"
 #include "master/master.h"
 

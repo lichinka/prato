@@ -1,13 +1,13 @@
 include Makefile.inc
 
-DIRS 	= master worker performance
+DIRS 	= master worker
 BIN		= r.coverage
 CFLAGS 	= $(PRJCFLAGS) 
-INCS 	= $(PRJINCS)
-LIBS 	= $(PRJLIBS) -L. -lworker -lperformance -lOpenCL
+INCS 	= $(PRJINCS) -I$(OCL_COMMON_LIB_DIR) -I$(PERFORMANCE_LIB_DIR)
+LIBS 	= $(PRJLIBS) -L. -loclcommon -lperformance -lworker -lOpenCL
 SRCS    = $(wildcard *.c) $(wildcard master/*.c)
 OBJS    = $(SRCS:.c=.o)
-OBJLIBS = libperformance.so libworker.so
+OBJLIBS = libworker.so
 
 all: $(BIN)
 
@@ -23,10 +23,6 @@ $(BIN): $(OBJS) $(OBJLIBS)
 libworker.so: force_look
 	$(ECHO) Looking into worker : $(MAKE) $(MFLAGS)
 	cd worker; $(MAKE) $(MFLAGS)
-
-libperformance.so: force_look
-	$(ECHO) Looking into performance: $(MAKE) $(MFLAGS)
-	cd performance; $(MAKE) $(MFLAGS)
 
 clean:
 	$(ECHO) Cleaning up ...

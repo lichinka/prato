@@ -26,9 +26,15 @@
  *
  *****************************************************************************/
 
+//
+// From the performance metrics library
+//  
+//      https://github.com/lichinka/performance_metrics
+//
+#include <performance_metric.h>
+
 #include "worker/eric.h"
 #include "worker/antenna.h"
-#include "performance/metric.h"
 
 
 

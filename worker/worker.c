@@ -1,5 +1,4 @@
 #include "worker/coverage.h"
-#include "performance/metric.h"
 
 
 

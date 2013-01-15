@@ -1,8 +1,19 @@
 #include <assert.h>
+//
+// From the performance metrics library
+//  
+//      https://github.com/lichinka/performance_metrics
+//
+#include <performance_metric.h>
+
+//
+// From the OpenCL common library
+//
+//      https://github.com/lichinka/ocl_common
+//
+#include <ocl_common.h>
 
 #include "worker/antenna.h"
-#include "worker/ocl_common.h"
-#include "performance/metric.h"
 
 
 
