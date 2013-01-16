@@ -3,7 +3,9 @@
 TX=$1
 INI=$2
 RAST=$3
-PSQL_SERVER=localhost
+PSQL_SERVER=ninestein
+PSQL_USER=grassuser
+PSQL_DB=grass
 
 if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     echo "*** INFO: Aggregating partial predictions for ${TX} ..."
@@ -17,7 +19,7 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     SQL="${SQL}) AS agg GROUP BY agg.east, agg.north ) AS sub "
     SQL="${SQL} WHERE rscp < 0"
     echo "*** INFO: Importing path-loss predictions from the database ..."
-    echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U garufa grass_backend | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
+    echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
     echo "*** INFO: Converting vector to raster map ..."
     v.to.rast input=temp type=point output=temp use=z --overwrite
     echo "*** INFO: Changing resolution of the final raster map ..."
