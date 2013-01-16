@@ -94,6 +94,9 @@ where `performance` and `ocl_common` are the dependency libraries listed above.
 
 Using PRATO
 ===========
+
+Single node processing
+----------------------
 - Start the GRASS environment, selecting or creating a `grassdata` directory where all GIS files will be saved.
 - Adjust the dynamic library path so that it will find all the required libraries:
 
@@ -131,3 +134,56 @@ where `prato/src` is the directory containing the module binary and required lib
 	`grass> g.region -p | grep res`
 	`nsres:      100`
 	`ewres:      100`
+
+
+Multinode processing over MPI
+-----------------------------
+- Create a host file for your computing nodes, for example:
+
+	prato/src> head hostfile
+	localhost	slots=1
+
+	k1	slots=4
+	k2	slots=4
+	k3	slots=4
+	k4	slots=4
+	k5	slots=4
+	k6	slots=4
+	k7	slots=4
+	k8	slots=4
+
+where `localhost` represents the master node, and the `k*` entries represent the worker processes.
+
+- Check that a PostgreSQL server is running and a database is available from the master node, for example:
+
+	prato/src> psql -h <hostname> -d <db_name>
+	db_name=>
+
+- Also check that the database is available from the computing nodes. You may want to prepare a `.pgpass` file to avoid entering login credentials during processing.
+
+- Update the contents of `run_worker.sh` and `aggregate.sh` to reflect your database configuration:
+
+	prato/src> head run_worker.sh
+	#!/bin/bash
+
+	RANK=$1
+	CMD="./worker/worker"
+	PSQL_SERVER=hostname
+	PSQL_USER=dbuser
+	PSQL_DB=db_name
+
+- To start the multinode processing you may use the `run_mpi.sh` helper script, e.g.:
+
+	prato/src> ./run_mpi.sh hostfile TX_1,TX_2,TX_3 resulting_raster
+
+
+
+
+
+
+
+
+
+ for the computing nodes to log into.
+
+
