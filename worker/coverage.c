@@ -245,12 +245,12 @@ void init_coverage (FILE       *ini_file,
                           metadata);
     if (errno == 0)
     {
-        if (params->map_east != metadata->east ||
-            params->map_west != metadata->west ||
-            params->map_north != metadata->north ||
-            params->map_south != metadata->south ||
-            params->map_ew_res != metadata->ew_res ||
-            params->map_ns_res != metadata->ns_res)
+        if (!(params->map_east >= metadata->east &&
+              params->map_west <= metadata->west &&
+              params->map_north >= metadata->north &&
+              params->map_south <= metadata->south &&
+              params->map_ew_res == metadata->ew_res &&
+              params->map_ns_res == metadata->ns_res))
             G_fatal_error ("Map metadata of input maps do not match.");
     }
     else
