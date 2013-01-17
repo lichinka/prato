@@ -87,6 +87,9 @@ static int spawn_workers (Parameters *params,
     MPI_Comm_size (MPI_COMM_WORLD, &world_size); 
     MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 
+	printf ("*** DEBUG: World size %d\n", world_size);
+	printf ("*** DEBUG: Rank %d\n", world_size);
+
     //
     // only one master process should be started at once
     //
@@ -111,6 +114,8 @@ static int spawn_workers (Parameters *params,
         exit (1);
     }
 
+	printf ("*** DEBUG: Universe size %d\n", universe_size);
+
     //
     // spawn the workers. Note that there is a run-time determination 
     // of what type of worker to spawn, and presumably this calculation must 
@@ -133,7 +138,8 @@ static int spawn_workers (Parameters *params,
     // prepare workers' commands and arguments
     //
     int buff_size = _CHAR_BUFFER_SIZE_;
-    char    *worker_command = "run_worker.sh";
+    //char    *worker_command = "run_worker.sh";
+    char    *worker_command = "hostname";
     char    *worker_program  [nworkers];
     char    *worker_arg      [nworkers];
     char    *worker_args     [nworkers][2];
@@ -146,7 +152,11 @@ static int spawn_workers (Parameters *params,
     {
         // worker's arguments 
         worker_arg[i] = (char *) malloc (buff_size);
-        snprintf (worker_arg[i], buff_size, "%d", i);
+		//
+		// test dynamic spawning with the hostname command
+		//
+        //snprintf (worker_arg[i], buff_size, "%d", i);
+        snprintf (worker_arg[i], buff_size, "-s");
         worker_args[i][0] = worker_arg[i];
         worker_args[i][1] = NULL;
         worker_argv[i]    = &(worker_args[i][0]);
@@ -156,7 +166,17 @@ static int spawn_workers (Parameters *params,
         snprintf (worker_program[i], buff_size, worker_command);
 
         worker_maxproc[i] = 1;
+
+		// 
+		// manually set host info to test the problem on ninestein
+		//
         worker_info[i] = MPI_INFO_NULL;
+		//MPI_Info_create (&(worker_info[i]));
+		//MPI_Info_set (worker_info[i], "host", "k1");
+
+		printf ("*** DEBUG: worker_args[%d][0]\t%s\n", i, worker_args[i][0]);
+		printf ("*** DEBUG: worker_argv[%d]\t%s\n", i, worker_args[i][0]);
+		printf ("*** DEBUG: worker_program[%d]\t%s\n", i, worker_program[i]);
     }
     //
     // spawn worker processes
