@@ -113,7 +113,7 @@ static void receive_tx_data (Parameters *params,
  *
  */
 void worker (const int rank,
-             MPI_Comm *comm)
+             MPI_Comm comm)
 {
     int has_finished;
     MPI_Status status;
@@ -123,15 +123,15 @@ void worker (const int rank,
     //
     // sync point: receive common input data from master
     //
-    MPI_Barrier (*comm);
-    receive_common_data (params, comm);
+    MPI_Barrier (comm);
+    receive_common_data (params, &comm);
     params->tx_params = NULL;
 
     //
     // sync point: common data passing finished, 
     // starting coverage processing
     //
-    MPI_Barrier (*comm);
+    MPI_Barrier (comm);
 
     //
     // start processing loop
@@ -147,7 +147,7 @@ void worker (const int rank,
                   MPI_BYTE,
                   _COVERAGE_MASTER_RANK_,
                   _WORKER_IS_IDLE_TAG_,
-                  *comm);
+                  comm);
         //
         // check if this worker should shutdown
         // or continue working
@@ -157,7 +157,7 @@ void worker (const int rank,
                   MPI_BYTE,
                   _COVERAGE_MASTER_RANK_,
                   MPI_ANY_TAG,
-                  *comm,
+                  comm,
                   &status);
         if (status.MPI_TAG == _WORKER_SHUTDOWN_TAG_)
             has_finished = 1;
@@ -166,7 +166,7 @@ void worker (const int rank,
             //
             // receive data for processing the next transmitter
             //
-            receive_tx_data (params, comm);
+            receive_tx_data (params, &comm);
             //
             // calculate coverage for the received transmitter
             //

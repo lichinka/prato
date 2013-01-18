@@ -12,9 +12,7 @@ CC          = gcc
 #PRJCFLAGS   = -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJCFLAGS   = -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJINCS     = -I$(HOME)/papi/include -I$(CUDA_DIR)/include -I$(GRASS_TOPDIR)/include $(shell mpicc --showme:compile) -I.
-#PRJINCS     = -I$(HOME)/papi/include -I$(CUDA_DIR)/include -I$(GRASS_TOPDIR)/include -I/usr/include/mpich2 -I.
-PRJLIBS     = -L$(HOME)/papi/lib -L$(CUDA_DIR)/lib/x86_64 -L$(GRASS_TOPDIR)/lib -lgrass_gis -lgrass_datetime -lgrass_dbmibase -lgrass_dbmiclient -lpapi -lm -Wl,-rpath=$(GRASS_TOPDIR)/lib $(shell mpicc --showme:link)
-#PRJLIBS     = -L$(HOME)/papi/lib -L$(CUDA_DIR)/lib/x86_64 -L$(GRASS_TOPDIR)/lib -lgrass_gis -lgrass_datetime -lgrass_dbmibase -lgrass_dbmiclient -lpapi -lm -Wl,-rpath=$(GRASS_TOPDIR)/lib -lmpich -lopa -lmpl -lrt -lcr -lpthread
+PRJLIBS     = $(shell mpicc --showme:link)
 RM          = rm
 ECHO        = echo
 

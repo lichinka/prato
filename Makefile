@@ -4,7 +4,7 @@ DIRS 	= master worker
 BIN		= r.coverage
 CFLAGS 	= $(PRJCFLAGS) 
 INCS 	= $(PRJINCS) -I$(OCL_COMMON_LIB_DIR) -I$(PERFORMANCE_LIB_DIR)
-LIBS 	= $(PRJLIBS) -L. -loclcommon -lperformance -lworker -lOpenCL
+LIBS 	= $(PRJLIBS) -L$(GRASS_TOPDIR)/lib -lgrass_gis -lgrass_datetime -lgrass_dbmibase -lgrass_dbmiclient -lpapi -lm -Wl,-rpath=$(GRASS_TOPDIR)/lib -L. -loclcommon -lperformance -lworker -lOpenCL
 SRCS    = $(wildcard *.c) $(wildcard master/*.c)
 OBJS    = $(SRCS:.c=.o)
 OBJLIBS = libworker.so
