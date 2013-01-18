@@ -231,7 +231,7 @@ void load_field_measurements_from_db (const char *tx_name,
     db_set_string  (&sql, buf);
     // printf ("\t*** DEBUG: Executing \n\t%s\n", db_get_string (&sql));
     if (db_open_select_cursor (driver, &sql, &cursor, DB_SEQUENTIAL) != DB_OK) 
-        G_fatal_error ("Unable to open select cursor:\n\t'%s'"), db_get_string (&sql);
+        G_fatal_error ("Unable to open select cursor:\n\t'%s'", db_get_string (&sql));
 
     table = db_get_cursor_table (&cursor);
     //
