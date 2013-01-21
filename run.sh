@@ -13,6 +13,10 @@ if [ -n "${TX}" ]; then
     echo ${CMD} >&2 
     #${CMD} | psql -h ${PSQL_SERVER} -U garufa grass_backend
     ${CMD} 
+    #
+    # change raster colors
+    #
+    r.colors map=${OUT} color=rainbow
 else
     echo "Usage"
     echo "  $0 [transmitter's section name in the INI file] [output raster name]"
