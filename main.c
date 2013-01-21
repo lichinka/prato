@@ -92,12 +92,14 @@ int main (int argc, char *argv [])
     if (G_parser (argc, argv) < 0)
 	    exit (EXIT_FAILURE);
 
+#ifdef _PERFORMANCE_METRICS_
     measure_time ("Read input data");
+#endif
 
     //
     // read the whole configuration INI file into memory
     //
-    char content [1024 * 1024];
+    char *content = (char *) malloc (1024 * 1024, sizeof (char));
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
     params->ini_file_content_size = read_file_into_memory (ini_file->answer,
                                                            content);
@@ -115,6 +117,10 @@ int main (int argc, char *argv [])
     init_coverage (ini_file_stream,
                    tx_ini_sections->answer,
                    params);
+    //
+    // free memory and close input stream
+    //
+    free (content);
     fclose (ini_file_stream);
 
     //
@@ -122,7 +128,9 @@ int main (int argc, char *argv [])
     //
     params->use_gpu = use_gpu->answer;
 
+#ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
+#endif
 
     //
     // ... and execute it
