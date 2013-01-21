@@ -193,7 +193,9 @@ antenna_influence_on_point (double d_east,
     horizontal_loss  = diagram->horizontal[index];
     horizontal_loss += ((diagram->horizontal[(int)temp_angle] - diagram->horizontal[index])*(hor_diag_angle - floor(hor_diag_angle)));
     
-    /* determine vertical angle and loss */
+    //
+    // determine vertical angle and loss
+    //
     height_diff_Tx_Rx = total_height - (double)dem_height - rec_height;
 
     //
@@ -250,7 +252,9 @@ antenna_influence_on_point (double d_east,
     vertical_loss  = diagram->vertical[(int)floor(vert_diag_angle)];
     vertical_loss += ((diagram->vertical[(int)temp_angle] - diagram->vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
   
+    //
     // finally take into account pathloss for determined diagram angles and antenna gain 
+    //
     return (float)((double)path_loss + horizontal_loss + vertical_loss - diagram->gain);
 }
 

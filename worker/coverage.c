@@ -19,10 +19,11 @@
  *                  in this case (A0, A1, A2 and A3);
  *
  */
-void coverage (const Parameters     *params,
-               const Tx_parameters  *tx_params,
-               const double         *eric_params, 
-               const unsigned int   eric_params_len)
+void 
+coverage (const Parameters     *params,
+          const Tx_parameters  *tx_params,
+          const double         *eric_params, 
+          const unsigned int   eric_params_len)
 {
     //
     // calculate the subregion (within the area) where this transmitter is 
@@ -325,8 +326,9 @@ void coverage (const Parameters     *params,
  * tx_params        a structure holding transmitter-specific configuration
  *                  parameters;
  */
-void output_to_stdout (const Parameters *params,
-                       const Tx_parameters *tx_params)
+void 
+output_to_stdout (const Parameters *params,
+                  const Tx_parameters *tx_params)
 {
     int r, c;
     

@@ -245,6 +245,28 @@ worker (const int rank,
 
 
 /**
+ * Calculates the coverage prediction for one transmitter, using the 
+ * Ericsson 9999 model.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ *                  configuration parameters needed for calculation;
+ * eric_params      contains the four tunning parameters for the Ericsson 9999
+ *                  model;
+ * eric_params_len  the number of parameters within the received vector, four 
+ *                  in this case (A0, A1, A2 and A3);
+ *
+ */
+void 
+coverage (const Parameters     *params,
+          const Tx_parameters  *tx_params,
+          const double         *eric_params, 
+          const unsigned int   eric_params_len);
+
+
+/**
  * Displays the calculation result in the standard output.
  *
  * params           a structure holding configuration parameters which are common
@@ -252,7 +274,7 @@ worker (const int rank,
  * tx_params        a structure holding transmitter-specific configuration
  *                  parameters;
  */
-extern void 
+void 
 output_to_stdout (const Parameters *params,
                   const Tx_parameters *tx_params);
 
