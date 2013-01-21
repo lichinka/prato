@@ -428,19 +428,26 @@ init_coverage (FILE       *ini_file,
     //
     struct Cell_head *metadata = (struct Cell_head *) malloc (sizeof (struct Cell_head));
     struct Cell_head *window   = (struct Cell_head *) malloc (sizeof (struct Cell_head));
+
+    //
+    // DEM metadata
+    //
     errno = G_get_cellhd (params->dem_map,
                           mapset,
                           metadata);
-    //
-    // check the size of a map cell in bytes, so that later casts won't fail
-    //
-    if (metadata->format != sizeof (params->null_value) - 1)
-        G_fatal_error ("The number of bytes per map-cell is castable to Float");
-    else
-        G_set_f_null_value ((FCELL *) &(params->null_value), 1);
 
     if (errno == 0)
     {
+        //
+        // check the size of a map cell in bytes, so that later casts won't fail
+        //
+        if (metadata->format != sizeof (params->null_value) - 1)
+            G_fatal_error ("DEM: the number of bytes per map-cell is not castable to `float`");
+        else
+            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
+        //
+        // get map metadata
+        //
         params->map_east = metadata->east;
         params->map_west = metadata->west;
         params->map_north = metadata->north;
@@ -450,12 +457,23 @@ init_coverage (FILE       *ini_file,
     }
     else
         G_fatal_error("Unable to open raster map <%s>", params->dem_map);
-        
+       
+    //
+    // clutter metadata
+    //
     errno = G_get_cellhd (params->clutter_map,
                           mapset2,
                           metadata);
     if (errno == 0)
     {
+        //
+        // check the size of a map cell in bytes, so that later casts won't fail
+        //
+        if (metadata->format != sizeof (params->null_value) - 1)
+            G_fatal_error ("Clutter: the number of bytes per map-cell is not castable to `float`");
+        else
+            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
+
         if (!(params->map_east >= metadata->east &&
               params->map_west <= metadata->west &&
               params->map_north >= metadata->north &&
@@ -476,7 +494,7 @@ init_coverage (FILE       *ini_file,
         params->map_south != window->south ||
         params->map_ew_res != window->ew_res ||
         params->map_ns_res != window->ns_res)
-        G_fatal_error ("Loaded map metadata does not match with your current GRASS window. Run 'g.region -p' to check the settings.");
+        G_fatal_error ("Loaded map metadata does not match with your current GRASS window.\nRun 'g.region -p' to check the settings.");
 
     //
     // number of rows and columns within the maps
