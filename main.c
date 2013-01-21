@@ -55,7 +55,7 @@ int main (int argc, char *argv [])
     //
     module = G_define_module ( );
     module->keywords = "raster, coverage, E/// 9999, directional antennas";
-    module->description = "Coverage module using the E/// 9999 model and antenna diagrams.-";
+    module->description = "Parallel coverage-prediction module using the E/// 9999 model and antenna diagrams.-";
   
     //
     // define the module options ...
