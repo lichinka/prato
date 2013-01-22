@@ -746,7 +746,7 @@ EricPathLossSub (double **Raster,
 	double A3  = IniEric->A3;			//	Model 9999 parameters
 	double freq  = IniEric->freq;			//	carrier frequency
 	double ResDist = IniEric->ResDist;		//	distance BS - MS sampling rate [normalized with scale
-	double Lambda = 300.0/freq;			//	wave lenght
+	double Lambda = 300.0 / freq;			//	wave lenght
 	double radi = IniEric->radi;			// radius of calculation
 
 	double ZoBS;					// BS and MS height about the sea level
@@ -812,13 +812,13 @@ EricPathLossSub (double **Raster,
             }
             */
 
-            Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
+            Zeff += (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
             
-            if (- AntHeightBS < Zeff && Zeff < AntHeightBS){
+            if (-AntHeightBS < Zeff && Zeff < AntHeightBS){
                 Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
             }
             
-            log10Zeff=log10(fabs(Zeff));
+            log10Zeff = log10 (fabs (Zeff));
 
             //log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
             log10DistBS2MSKm=log10(DistBS2MSKm);			
@@ -858,7 +858,7 @@ EricPathLossSub (double **Raster,
                 Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
             }
 
-//Obstacle height korrection due to earth sphere
+//Obstacle height correction due to earth sphere
             if (Ddot <= Ddotdot){
                 ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
             }
@@ -866,15 +866,17 @@ EricPathLossSub (double **Raster,
                 ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
             }
 
-//Hight correction due to BS2MS line angle
+//Height correction due to BS2MS line angle
             Hdot = ZObs2LOS*ElevAngCos;
 
             PathLossDiff = 0;
             KDFR = 0;
-            if (Ddot > 0 && Ddotdot > 0) {
-                Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
+            if (Ddot > 0 && Ddotdot > 0) 
+            {
+                // First Fresnel elipsoid radius
+                Fresnel = sqrt ( (Lambda*Ddot*Ddotdot*scale) / (Ddot + Ddotdot) );
 
-                PathLossDiff = Hdot/Fresnel;
+                PathLossDiff = Hdot / Fresnel;
 
 // NLOS komponent calculation KDFR
 
@@ -916,8 +918,9 @@ EricPathLossSub (double **Raster,
             else{
                 JDFR = 0;
             }
-
+            
             PathLossTmp = PathLossTmp + sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
+
             // write data to pathloss
             PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
         } // end irow

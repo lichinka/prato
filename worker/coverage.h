@@ -6,6 +6,30 @@
 #define _WORKER_IS_IDLE_TAG_        100
 #define _WORKER_KEEP_WORKING_TAG_   105
 #define _WORKER_SHUTDOWN_TAG_       110
+#define _WORKER_OPTIMIZE_TAG_       115
+
+//
+// whether the target point is whithin the main antenna beam or not
+//
+#define _RADIO_ZONE_MAIN_BEAM_ON_       0x01
+#define _RADIO_ZONE_MAIN_BEAM_OFF_      0xfe
+//
+// whether the target point is within the distance limit of the prediction model
+//
+#define _RADIO_ZONE_SECONDARY_BEAM_ON_  0x02
+#define _RADIO_ZONE_SECONDARY_BEAM_OFF_ 0xfd
+//
+// whether the target point is within the distance limit of the prediction model
+//
+#define _RADIO_ZONE_MODEL_DISTANCE_ON_  0x04
+#define _RADIO_ZONE_MODEL_DISTANCE_OFF_ 0xfb
+
+//
+// dimensions of the search vector - only used for optimization
+//
+#define _SEARCH_VECTOR_DIMENSIONS_  4
+
+
 
 #include <mpi.h>
 #include <time.h>
@@ -41,19 +65,74 @@
 //
 struct Tx_parameters
 {
-    //
-    // transmitter-specific parameters
-    //
+    // antenna azimuth
     int     beam_direction;
     int     electrical_tilt;
     int     mechanical_tilt;
+
+    // antenna height above ground level
     double  antenna_height_AGL;
+
+    // antenna height above sea level
+    double  total_tx_height;
+
+    // geographical coordinates of this transmitter
     double  tx_east_coord;
     double  tx_north_coord;
+
+    // 2D RADIUS area matrix indeces of the geographical coordinates
+    int tx_east_coord_idx;
+    int tx_north_coord_idx;
+
+    // transmit pilot power 
     double  tx_power;
-    double  total_tx_height;
-    char    tx_name              [_CHAR_BUFFER_SIZE_];
+
+    // name of this transmitter
+    char    tx_name [_CHAR_BUFFER_SIZE_];
+
+    // full path to the antenna diagram file
     char    antenna_diagram_file [_CHAR_BUFFER_SIZE_];
+
+    // binary file from which the field measurements are read
+    char    field_meas_map [_CHAR_BUFFER_SIZE_];
+
+    // number of rows and columns of each of the 2D RADIUS area matrices
+    int nrows;
+    int ncols;
+
+    // geographical limits of each of the 2D RADIUS area matrices
+    double map_north;
+    double map_east;
+    double map_south;
+    double map_west;
+
+    // 2D RADIUS area matrix indeces of the geographical limits
+    int map_north_idx;
+    int map_east_idx;
+    int map_south_idx;
+    int map_west_idx;
+
+    // 2D RADIUS area matrix containing the digital-elevation-model raster
+    // as received from the master process
+    double **m_dem;
+
+    // 2D RADIUS area matrix containing the clutter information 
+    // as received from the master process
+    double **m_clut;
+    
+    // 2D RADIUS area matrix where the field measurements are kept
+    // as received from the master process
+    double **m_field_meas;
+
+    // 2D RADIUS area matrix where the path-loss predictions are saved
+    double **m_loss;
+
+    // 2D RADIUS area matrix where the antenna losses are saved
+    double **m_antenna_loss;
+
+    // 2D RADIUS area matrix where radio zones are marked; 
+    // each element is a bit mask of _RADIO_ZONE_* constants
+    char **m_radio_zone;
 } __attribute__((__packed__));
 
 typedef struct Tx_parameters Tx_parameters;
@@ -81,7 +160,11 @@ static int tx_params_handler (void *user_struct,
     #define MATCH(s,n) strcasecmp(section, s) == 0 && strcasecmp(name, n) == 0
 
     if (MATCH (tx_section, "cellName"))
-        strncpy (pconfig->tx_name, value, _CHAR_BUFFER_SIZE_);
+    {
+        strncpy (pconfig->tx_name,
+                 value,
+                 _CHAR_BUFFER_SIZE_);
+    }
     else if (MATCH (tx_section, "beamDirection"))
     {
         pconfig->beam_direction = atoi (value);
@@ -99,7 +182,11 @@ static int tx_params_handler (void *user_struct,
         pconfig->antenna_height_AGL = atof (value);
     }
     else if (MATCH (tx_section, "antennaFile"))
-        strncpy (pconfig->antenna_diagram_file, value, _CHAR_BUFFER_SIZE_);
+    {
+        strncpy (pconfig->antenna_diagram_file, 
+                 value, 
+                 _CHAR_BUFFER_SIZE_);
+    }
     else if (MATCH (tx_section, "positionEast"))
     {
         pconfig->tx_east_coord = atof (value);
@@ -112,7 +199,13 @@ static int tx_params_handler (void *user_struct,
     {
         pconfig->tx_power = atof (value);
     }
-    else 
+    else if (MATCH (tx_section, "measurementsMap"))
+    {
+        strncpy (pconfig->field_meas_map, 
+                 value, 
+                 _CHAR_BUFFER_SIZE_);
+    }
+    else
         return 0;  /* unknown section/name, error */
     return 1;
 }
@@ -158,9 +251,6 @@ struct Parameters
     // 2D area matrix where the path-loss predictions are saved
     double **m_loss;
     
-    // 2D area matrix where the field measurements are saved
-    double **m_field_meas;
-
     //
     // common parameters to all transmitters
     //
@@ -179,9 +269,20 @@ struct Parameters
     char    clutter_map         [_CHAR_BUFFER_SIZE_];
     char    antenna_diagram_dir [_CHAR_BUFFER_SIZE_];
 
+    // horizontal and vertical losses that define the main antenna beam
+    int     main_zone_horiz;    
+    int     main_zone_vert;
+
+    // horizontal and vertical losses that define the secondary antenna beam
+    int     sec_zone_horiz;
+    int     sec_zone_vert;
+
     // a buffer to save the INI file to memory
     char *  ini_file_content;
     int     ini_file_content_size;
+
+    // a flag to indicate the framework starts in optimization mode
+    char    use_opt;
 
     // a flag to indicate the GPU should be used
     char            use_gpu;
@@ -224,6 +325,14 @@ static int common_params_handler (void *user_struct,
         pconfig->radius = atof (value);
     else if (MATCH ("common", "antennaDirectory"))
         strncpy (pconfig->antenna_diagram_dir, value, _CHAR_BUFFER_SIZE_);
+    else if (MATCH ("common", "firstRadioZoneHorizontal"))
+        pconfig->main_zone_horiz = atoi (value);
+    else if (MATCH ("common", "firstRadioZoneVertical"))
+        pconfig->main_zone_vert = atoi (value);
+    else if (MATCH ("common", "secondRadioZoneHorizontal"))
+        pconfig->sec_zone_horiz = atoi (value);
+    else if (MATCH ("common", "secondRadioZoneVertical"))
+        pconfig->sec_zone_vert = atoi (value);
     else
         return 0;  /* unknown section/name, error */
     return 1;

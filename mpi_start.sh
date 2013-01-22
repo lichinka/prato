@@ -1,7 +1,7 @@
 #
 # Sync cubo
 #
-rsync -avz /home/luka/etc/dr/tun_par/prato/ luka@192.168.1.102:/home/luka/etc/dr/tun_par/prato/
+#rsync -avz /home/luka/etc/dr/tun_par/prato/ luka@192.168.1.102:/home/luka/etc/dr/tun_par/prato/
 
 #
 # Start MPI jobs

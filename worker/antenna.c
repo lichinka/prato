@@ -114,21 +114,32 @@ read_antenna_diagram (const char *file_name,
 /**
  * Calculates the antenna gain on a specific point of the area.
  *
- * d_east       difference between receiver and transmitter eastern 
- *              coordinates;
- * d_north      difference between receiver and transmitter northern
- *              coordinates;
- * total_height transmitter's height above sea level;
- * beam_dir     direction of the antenna beam, in degrees;
- * mech_tilt    mechanical antenna tilt angle, in degress;
- * dem_height   height above sea level from the DEM;
- * rec_height   Rx antenna height above ground level;
- * dist_Tx_Rx   distance between receiver and transmitter;
- * path_loss    path-loss value at the current point;
- * diagram      the antenna diagram and gain.-
+ * d_east           difference between receiver and transmitter eastern 
+ *                  coordinates;
+ * d_north          difference between receiver and transmitter northern
+ *                  coordinates;
+ * total_height     transmitter's height above sea level;
+ * beam_dir         direction of the antenna beam, in degrees;
+ * mech_tilt        mechanical antenna tilt angle, in degress;
+ * dem_height       height above sea level from the DEM;
+ * rec_height       Rx antenna height above ground level;
+ * dist_Tx_Rx       distance between receiver and transmitter;
+ * diagram          the antenna diagram and gain;
+ * main_zone_horiz  indicates the horizontal loss that defines the main
+ *                  antenna beam;
+ * main_zone_vert   indicates the vertical loss that defines the main
+ *                  antenna beam;
+ * sec_zone_horiz   indicates the horizontal loss that defines the secondary
+ *                  antenna beam;
+ * sec_zone_vert    indicates the vertical loss that defines the secondary
+ *                  antenna beam;
+ * radio_zone       indicates the radio zone to which this point belongs
+ *                  (output parameter);
+ * antenna_loss     indicates the loss, introduced by the antenna, on this
+ *                  point (output parameter);
  *
  */
-static float 
+static void
 antenna_influence_on_point (double d_east,
                             double d_north,
                             const double total_height,
@@ -137,8 +148,13 @@ antenna_influence_on_point (double d_east,
                             const float dem_height,
                             const double rec_height,
                             double dist_Tx_Rx,
-                            const float path_loss,
-                            const Diagram *diagram)
+                            const Diagram *diagram,
+                            const int main_zone_horiz,
+                            const int main_zone_vert,
+                            const int sec_zone_horiz,
+                            const int sec_zone_vert,
+                            char   *radio_zone,
+                            double *antenna_loss)
 {
     //
     // local variables
@@ -159,7 +175,7 @@ antenna_influence_on_point (double d_east,
         d_north = 0.01;
     temp_angle = atan (d_east / d_north);
     if (temp_angle < 0)
-      temp_angle = - temp_angle;
+      temp_angle = -temp_angle;
              
     if (d_north >= 0 && d_east >= 0)
       hor_coor_angle = temp_angle;
@@ -202,9 +218,9 @@ antenna_influence_on_point (double d_east,
     // the arctan cannot be calculated if any of the involved numbers is 0
     //
     if (height_diff_Tx_Rx == 0)
-        height_diff_Tx_Rx = 0.01;
+        height_diff_Tx_Rx = 0.001;
     if (dist_Tx_Rx == 0)
-        dist_Tx_Rx = 0.01;
+        dist_Tx_Rx = 0.001;
     vert_coor_angle = atan (height_diff_Tx_Rx / (dist_Tx_Rx * 1000));
     vert_coor_angle = vert_coor_angle * 180 / _PI_;	
   
@@ -251,271 +267,32 @@ antenna_influence_on_point (double d_east,
 #endif
     vertical_loss  = diagram->vertical[(int)floor(vert_diag_angle)];
     vertical_loss += ((diagram->vertical[(int)temp_angle] - diagram->vertical[(int)floor(vert_diag_angle)])*(vert_diag_angle - floor(vert_diag_angle)));
-  
+ 
+    //
+    // check if this point is within the main antenna beam, i.e. 
+    // horizontally and vertically introduced loss is within threshold
+    //
+    if ((horizontal_loss <= main_zone_horiz) && (vertical_loss <= main_zone_vert))
+        *radio_zone |= _RADIO_ZONE_MAIN_BEAM_ON_;
+    //
+    // check if this point is within the secondary main antenna beam, i.e. 
+    // a larger main antenna beam not including the main one (only the difference)
+    //
+    else if ((horizontal_loss <= sec_zone_horiz) && (vertical_loss <= sec_zone_vert))
+        *radio_zone |= _RADIO_ZONE_SECONDARY_BEAM_ON_;
+
     //
     // finally take into account pathloss for determined diagram angles and antenna gain 
     //
-    return (float)((double)path_loss + horizontal_loss + vertical_loss - diagram->gain);
+    *antenna_loss = horizontal_loss + vertical_loss - diagram->gain;
 }
-
-
-
-/**
- * Unrolled-loop CPU version of the antenna influence algorithm.
- * For a description of the parameters used, see the function
- * 'calculate_antenna_influence'.
- *
- * null_value   The value representing NULL on the output map.-
- *
- *
-static void 
-antenna_influence_unrolled (const double east,
-                            const double north,
-                            const double total_height,
-                            const int beam_dir,
-                            const int mech_tilt,
-                            const double radius,
-                            const double rec_height,
-                            const int nrows,
-                            const int ncols,
-                            const double west_ext,
-                            const double north_ext,
-                            const double ew_res,
-                            const double ns_res,
-                            const float null_value,
-                            double **dem,
-                            double **path_loss)
-{
-    int r, c;
-
-    //
-    // unroll the loops to improve the number of flops per memory transfer
-    //
-    // this version measures ~292 MFlops and ~341 MB/s
-    //
-    for (r = 0; r < (nrows - 1) / 2; r ++)
-    {
-        // calculate receiver coordinates
-        double rec_north [4];
-
-        rec_north[0] = north_ext - ((2*r) * ns_res);
-        rec_north[1] = rec_north[0];
-        rec_north[2] = north_ext - ((2*r + 1) * ns_res);
-        rec_north[3] = rec_north[2];
-
-        // calculate differences between receiver and transmitter coordinates
-        double d_north [4], d_north_square [4];
-
-        d_north[0]  = (rec_north[0] - north);
-        d_north[1]  = (rec_north[1] - north);
-        d_north[2]  = (rec_north[2] - north);
-        d_north[3]  = (rec_north[3] - north);
-        d_north_square[0] = d_north[0] * d_north[0];
-        d_north_square[1] = d_north[1] * d_north[1];
-        d_north_square[2] = d_north[2] * d_north[2];
-        d_north_square[3] = d_north[3] * d_north[3];
-
-        for (c = 0; c < (ncols - 1) / 2; c ++)
-        {
-            int i;
-            float f_in [4];
-            float f_in_dem [4]; 
-            float f_out [4];
-
-#ifdef _PERFORMANCE_METRICS_
-            memory_access (8, 8);
-#endif
-
-            f_in[0] = (float) path_loss[2*r][2*c];
-            f_in[1] = (float) path_loss[2*r][2*c + 1];
-            f_in[2] = (float) path_loss[2*r + 1][2*c];
-            f_in[3] = (float) path_loss[2*r + 1][2*c + 1];
-
-            f_in_dem[0] = (float) dem[2*r][2*c];
-            f_in_dem[1] = (float) dem[2*r][2*c + 1];
-            f_in_dem[2] = (float) dem[2*r + 1][2*c];
-            f_in_dem[3] = (float) dem[2*r + 1][2*c + 1];
-
-            f_out[0] = null_value;
-            f_out[1] = null_value;
-            f_out[2] = null_value;
-            f_out[3] = null_value;
-
-            // calculate receiver coordinates
-            double rec_east [4];
-
-            rec_east[0] = west_ext + ((2*c) * ew_res);
-            rec_east[1] = west_ext + ((2*c + 1) * ew_res);
-            rec_east[2] = rec_east[0];
-            rec_east[3] = rec_east[1];
-
-            for (i = 0; i < 4; i ++)
-            {
-                // calculate distance between receiver and transmitter
-                double d_east = rec_east[i] - east;
-                double d_east_square = d_east * d_east;
-                
-                // calculate distance between Tx and Rx in kilometers
-                double dist_Tx_Rx = sqrt (d_east_square + d_north_square[i]);
-                dist_Tx_Rx /= 1000.0;
-
-                // process this point iif its distance to the Tx falls within
-                // the given radius
-                if (dist_Tx_Rx <= radius)
-                {   
-                    f_out[i] = antenna_influence_on_point (d_east,
-                                                           d_north[i],
-                                                           total_height,
-                                                           beam_dir,
-                                                           mech_tilt,
-                                                           f_in_dem[i],
-                                                           rec_height,
-                                                           dist_Tx_Rx,
-                                                           f_in[i],
-                                                           diagram);
-                }
-            }
-            // 
-            // save the result in the output matrix
-            //
-            path_loss[2*r][2*c]         = f_out[0];
-            path_loss[2*r][2*c + 1]     = f_out[1];
-            path_loss[2*r + 1][2*c]     = f_out[2];
-            path_loss[2*r + 1][2*c + 1] = f_out[3];
-        }
-    }
-    //
-    // the last row, for all the columns
-    //
-    r = nrows - 1;
-
-    // calculate receiver coordinates
-    double rec_north = north_ext - (r * ns_res);
-
-    // calculate differences between receiver and transmitter coordinates
-    double d_north = rec_north - north;
-    double d_north_square = d_north * d_north;
-
-    for (c = 0; c < ncols; c ++)
-    {
-        float f_in;
-        float f_in_dem; 
-        float f_out;
-
-#ifdef _PERFORMANCE_METRICS_
-        memory_access (2, 8);
-#endif
-
-        f_in = (float) path_loss[r][c];
-
-        f_in_dem = (float) dem[r][c];
-
-        f_out = null_value;
-
-        // calculate receiver coordinates
-        double rec_east = west_ext + (c * ew_res);
-
-        // calculate distance between receiver and transmitter coordinates
-        double d_east = rec_east - east;
-        double d_east_square = d_east * d_east;
-        
-        // calculate distance between Tx and Rx in kilometers
-        double dist_Tx_Rx = sqrt (d_east_square + d_north_square);
-        dist_Tx_Rx /= 1000.0;
-
-        // process this point iif its distance to the Tx falls within
-        // the given radius
-        if (dist_Tx_Rx <= radius)
-        {    
-            f_out = antenna_influence_on_point (d_east,
-                                                d_north,
-                                                total_height,
-                                                beam_dir,
-                                                mech_tilt,
-                                                f_in_dem,
-                                                rec_height,
-                                                dist_Tx_Rx,
-                                                f_in,
-                                                diagram);
-        }
-        // 
-        // save the result in the output matrix
-        //
-        path_loss[r][c] = f_out;
-    }
-    //
-    // the last column, for all the rows
-    //
-    c = ncols - 1;
-
-    for (r = 0; r < nrows; r ++)
-    { 
-        // calculate receiver coordinates
-        double rec_north = north_ext - (r * ns_res);
-
-        // calculate differences between receiver and transmitter coordinates
-        double d_north = rec_north - north;
-        double d_north_square = d_north * d_north;
-
-        float f_in;
-        float f_in_dem; 
-        float f_out;
-
-#ifdef _PERFORMANCE_METRICS_
-        memory_access (2, 8);
-#endif
-        f_in = (float) path_loss[r][c];
-
-        f_in_dem = (float) dem[r][c];
-
-        f_out = null_value;
-
-        // calculate receiver coordinates
-        double rec_east = west_ext + (c * ew_res);
-
-        // calculate distance between receiver and transmitter coordinates
-        double d_east = rec_east - east;
-        double d_east_square = d_east * d_east;
-        
-        // calculate distance between Tx and Rx in kilometers
-        double dist_Tx_Rx = sqrt (d_east_square + d_north_square);
-        dist_Tx_Rx /= 1000.0;
-       
-        // process this point iif its distance to the Tx falls within
-        // the given radius
-        if (dist_Tx_Rx <= radius)
-        {    
-            f_out = antenna_influence_on_point (d_east,
-                                                d_north,
-                                                total_height,
-                                                beam_dir,
-                                                mech_tilt,
-                                                f_in_dem,
-                                                rec_height,
-                                                dist_Tx_Rx,
-                                                f_in,
-                                                diagram);
-        }
-        // 
-        // save the result in the output matrix
-        //
-        path_loss[r][c] = f_out;
-    }
-}
-*
-*/
 
 
 
 /**
  * Standard CPU version of the antenna influence algorithm.
  * For a description of the parameters used, see the function
- * 'calculate_antenna_influence'.
- *
- * params       a structure holding configuration parameters which are 
- *              common to all transmitters;
- * tx_params    a structure holding transmitter-specific configuration
- *              parameters.-
+ * 'calculate_antenna_influence'.-
  *
  */
 static void 
@@ -535,8 +312,14 @@ antenna_influence_cpu (const double tx_east_coord,
                        const double map_ew_res,  
                        const double map_ns_res,  
                        const float  null_value,
+                       const int main_zone_horiz,
+                       const int main_zone_vert,
+                       const int sec_zone_horiz,
+                       const int sec_zone_vert,
                        double **m_dem,          
-                       double **m_loss)
+                       double **m_loss,
+                       char   **m_radio_zone,
+                       double **m_antenna_loss)
 {
     int r, c;
 
@@ -545,7 +328,7 @@ antenna_influence_cpu (const double tx_east_coord,
     // 
     for (r = 0; r < nrows; r++) 
     {
-        float f_in, f_out, f_in_dem; 
+        float loss_out, dem_in; 
 
         // calculate receiver coordinates
         double rec_north = map_north - (r * map_ns_res);
@@ -561,8 +344,7 @@ antenna_influence_cpu (const double tx_east_coord,
 #ifdef _PERFORMANCE_METRICS_
             memory_access (2, 8);
 #endif
-            f_in = (float) m_loss[r][c];
-            f_in_dem = (float) m_dem[r][c];
+            dem_in = (float) m_dem[r][c];
 
             // calculate receiver coordinates
             double rec_east = map_west + (c * map_ew_res);
@@ -570,29 +352,44 @@ antenna_influence_cpu (const double tx_east_coord,
             // calculate differences between receiver and transmitter coordinates
             double d_east = rec_east - tx_east_coord;
             
-            // calculate distance between Tx and Rx
+            // calculate distance between Tx and Rx (in kilometers)
             double dist_Tx_Rx = sqrt (pow (d_east, 2) + 
                                       pow (d_north, 2));
-            dist_Tx_Rx = dist_Tx_Rx / 1000;
-        
-            // ignore pixels exceeding radius distance between Rx and Tx
-            if (dist_Tx_Rx > radius)
-                f_out = null_value;
-            else
-                f_out = antenna_influence_on_point (d_east,
-                                                    d_north,
-                                                    total_tx_height,
-                                                    beam_direction,
-                                                    mechanical_tilt,
-                                                    f_in_dem,
-                                                    rx_height_AGL,
-                                                    dist_Tx_Rx,
-                                                    f_in,
-                                                    diagram);
+            dist_Tx_Rx /= 1000;
+       
+            //
+            // ignore pixels exceeding radius distance between Rx and Tx or
+            // if they are too close (less than 200 mts)
+            // 
+            if ((dist_Tx_Rx < 0.2) || (dist_Tx_Rx > radius))
+            {
+                loss_out            = null_value;
+                m_radio_zone[r][c] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
+            }
+            else 
+            {
+                m_radio_zone[r][c] |= _RADIO_ZONE_MODEL_DISTANCE_ON_;
+                antenna_influence_on_point (d_east,
+                                            d_north,
+                                            total_tx_height,
+                                            beam_direction,
+                                            mechanical_tilt,
+                                            dem_in,
+                                            rx_height_AGL,
+                                            dist_Tx_Rx,
+                                            diagram,
+                                            main_zone_horiz,
+                                            main_zone_vert,
+                                            sec_zone_horiz,
+                                            sec_zone_vert,
+                                            &(m_radio_zone[r][c]),
+                                            &(m_antenna_loss[r][c]));
+                loss_out = (float) (m_loss[r][c] + m_antenna_loss[r][c]);
+            }
             // 
             // save the result in the output matrix
             //
-            m_loss[r][c] = (double) f_out;
+            m_loss[r][c] = (double) loss_out;
         }
     }
 }
@@ -606,10 +403,6 @@ antenna_influence_cpu (const double tx_east_coord,
  * For a description of the parameters used, see the function
  * 'calculate_antenna_influence'.
  *
- * params       a structure holding configuration parameters which are 
- *              common to all transmitters;
- * tx_params    a structure holding transmitter-specific configuration
- *              parameters.-
  */
 static void 
 antenna_influence_gpu (const double tx_east_coord,
@@ -802,12 +595,46 @@ antenna_influence_gpu (const double tx_east_coord,
  * Calculates additional gain/pathloss according to the antenna's
  * 3-dimensional diagram.
  *
- * params           a structure holding configuration parameters which are 
- *                  common to all transmitters;
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters.-
+ * use_gpu              A flag indicating whether to use GPU hardware;
+ * tx_east_coord        eastern coordinate of the transmitter;
+ * tx_north_coord       northern coordinate of the transmitter;
+ * antenna_height_AGL   height of the transmitter above ground level;
+ * total_tx_height      height of the transmitter above sea level;
+ * beam_direction       direction of the antenna beam, ie azimuth, in degrees;
+ * mechanical_tilt      mechanical antenna tilt angle, in degress;
+ * frequency            transmitter frequency, in Mhz;
+ * radius               calculation radius around the given transmitter, in km;
+ * rx_height_AGL        receiver's height above ground level;
+ * nrows                number of rows within the 2D-matrices;
+ * ncols                number of columns within the 2D-matrices;
+ * map_west             western coordinate of the given maps, ie matrices;
+ * map_north            northern coordinate of the given maps, ie matrices;
+ * map_ew_res           east/west map resolution;
+ * map_ns_res           north/south map resolution;
+ * null_value           value representing NULL data on a map;
+ * antenna_diagram_dir  directory containing the files describing the antenna
+ *                      diagrams;
+ * antenna_diagram_file file containing the antenna diagram description;
+ * main_zone_horiz      indicates the horizontal loss that defines the main
+ *                      antenna beam;
+ * main_zone_vert       indicates the vertical loss that defines the main
+ *                      antenna beam;
+ * sec_zone_horiz       indicates the horizontal loss that defines the secondary
+ *                      antenna beam;
+ * sec_zone_vert        indicates the vertical loss that defines the secondary
+ *                      antenna beam;
+ * gpu_params           parameters for GPU-based execution;
+ * m_dem                a 2D-matrix containing the digital elevation model;
+ * m_loss               a 2D-matrix containing the path-loss values from the
+ *                      isotrophic prediction (output parameter);
+ * m_radio_zone         a 2D-matrix containing bit masks that indicate the
+ *                      radio zone to which each point belongs 
+ *                      (output parameter);
+ * m_antenna_loss       a 2D-matrix containing the loss, introduced by the 
+ *                      antenna, on every point (output parameter);
  *
- * WARNING: the output of this function overwrites the path-loss matrix!
+ * WARNING: the output of this function overwrites 
+ *          `m_loss`, `m_radio_zone` and `m_antenna_loss`
  *
  */
 void
@@ -830,9 +657,15 @@ calculate_antenna_influence (const char use_gpu,
                              const float  null_value,
                              const char *antenna_diagram_dir,
                              const char *antenna_diagram_file,
+                             const int main_zone_horiz,
+                             const int main_zone_vert,
+                             const int sec_zone_horiz,
+                             const int sec_zone_vert,
                              GPU_parameters *gpu_params,
                              double **m_dem,          
-                             double **m_loss)
+                             double **m_loss,
+                             char   **m_radio_zone,
+                             double **m_antenna_loss)
 {
     //
     // do we have to load the antenna diagram?
@@ -909,8 +742,14 @@ calculate_antenna_influence (const char use_gpu,
                                map_ew_res,  
                                map_ns_res,  
                                null_value,
+                               main_zone_horiz,
+                               main_zone_vert,
+                               sec_zone_horiz,
+                               sec_zone_vert,
                                m_dem,          
-                               m_loss);
+                               m_loss,
+                               m_radio_zone,
+                               m_antenna_loss);
     /*
      * DEBUG memory
      *
