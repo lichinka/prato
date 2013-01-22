@@ -13,6 +13,97 @@
 
 
 /**
+ * Loads the field-measurements array from a raster map.
+ *
+ * mapname     the full name of the raster map from which the matrix
+ *              should be loaded;
+ * field_meas   a 2D-matrix where the loaded data are saved.-
+ */
+void 
+load_field_measurements_from_map (const char *mapname,
+                                  double **field_meas)
+{
+    int row, col, infd, errno;
+    char *mapset;
+ 
+    //
+    // NULL if the map was not found in any mapset
+    //
+    mapset = G_find_cell2 (mapname, "");
+    if (mapset == NULL)
+        G_fatal_error ("Field measurements raster map <%s> not found", 
+                       mapname);
+    //
+    // open raster map
+    //
+    if ((infd = G_open_cell_old (mapname, mapset)) < 0)
+        G_fatal_error ("Unable to open raster map <%s>", 
+                       mapname);
+    //
+    // read map metadata, making sure it matches the current region
+    //
+    struct Cell_head *metadata = (struct Cell_head *) malloc (sizeof (struct Cell_head));
+    struct Cell_head *window   = (struct Cell_head *) malloc (sizeof (struct Cell_head));
+
+	G_get_window (window);
+    errno = G_get_cellhd (mapname,
+                          mapset,
+                          metadata);
+    if (errno == 0)
+    {
+        //
+        // compare map metadata with current region
+        //
+        if ((window->east != metadata->east) ||
+            (window->west != metadata->west) ||
+            (window->north != metadata->north) ||
+            (window->south != metadata->south) ||
+            (window->ew_res != metadata->ew_res) ||
+            (window->ns_res != metadata->ns_res))
+            fprintf (stderr, 
+                     "*** WARNING: Metadata of field measurements map does not match with DEM.\n");
+        else
+        {
+            //
+            // allocate the reading buffer for DEM 
+            //
+            void *inrast = G_allocate_raster_buf (FCELL_TYPE);
+
+            //
+            // read field measurements into the 2D matrix
+            //
+            for (row = 0; row < metadata->rows; row ++) 
+            {	
+                if (G_get_raster_row (infd, inrast, row, FCELL_TYPE) < 0)
+                    G_fatal_error ("Unable to read raster map <%s> row %d", 
+                                   mapname, 
+                                   row);
+                for (col = 0; col < metadata->cols; col ++) 
+                { 
+                    FCELL f_in = ((FCELL *) inrast)[col];
+                    field_meas[row][col] = (double) f_in;
+                }
+            }
+            //
+            // deallocate reading buffer
+            //
+            G_free (inrast);
+        }
+    }
+    else
+        G_fatal_error ("Unable to open raster map <%s>", 
+                       mapname);
+    //
+    // deallocate memory elements
+    //
+    free (window);
+    free (metadata);
+    G_close_cell (infd);
+}
+
+
+
+/**
  * Loads the field-measurements array from a binary file on disk.
  * The first 96 bits contain the: size of an element (in bytes),
  * number of rows of the matrix, and number of columns of the 

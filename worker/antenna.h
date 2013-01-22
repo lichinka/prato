@@ -37,16 +37,49 @@ typedef struct Diagram Diagram;
 
 static Diagram *diagram = NULL;
 
+
+
 /**
  * Calculates additional gain/pathloss according to the antenna's
  * 3-dimensional diagram.
  *
- * params           a structure holding configuration parameters which are 
- *                  common to all transmitters;
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters.-
+ * use_gpu              A flag indicating whether to use GPU hardware;
+ * tx_east_coord        eastern coordinate of the transmitter;
+ * tx_north_coord       northern coordinate of the transmitter;
+ * antenna_height_AGL   height of the transmitter above ground level;
+ * total_tx_height      height of the transmitter above sea level;
+ * beam_direction       direction of the antenna beam, ie azimuth, in degrees;
+ * mechanical_tilt      mechanical antenna tilt angle, in degress;
+ * frequency            transmitter frequency, in Mhz;
+ * radius               calculation radius around the given transmitter, in km;
+ * rx_height_AGL        receiver's height above ground level;
+ * nrows                number of rows within the 2D-matrices;
+ * ncols                number of columns within the 2D-matrices;
+ * map_west             western coordinate of the given maps, ie matrices;
+ * map_north            northern coordinate of the given maps, ie matrices;
+ * map_ew_res           east/west map resolution;
+ * map_ns_res           north/south map resolution;
+ * null_value           value representing NULL data on a map;
+ * antenna_diagram_dir  directory containing the files describing the antenna
+ *                      diagrams;
+ * antenna_diagram_file file containing the antenna diagram description;
+ * main_zone_horiz      indicates the horizontal loss that defines the main
+ *                      antenna beam;
+ * main_zone_vert       indicates the vertical loss that defines the main
+ *                      antenna beam;
+ * sec_zone_horiz       indicates the horizontal loss that defines the secondary
+ *                      antenna beam;
+ * sec_zone_vert        indicates the vertical loss that defines the secondary
+ *                      antenna beam;
+ * gpu_params           parameters for GPU-based execution;
+ * m_dem                a 2D-matrix containing the digital elevation model;
+ * m_loss               a 2D-matrix containing the path-loss values from the
+ *                      isotrophic prediction (output parameter);
+ * m_radio_zone         a 2D-matrix containing bit masks that indicate the
+ *                      radio zone to which each point belongs (output
+ *                      parameter);
  *
- * WARNING: the output of this function overwrites the path-loss matrix!
+ * WARNING: the output of this function overwrites `m_loss` and `m_radio_zone`!
  *
  */
 void
@@ -69,8 +102,13 @@ calculate_antenna_influence (const char use_gpu,
                              const float  null_value,
                              const char *antenna_diagram_dir,
                              const char *antenna_diagram_file,
+                             const int main_zone_horiz,
+                             const int main_zone_vert,
+                             const int sec_zone_horiz,
+                             const int sec_zone_vert,
                              GPU_parameters *gpu_params,
                              double **m_dem,          
-                             double **m_loss);
+                             double **m_loss,
+                             char   **m_radio_zone);
 
 #endif

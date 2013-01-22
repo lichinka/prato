@@ -1,5 +1,5 @@
 #include <performance_metric.h>
-
+#include "measurement.h"
 #include "worker/coverage.h"
 
 
@@ -39,6 +39,15 @@ distribute_common_data (Parameters *params,
                MPI_DOUBLE,
                _COVERAGE_MASTER_RANK_,
                comm);
+    //
+    // broadcast flag indicating the execution mode, e.g.
+    // coverage prediction or optimization.
+    //
+    MPI_Bcast (&(params->use_opt),
+               1,
+               MPI_BYTE,
+               _COVERAGE_MASTER_RANK_,
+               comm);
 }
 
 
@@ -46,13 +55,16 @@ distribute_common_data (Parameters *params,
 /**
  * Sends transmitter input data to the specified worker.
  *
- * tx_params    A structure holding transmitter-specific parameters;
+ *
+ * params       A structure holding all parameters needed for calculation;
+ * tx_params    a structure holding transmitter-specific parameters;
  * comm         the communicator used to communicate with the worker;
  * worker_rank  the target worker.-
  *
  */
 static void 
-send_tx_data (Tx_parameters *tx_params,
+send_tx_data (Parameters *params,
+              Tx_parameters *tx_params,
               MPI_Comm comm,
               int worker_rank)
 {
@@ -65,6 +77,18 @@ send_tx_data (Tx_parameters *tx_params,
               worker_rank,
               1,
               comm);
+    //
+    // also send the field measurements matrix if in optimization mode
+    //
+    if (params->use_opt)
+    {
+        MPI_Send (tx_params->m_field_meas[0],
+                  params->nrows * params->ncols,
+                  MPI_DOUBLE,
+                  worker_rank,
+                  1,
+                  comm);
+    }
 }
 
 
@@ -130,7 +154,8 @@ static int spawn_workers (Parameters *params,
 
     if (nworkers < params->ntx)
     {
-        fprintf (stderr, "WARNING There are not enough slots to process all transmitters in parallel\n");
+        fprintf (stderr, 
+                 "*** WARNING There are not enough slots to process all transmitters in parallel\n");
     }
     else if (nworkers > params->ntx)
     {
@@ -196,9 +221,10 @@ static int spawn_workers (Parameters *params,
                              worker_errcodes);
     for (i = 0; i < nworkers; i ++)
         if (worker_errcodes[i] != 0)
-            fprintf (stderr, "WARNING Worker %d. returned with exit code %d\n", i,
-                                                                                worker_errcodes[i]);
-
+            fprintf (stderr, 
+                     "*** WARNING Worker %d. returned with exit code %d\n", 
+                     i,
+                     worker_errcodes[i]);
     //
     // deallocate memory
     //
@@ -296,10 +322,38 @@ init_coverage_for_tx (FILE          *ini_file,
     // check if transmitter is on DEM
     //
     if (isnan ((double) trans_elev))							
-        G_fatal_error ("Transmitter outside raster DEM map.");
+        G_fatal_error ("Transmitter outside DEM raster map.");
 
     tx_params->total_tx_height = (double) trans_elev + tx_params->antenna_height_AGL;
-   
+  
+    //
+    // if running in optimization mode, load the measurements of this Tx
+    //
+    if (params->use_opt)
+    {
+        //
+        // allocate memory for the field-measurement matrix
+        //
+        if (tx_params->m_field_meas == NULL)
+        {
+            int i;
+            double *m_field_meas_data = (double *) calloc (params->nrows * params->ncols,
+                                                     sizeof (double));
+            tx_params->m_field_meas = (double **) calloc (params->nrows, 
+                                                 sizeof (double *));
+            for (i = 0; i < params->nrows; i ++)
+                tx_params->m_field_meas[i] = &(m_field_meas_data[i * params->ncols]);
+        }
+        else
+            fprintf (stderr, 
+                     "*** WARNING: Not initializing field measurements matrix\n");
+
+        load_field_measurements_from_map (tx_params->field_meas_map,
+                                          tx_params->m_field_meas);
+    }
+    else
+        fprintf (stdout, "*** INFO: Not loading transmitter measurements in coverage prediction mode\n");
+
     //
     // free the read buffer for DEM data
     //
@@ -374,12 +428,11 @@ init_coverage (FILE       *ini_file,
     int i, errno;
 
     //
-    // initialize some pointers inside the Parameters structure
+    // initialize matrix pointers inside the Parameters structure
     //
     params->m_dem        = NULL;
     params->m_clut       = NULL;
     params->m_loss       = NULL;
-    params->m_field_meas = NULL;
 
     //
     // GPU-specific parameters are kept here
@@ -601,6 +654,7 @@ init_coverage (FILE       *ini_file,
                                                   sizeof (Tx_parameters));
     for (i = 0; i < params->ntx; i ++)
     {
+        params->tx_params[i].m_field_meas = NULL;
         init_coverage_for_tx (ini_file,
                               tx_sections[i],
                               params,
@@ -652,18 +706,6 @@ void coverage_mpi (int argc,
     //
     nworkers -= 1;
 
-    /*
-    // The spawning of worker processes is no longer done dynamically
-    //
-    measure_time ("Dynamic process spawning");
-    nworkers = spawn_workers (params, &worker_comm);
-    if (nworkers < 1)
-    {
-        fprintf (stderr, "ERROR Could not start any worker processes\n");
-        exit (1);
-    }
-    measure_time (NULL);*/
-
     //
     // sync point: pass common input data to all workers
     //
@@ -695,7 +737,7 @@ void coverage_mpi (int argc,
                   &status);
         worker_rank = status.MPI_SOURCE;
         //
-        // coverage calculation and result dump finished
+        // previous coverage calculation and result dump finished
         //
         measure_time_id (NULL, worker_rank);
 
@@ -721,14 +763,17 @@ void coverage_mpi (int argc,
                     //
                     measure_time_id ("Transmitter data send", 
                                      worker_rank);
-                    send_tx_data (&(params->tx_params[-- tx_count]),
+                    send_tx_data (params,
+                                  &(params->tx_params[-- tx_count]),
                                   worker_comm,
                                   worker_rank);
                     //
                     // transmitter-data send finished,
+                    //
+                    measure_time_id (NULL, worker_rank);
+                    //
                     // start coverage calculation
                     // 
-                    measure_time_id (NULL, worker_rank);
                     measure_time_id ("Calculation and result dump",
                                      worker_rank);
                 }

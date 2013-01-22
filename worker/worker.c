@@ -11,8 +11,9 @@
  * comm     the MPI communicator to use.-
  *
  */
-static void receive_common_data (Parameters *params,
-                                 MPI_Comm *comm)
+static void 
+receive_common_data (Parameters *params,
+                     MPI_Comm comm)
 {
     int i;
 
@@ -23,13 +24,18 @@ static void receive_common_data (Parameters *params,
                sizeof (Parameters),
                MPI_BYTE,
                _COVERAGE_MASTER_RANK_,
-               *comm);
+               comm);
     //
     // the worker doesn't parse the INI file content, it
     // receives the relevant parts from master
     //
     params->ini_file_content = NULL;
     params->ini_file_content_size = -1;
+
+    //
+    // optimization mode is off by default
+    //
+    params->use_opt = 0;
 
     //
     // allocate memory for the output Path-loss array
@@ -55,7 +61,7 @@ static void receive_common_data (Parameters *params,
                params->nrows * params->ncols,
                MPI_DOUBLE,
                _COVERAGE_MASTER_RANK_,
-               *comm);
+               comm);
     //
     // receive the broadcasted the Clutter array content
     //
@@ -70,7 +76,20 @@ static void receive_common_data (Parameters *params,
                params->nrows * params->ncols,
                MPI_DOUBLE,
                _COVERAGE_MASTER_RANK_,
-               *comm);
+               comm);
+    //
+    // receive flag indicating whether to run in 
+    // optimization mode
+    //
+    MPI_Bcast (&(params->use_opt),
+               1,
+               MPI_BYTE,
+               _COVERAGE_MASTER_RANK_,
+               comm);
+    if (params->use_opt)
+        fprintf (stdout, "*** INFO: Optimization mode enabled\n");
+    else
+        fprintf (stdout, "*** INFO: Coverage prediction mode enabled\n");
 }
 
 
@@ -83,8 +102,9 @@ static void receive_common_data (Parameters *params,
  * comm     the MPI communicator to use.-
  *
  */
-static void receive_tx_data (Parameters *params,
-                             MPI_Comm *comm)
+static void 
+receive_tx_data (Parameters *params,
+                 MPI_Comm comm)
 {
     MPI_Status status;
 
@@ -99,8 +119,46 @@ static void receive_tx_data (Parameters *params,
               MPI_BYTE,
               _COVERAGE_MASTER_RANK_,
               MPI_ANY_TAG,
-              *comm,
+              comm,
               &status);
+    //
+    // also receive the field measurements matrix if in optimization mode
+    //
+    if (params->use_opt)
+    {
+        //
+        // allocate memory for the radio-zone matrix
+        //
+        int i;
+        char *m_radio_zone_data = (char *) calloc (params->nrows * params->ncols,
+                                                   sizeof (char));
+        params->tx_params->m_radio_zone = (char **) calloc (params->nrows, 
+                                                            sizeof (char *));
+        for (i = 0; i < params->nrows; i ++)
+            params->tx_params->m_radio_zone[i] = &(m_radio_zone_data[i * params->ncols]);
+
+        //
+        // allocate memory for the field-measurement matrix
+        //
+        double *m_field_meas_data = (double *) calloc (params->nrows * params->ncols,
+                                                 sizeof (double));
+        params->tx_params->m_field_meas = (double **) calloc (params->nrows, 
+                                             sizeof (double *));
+        for (i = 0; i < params->nrows; i ++)
+            params->tx_params->m_field_meas[i] = &(m_field_meas_data[i * params->ncols]);
+        //
+        // now receive the data from master
+        //
+        MPI_Recv (params->tx_params->m_field_meas[0],
+                  params->nrows * params->ncols,
+                  MPI_DOUBLE,
+                  _COVERAGE_MASTER_RANK_,
+                  MPI_ANY_TAG,
+                  comm,
+                  &status);
+        if (status.MPI_ERROR)
+            fprintf (stderr, "*** ERROR: Incorrect receive of field measurements data\n");
+    }
 }
 
 
@@ -124,17 +182,16 @@ void worker (const int rank,
     // sync point: receive common input data from master
     //
     MPI_Barrier (comm);
-    receive_common_data (params, &comm);
+    receive_common_data (params, comm);
     params->tx_params = NULL;
 
     //
-    // sync point: common data passing finished, 
-    // starting coverage processing
+    // sync point: common data distribution finished 
     //
     MPI_Barrier (comm);
 
     //
-    // start processing loop
+    // start coverage-processing loop
     //
     has_finished = 0;
     while (!has_finished)
@@ -166,7 +223,7 @@ void worker (const int rank,
             //
             // receive data for processing the next transmitter
             //
-            receive_tx_data (params, &comm);
+            receive_tx_data (params, comm);
             //
             // calculate coverage for the received transmitter
             //
@@ -185,6 +242,13 @@ void worker (const int rank,
     //
     // deallocate memory before exiting
     //
+    if (params->use_opt)
+    {
+        free (&(params->tx_params->m_radio_zone[0][0]));
+        free (params->tx_params->m_radio_zone);
+        free (&(params->tx_params->m_field_meas[0][0]));
+        free (params->tx_params->m_field_meas);
+    }
     free (params->tx_params);
     free (&(params->m_clut[0][0]));
     free (params->m_clut);

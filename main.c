@@ -43,7 +43,7 @@ int main (int argc, char *argv [])
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output;
-    struct Flag    *use_mpi, *use_gpu;
+    struct Flag    *use_mpi, *use_gpu, *use_opt;
 
     //
     // initialize the GIS environment
@@ -86,6 +86,10 @@ int main (int argc, char *argv [])
     use_gpu->key = 'g';
     use_gpu->description = "Whether to use the GPU implementation";
 
+    use_opt = G_define_flag ( );
+    use_opt->key = 't';
+    use_opt->description = "Whether to start the framework in optimization mode. Implies -p.";
+
     //
     // ... and parse them
     //
@@ -95,12 +99,31 @@ int main (int argc, char *argv [])
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("Read input data");
 #endif
+    //
+    // allocate the parameters structure
+    //
+    Parameters *params = (Parameters *) malloc (sizeof (Parameters));
+
+    //
+    // flags for GPU implementations and optimization mode
+    //
+    params->use_gpu = use_gpu->answer;
+    params->use_opt = use_opt->answer;
+
+    if (params->use_opt)
+    {
+        use_mpi->answer = 1;
+        if (params->use_gpu)
+            G_fatal_error ("Sorry, GPU is not supported in optimization mode");
+        else
+            fprintf (stdout, "*** INFO: Optimization mode enabled\n");
+
+    }
 
     //
     // read the whole configuration INI file into memory
     //
-    char *content = (char *) malloc (1024 * 1024, sizeof (char));
-    Parameters *params = (Parameters *) malloc (sizeof (Parameters));
+    char *content = (char *) calloc (1024 * 1024, sizeof (char));
     params->ini_file_content_size = read_file_into_memory (ini_file->answer,
                                                            content);
     params->ini_file_content = (char *) malloc (params->ini_file_content_size);
@@ -122,11 +145,6 @@ int main (int argc, char *argv [])
     //
     free (content);
     fclose (ini_file_stream);
-
-    //
-    // flag to turn the GPU implementations on/off
-    //
-    params->use_gpu = use_gpu->answer;
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
@@ -169,7 +187,7 @@ int main (int argc, char *argv [])
             // controlling, if we can write the raster 
             if ((outfd = G_open_raster_new (output->answer, FCELL_TYPE)) < 0)
                 G_fatal_error ("Unable to create raster map <%s>", 
-			       output->answer);
+			                   output->answer);
 
             for (row = 0; row < params->nrows; row++)
             {
@@ -185,7 +203,7 @@ int main (int argc, char *argv [])
                 // write raster row to output raster map
                 if (G_put_raster_row (outfd, outrast, FCELL_TYPE) < 0)
                     G_fatal_error ("Failed writing raster map <%s>", 
-				   output->answer);
+				                   output->answer);
             }
             G_close_cell (outfd);
             G_free (outrast);
@@ -194,6 +212,15 @@ int main (int argc, char *argv [])
     //
     // deallocate memory before exiting
     //
+    if (params->use_opt)
+    {
+        int i;
+        for (i = 0; i < params->ntx; i ++)
+        {
+            free (&(params->tx_params[i].m_field_meas[0][0]));
+            free (params->tx_params[i].m_field_meas);
+        }
+    }
     free (params->tx_params);
     free (params->ini_file_content);
     free (&(params->m_loss[0][0]));

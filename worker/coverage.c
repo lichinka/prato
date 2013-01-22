@@ -81,6 +81,15 @@ coverage (const Parameters     *params,
                                                sizeof (double *));
     for (r = 0; r < diameter_in_pixels; r ++)
         mini_m_loss[r] = &(mini_m_loss_data[r * diameter_in_pixels]);
+    //
+    // radio zones
+    //
+    char *mini_m_radio_zone_data = (char *) calloc (diameter_in_pixels * diameter_in_pixels, 
+                                                    sizeof (char));
+    char **mini_m_radio_zone = (char **) calloc (diameter_in_pixels,
+                                                 sizeof (char *));
+    for (r = 0; r < diameter_in_pixels; r ++)
+        mini_m_radio_zone[r] = &(mini_m_radio_zone_data[r * diameter_in_pixels]);
   
     //
     // copy data from the big matrices to the mini ones
@@ -95,9 +104,10 @@ coverage (const Parameters     *params,
             {
                 if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
                 {
-                    mini_m_dem[mini_r][mini_c]  = params->m_dem[r][c];
-                    mini_m_clut[mini_r][mini_c] = params->m_clut[r][c];
-                    mini_m_loss[mini_r][mini_c] = params->m_loss[r][c];
+                    mini_m_dem[mini_r][mini_c]        = params->m_dem[r][c];
+                    mini_m_clut[mini_r][mini_c]       = params->m_clut[r][c];
+                    mini_m_loss[mini_r][mini_c]       = params->m_loss[r][c];
+                    mini_m_radio_zone[mini_r][mini_c] = params->tx_params->m_radio_zone[r][c];
                     mini_c ++;
                 }
             }
@@ -207,16 +217,21 @@ coverage (const Parameters     *params,
                                  params->null_value,
                                  params->antenna_diagram_dir,
                                  tx_params->antenna_diagram_file, 
+                                 params->main_zone_horiz,
+                                 params->main_zone_vert,
+                                 params->sec_zone_horiz,
+                                 params->sec_zone_vert,
                                  params->gpu_params,
                                  mini_m_dem,          
-                                 mini_m_loss);
+                                 mini_m_loss,
+                                 mini_m_radio_zone);
 #ifdef _PERFORMANCE_METRICS_
     measure_flops ("Antenna", 0);
 #endif
 
     //
-    // copy the PathLoss mini matrix back into the big one;
-    // we ignore the other ones, because they are used only as input
+    // copy the path-loss and radio-zones mini matrices back into the big ones;
+    // we ignore the other ones, because they are only used as input
     //
     mini_r = 0;
     for (r = 0; r < params->nrows; r ++)
@@ -228,16 +243,17 @@ coverage (const Parameters     *params,
             {
                 if ((c > mini_west_border_idx) && (c <= mini_east_border_idx))
                 {
-                    params->m_loss[r][c] = mini_m_loss[mini_r][mini_c];
+                    params->m_loss[r][c]                  = mini_m_loss[mini_r][mini_c];
+                    params->tx_params->m_radio_zone[r][c] = mini_m_radio_zone[mini_r][mini_c];
                     mini_c ++;
                 }
                 else
                 {
                     //
-                    // this point is outside the mini matrix (i.e. calculation 
-                    // within radius), write null to it
+                    // this point is outside the calculation radius
                     //
-                    params->m_loss[r][c] = params->null_value;
+                    params->m_loss[r][c]                   = params->null_value;
+                    params->tx_params->m_radio_zone[r][c] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
                 }
             }
             mini_r ++;
@@ -245,12 +261,12 @@ coverage (const Parameters     *params,
         else
         {
             //
-            // this row is outside the mini matrix (i.e. calculation 
-            // within radius), write nulls to it
+            // this row is outside the calculation radius
             //
             for (c = 0; c < params->ncols; c ++)
             {
-                params->m_loss[r][c] = params->null_value;
+                params->m_loss[r][c]                   = params->null_value;
+                params->tx_params->m_radio_zone[r][c] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
             }
         }
     }
@@ -264,6 +280,8 @@ coverage (const Parameters     *params,
     free (mini_m_clut);
     free (mini_m_loss[0]);
     free (mini_m_loss);
+    free (mini_m_radio_zone[0]);
+    free (mini_m_radio_zone);
 
     /*
      * This part is only used when using this module as the objective
@@ -342,7 +360,7 @@ output_to_stdout (const Parameters *params,
              "TRUNCATE TABLE coverage_%s;\n",
              tx_params->tx_name);
     fprintf (stdout,
-             "\\COPY coverage_%s (east, north, pl) FROM STDIN WITH DELIMITER ' '\n",
+             "\\COPY coverage_%s (east, north, pl) FROM STDIN WITH DELIMITER '|'\n",
              tx_params->tx_name);
     //
     // output the data
@@ -351,15 +369,29 @@ output_to_stdout (const Parameters *params,
     {
         for (c = 0; c < params->ncols; c ++)
         {
-            float pl = (float) params->m_loss[r][c];
-            if ((!isnan (pl)) && (pl != params->null_value))
+            if (params->use_opt)
             {
+                char  rz = params->tx_params->m_radio_zone[r][c];
                 float east_coord  = params->map_west + c * params->map_ew_res;
                 float north_coord = params->map_north - r * params->map_ns_res;
+                if (rz)
+                    fprintf (stdout, "%.2f|%.2f|%02x\n", east_coord,
+                                                         north_coord,
+                                                         rz);
+            }
+            else
+            {
+                float pl = (float) params->m_loss[r][c];
 
-                fprintf (stdout, "%.2f %.2f %.5f\n", east_coord,
-                                                     north_coord,
-                                                     pl);
+                if ((!isnan (pl)) && (pl != params->null_value))
+                {
+                    float east_coord  = params->map_west + c * params->map_ew_res;
+                    float north_coord = params->map_north - r * params->map_ns_res;
+
+                    fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
+                                                         north_coord,
+                                                         pl);
+                }
             }
         }
     }
