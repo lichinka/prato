@@ -25,7 +25,6 @@ coverage (const Parameters     *params,
           const double         *eric_params, 
           const unsigned int   eric_params_len)
 {
-
     //
     // initialize the structure variables for Ericsson 9999 model
     //

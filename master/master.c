@@ -23,31 +23,6 @@ distribute_common_data (Parameters *params,
                MPI_BYTE,
                _COVERAGE_MASTER_RANK_,
                comm);
-    /*
-    // broadcast the DEM array content
-    // 
-    MPI_Bcast (params->m_dem[0],
-               params->nrows * params->ncols,
-               MPI_DOUBLE,
-               _COVERAGE_MASTER_RANK_,
-               comm);
-    //
-    // broadcast the Clutter array content
-    // 
-    MPI_Bcast (params->m_clut[0],
-               params->nrows * params->ncols,
-               MPI_DOUBLE,
-               _COVERAGE_MASTER_RANK_,
-               comm);
-    //
-    // broadcast flag indicating the execution mode, e.g.
-    // coverage prediction or optimization.
-    //
-    MPI_Bcast (&(params->use_opt),
-               1,
-               MPI_BYTE,
-               _COVERAGE_MASTER_RANK_,
-               comm);*/
 }
 
 

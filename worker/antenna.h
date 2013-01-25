@@ -114,5 +114,4 @@ calculate_antenna_influence (const char use_gpu,
                              double **m_loss,
                              char   **m_radio_zone,
                              double **m_antenna_loss);
-
 #endif
