@@ -38,21 +38,6 @@
 
 
 
-//
-// 2D area matrix where the obstacle heights are saved
-//
-static double **Obst_high = NULL;
-
-// 
-// 2D area matrix where the obstacle distances are saved
-//
-static double **Obst_dist = NULL;
-   
-//
-// 2D area matrix for some offsets of the line-of-sight calculation
-//
-static double **Offset = NULL;
-
 
 
 /**
@@ -274,8 +259,15 @@ static void calc_profile (double** Obst_high,
 
 
 
-static int DoProfile (double ResDist, 
-                      double** Raster, 
+/**
+ * Calculates line-of-sight vectors all around the transmitter.-
+ *
+ */
+static int DoProfile (double **Obst_high,
+                      double **Obst_dist,
+                      double **Offset,
+                      double ResDist, 
+                      double **Raster, 
                       double xBS, 
                       double yBS, 
                       double ZoTransBS, 
@@ -283,42 +275,18 @@ static int DoProfile (double ResDist,
                       int yN, 
                       double scale, 
                       double radius)
-
 {
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("Line-of-sight");
+#endif
 	double AZI;
-	int i, ix, iy;
+	int ix, iy;
 	double dx, dy;
 	
     //
     // LOS and obstacle height calculation is executed only once, 
     // because its results are constant throughout the optimization
     //
-    if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
-    {
-        // Obstacle height
-        double *Obst_high_data = (double *) calloc (xN * yN, 
-                                                    sizeof (double));
-        Obst_high = (double **) calloc (xN, 
-                                        sizeof (double *));
-        for (i = 0; i < xN; i ++)
-            Obst_high[i] = &(Obst_high_data[i * yN]);
-
-        // Obstacle distance 
-        double *Obst_dist_data = (double *) calloc (xN * yN,
-                                                    sizeof (double));
-        Obst_dist = (double **) calloc (xN, 
-                                        sizeof(double *));
-        for (i = 0; i < xN; i ++)
-            Obst_dist[i] = &(Obst_dist_data[i * yN]);
-    
-        // do_profile offset 
-        double *Offset_data = (double *) calloc (xN * yN,
-                                                 sizeof (double));
-        Offset = (double **) calloc (xN, 
-                                     sizeof(double *));
-        for (i = 0; i < xN; i ++)
-            Offset[i] = &(Offset_data[i * yN]);
-    }
 
     // Offset ini
 	for (ix = 0; ix < xN; ix++)
@@ -426,252 +394,183 @@ static int DoProfile (double ResDist,
 		
 		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);			
 	}
-	
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
 	return 0;
-}		// end doProfile
+}
 
 
 
 /**
  * Calculates the path loss using E/// 9999 model implementation on GPU.
  *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ * eric_params      the A0, A1, A2, A3 tuning parameters of the prediction 
+ *                  model;
+ *
  */
 void 
-eric_pathloss_on_gpu (const double tx_east_coord,
-                      const double tx_north_coord,
-                      const int tx_east_idx,
-                      const int tx_north_idx,
-                      const double antenna_height_AGL,
-                      const double total_tx_height,
-                      const int beam_direction,
-                      const int mechanical_tilt,
-                      const double frequency,
-                      const double radius,  
-                      const double rx_height_AGL,
-                      const int nrows,       
-                      const int ncols,      
-                      const double map_west,
-                      const double map_north,
-                      const double map_ew_res,  
-                      const double map_ns_res,  
-                      const float  null_value,
-                      GPU_parameters *gpu_params,
-                      double **m_dem,          
-                      double **m_clut,
-                      double **m_loss)
+eric_pathloss_on_gpu (Parameters    *params,
+                      Tx_parameters *tx_params,
+                      const double  *eric_params)
 {
-#ifdef _PERFORMANCE_METRICS_
-    measure_time ("LOS");
-#endif
-    //
-    // calculate the terrain profile (LOS)
-    // 
-    DoProfile (1.0,
-               m_dem,
-               tx_east_idx,
-               tx_north_idx,
-               total_tx_height,
-               ncols,
-               nrows,
-               map_ew_res,
-               radius);
-#ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-#endif
     //
     // size of all buffers used in this function
     //
-    size_t buffer_size = nrows * 
-                         ncols * 
+    size_t buffer_size = tx_params->nrows * 
+                         tx_params->ncols * 
                          sizeof (double);
     //
-    // local buffers, used by this function
+    // we use this pointer as a flag, indicating that we are about to
+    // run this function for the first time
     //
-    cl_mem m_obst_height_dev;
-    cl_mem m_obst_dist_dev;
-
-    //
-    // initialize the OpenCL environment if we haven't already
-    //
-    if (gpu_params->ocl_obj == NULL)
+    if (tx_params->ocl_obj == NULL)
     {
-#ifdef _PERFORMANCE_METRICS_
-        measure_time ("E///: OpenCL startup");
-#endif
         //
-        // create the objects, that will be shared among different functions
-        // (to minize data transfers to the GPU)
+        // initialize the OpenCL environment
         //
-        gpu_params->ocl_obj    = (OCL_objects *) malloc (sizeof (OCL_objects));
-        gpu_params->m_dem_dev  = (cl_mem *) malloc (sizeof (cl_mem));
-        gpu_params->m_clut_dev = (cl_mem *) malloc (sizeof (cl_mem));
-        gpu_params->m_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
+        init_gpu (tx_params);
 
-        // initialize the OpenCL platform
-        init_opencl (gpu_params->ocl_obj, 1);
-
-#ifdef _PERFORMANCE_METRICS_
-        measure_time (NULL);
-        measure_time ("E///: OpenCL create common buffers");
-#endif
         //
-        // create OpenCL buffers
+        // build the OpenCL source file (only the first time);
+        // in this case, all kernels reside in one source file
         //
-        *(gpu_params->m_dem_dev) = create_buffer (gpu_params->ocl_obj,
-                                                  CL_MEM_READ_ONLY, 
-                                                  buffer_size);
-        *(gpu_params->m_clut_dev) = create_buffer (gpu_params->ocl_obj,
-                                                   CL_MEM_READ_ONLY, 
-                                                   buffer_size);
-        *(gpu_params->m_loss_dev) = create_buffer (gpu_params->ocl_obj,
-                                                   CL_MEM_WRITE_ONLY, 
-                                                   buffer_size);
-#ifdef _PERFORMANCE_METRICS_
-        measure_time (NULL);
-#endif
-        m_obst_height_dev = create_buffer (gpu_params->ocl_obj,
-                                           CL_MEM_READ_ONLY, 
-                                           buffer_size);
-        m_obst_dist_dev = create_buffer (gpu_params->ocl_obj,
-                                         CL_MEM_READ_ONLY, 
-                                         buffer_size);
+        build_kernel_from_file (tx_params->ocl_obj,
+                                "r.coverage.cl",
+                                "eric_per_tx",
+                                "-I. -Werror");
         //
-        // send input data to the device
+        // calculate the terrain profile, i.e. line-of-sight,
+        // only the first time
         // 
-#ifdef _PERFORMANCE_METRICS_
-        measure_time ("E///: OpenCL data transfer to device");
-#endif
-        cl_event *event;
-        write_buffer (gpu_params->ocl_obj,
-                      0,
-                      &m_obst_height_dev,
-                      buffer_size,
-                      Obst_high[0]);
-        write_buffer (gpu_params->ocl_obj,
-                      0,
-                      &m_obst_dist_dev,
-                      buffer_size,
-                      Obst_dist[0]);
-        write_buffer (gpu_params->ocl_obj,
-                      0,
-                      gpu_params->m_dem_dev,
-                      buffer_size,
-                      m_dem[0]);
-        write_buffer (gpu_params->ocl_obj,
-                      0,
-                      gpu_params->m_clut_dev,
-                      buffer_size,
-                      m_clut[0]);
-        event = write_buffer (gpu_params->ocl_obj,
-                              0,
-                              gpu_params->m_loss_dev,
-                              buffer_size,
-                              m_loss[0]);
-        clWaitForEvents (1, event);
-#ifdef _PERFORMANCE_METRICS_
-        measure_time (NULL);
-#endif
+        DoProfile (tx_params->m_obst_height,
+                   tx_params->m_obst_dist,
+                   tx_params->m_obst_offset,
+                   1.0,
+                   tx_params->m_dem,
+                   tx_params->tx_east_coord_idx,
+                   tx_params->tx_north_coord_idx,
+                   tx_params->total_tx_height,
+                   tx_params->ncols,
+                   tx_params->nrows,
+                   params->map_ew_res,
+                   params->radius);
     }
-    // build and activate the kernel
-    build_kernel_from_file (gpu_params->ocl_obj,
-                            "eric_per_tx",
-                            "r.coverage.cl",
-                            "-I. -Werror");
-
-    // kernel parameters 
-    set_kernel_double_arg (gpu_params->ocl_obj,
+    //
+    // activate the compiled kernel
+    //
+    activate_kernel (tx_params->ocl_obj,
+                     "eric_per_tx");
+    //
+    // set scalar kernel parameters 
+    // 
+    set_kernel_double_arg (tx_params->ocl_obj,
                            0,
-                           &map_ew_res);
-    set_kernel_double_arg (gpu_params->ocl_obj,
+                           &params->map_ew_res);
+    set_kernel_double_arg (tx_params->ocl_obj,
                            1,
-                           &map_north);
-    set_kernel_double_arg (gpu_params->ocl_obj,
+                           &tx_params->map_north);
+    set_kernel_double_arg (tx_params->ocl_obj,
                            2,
-                           &map_west);
-    set_kernel_double_arg (gpu_params->ocl_obj,
+                           &tx_params->map_west);
+    set_kernel_double_arg (tx_params->ocl_obj,
                            5,
-                           &rx_height_AGL);
-    set_kernel_double_arg (gpu_params->ocl_obj,
+                           &params->rx_height_AGL);
+    set_kernel_double_arg (tx_params->ocl_obj,
                            6,
-                           &frequency);
+                           &params->frequency);
+    //
+    // set prediction model parameters
+    //
+    cl_double4 model_params;
+    model_params.s[0] = eric_params[0];
+    model_params.s[1] = eric_params[1];
+    model_params.s[2] = eric_params[2];
+    model_params.s[3] = eric_params[3];
+    set_kernel_value_arg (tx_params->ocl_obj,
+                          7,
+                          sizeof (cl_double4),
+                          &model_params);
+    //
+    // set memory pointer parameters
+    //
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        8,
+                        tx_params->m_obst_height_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        9,
+                        tx_params->m_obst_dist_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        10,
+                        tx_params->m_dem_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        11,
+                        tx_params->m_clut_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        12,
+                        tx_params->m_loss_dev);
 
     // reserve local memory on the device
     size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
                        _WORK_ITEMS_PER_DIMENSION_ *
                        sizeof (cl_float2);
-    set_local_mem (gpu_params->ocl_obj,
-                   12,
+    set_local_mem (tx_params->ocl_obj,
+                   13,
                    lmem_size);
-    //
-    // set the remaining parameters
-    //
-    set_kernel_mem_arg (gpu_params->ocl_obj,
-                        7,
-                        &m_obst_height_dev);
-    set_kernel_mem_arg (gpu_params->ocl_obj,
-                        8,
-                        &m_obst_dist_dev);
-    set_kernel_mem_arg (gpu_params->ocl_obj,
-                        9,
-                        gpu_params->m_dem_dev);
-    set_kernel_mem_arg (gpu_params->ocl_obj,
-                        10,
-                        gpu_params->m_clut_dev);
-    set_kernel_mem_arg (gpu_params->ocl_obj,
-                        11,
-                        gpu_params->m_loss_dev);
     //
     // calculation radius and diameter
     //
-    double radius_in_meters = radius * 1000;
-    int radius_in_pixels    = (int) (radius_in_meters / map_ew_res);
+    double radius_in_meters = params->radius * 1000;
+    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
     int diameter_in_pixels  = 2 * radius_in_pixels;
 
     //
     // calculation tile offset within the target area, given in pixel coordinates
     //
     cl_int2 tile_offset;
-    tile_offset.s[0]  = (int) ((tx_east_coord - map_west) - radius_in_meters);
-    tile_offset.s[0] /= map_ew_res;
-    tile_offset.s[1]  = (int) ((map_north - tx_north_coord) - radius_in_meters);
-    tile_offset.s[1] /= map_ns_res;
+    tile_offset.s[0]  = (int) ((tx_params->tx_east_coord - tx_params->map_west) - radius_in_meters);
+    tile_offset.s[0] /= params->map_ew_res;
+    tile_offset.s[1]  = (int) ((tx_params->map_north - tx_params->tx_north_coord) - radius_in_meters);
+    tile_offset.s[1] /= params->map_ns_res;
 
     //
     // transmitter data
     //
     cl_double4 tx_data;
-    tx_data.s[0] = (double) tx_east_coord;   // transmitter coordinate
-    tx_data.s[1] = (double) tx_north_coord;  // transmitter coordinate
-    tx_data.s[2] = (double) total_tx_height; // antenna height above sea level
-    tx_data.s[3] = (double) antenna_height_AGL; // antenna height above ground
+    tx_data.s[0] = (double) tx_params->tx_east_coord;   // transmitter coordinate
+    tx_data.s[1] = (double) tx_params->tx_north_coord;  // transmitter coordinate
+    tx_data.s[2] = (double) tx_params->total_tx_height; // antenna height above sea level
+    tx_data.s[3] = (double) tx_params->antenna_height_AGL; // antenna height above ground
 
     // set kernel parameters, specific for this transmitter
-    set_kernel_value_arg (gpu_params->ocl_obj,
+    set_kernel_value_arg (tx_params->ocl_obj,
                           3,
                           sizeof (cl_double4),
                           &tx_data);
-    set_kernel_value_arg (gpu_params->ocl_obj,
+    set_kernel_value_arg (tx_params->ocl_obj,
                           4,
                           sizeof (cl_int2),
                           &tile_offset);
-#ifdef _PERFORMANCE_METRICS_
-    measure_time ("E///: OpenCL kernel run");
-#endif
     //
     // number of processing tiles needed around each transmitter 
     //
     if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
     {
         fprintf (stderr, 
-                 "ERROR Cannot execute on GPU. Increase the calculation radius and try again.\n");
-        exit (1);
+                 "*** ERROR: Increase the calculation radius and try again.\n");
+        exit (-1);
     }
     if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
     {
         fprintf (stderr, 
-                 "ERROR Cannot execute on GPU. Try to set a calculation radius multiple of %d\n",
+                 "*** ERROR: Try to setting a calculation radius multiple of %d.\n",
                  _WORK_ITEMS_PER_DIMENSION_);
-        exit (1);
+        exit (-1);
     }
     //
     // define a 2D execution range for the kernel ...
@@ -684,31 +583,29 @@ eric_pathloss_on_gpu (const double tx_east_coord,
     //
     // ... and execute it
     //
-    run_kernel_2D_blocking (gpu_params->ocl_obj,
+    run_kernel_2D_blocking (tx_params->ocl_obj,
                             0,
                             NULL,
                             global_sizes,
                             local_sizes);
-#ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-    measure_time ("E///: OpenCL read data from GPU");
-#endif
+    //
     // sync memory
-    read_buffer_blocking (gpu_params->ocl_obj,
+    //
+    read_buffer_blocking (tx_params->ocl_obj,
                           0,
-                          gpu_params->m_loss_dev,
+                          tx_params->m_loss_dev,
                           buffer_size,
-                          m_loss[0]);
-#ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-#endif
+                          tx_params->m_loss[0]);
 }
 
 
 
 
 int 
-EricPathLossSub (double **Raster, 
+EricPathLossSub (double **Obst_high,
+                 double **Obst_dist,
+                 double **Offset,
+                 double **Raster, 
                  double **Clutter, 
                  double **PathLoss, 
                  struct StructEric *IniEric)
@@ -773,17 +670,28 @@ EricPathLossSub (double **Raster,
 									/*POPRAVJNEO (4.2.2010)*/	
 	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightBS),2);
 
-    // calculate the terrain profile
-    DoProfile (ResDist,
-               Raster,
-               BSxIndex,
-               BSyIndex,
-               ZoTransBS,
-               xN,
-               yN,
-               scale,
-               radi);
+    //
+    // calculate the terrain profile if we haven't already
+    // 
+    if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
+    {
+        DoProfile (Obst_high,
+                   Obst_dist,
+                   Offset,
+                   ResDist,
+                   Raster,
+                   BSxIndex,
+                   BSyIndex,
+                   ZoTransBS,
+                   xN,
+                   yN,
+                   scale,
+                   radi);
+    }
 
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("E/// on CPU");
+#endif
     for (ix = 0; ix < xN; ix++)
     {
         for (iy = 0; iy < yN; iy++)
@@ -925,6 +833,10 @@ EricPathLossSub (double **Raster,
             PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
         } // end irow
     } // end icol
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
 	return 0;
 }
 

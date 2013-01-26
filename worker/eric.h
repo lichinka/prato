@@ -1,10 +1,9 @@
 #ifndef _COVERAGE_ERICSSON9999_H_
 #define _COVERAGE_ERICSSON9999_H_
 
-#include <math.h>
-#include <stdlib.h>
-
+#include "worker/gpu.h"
 #include "worker/coverage.h"
+
 
 
 //
@@ -28,32 +27,29 @@ struct StructEric {
 };
 
 
+/**
+ * Calculates the path loss using E/// 9999 model implementation on GPU.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ *
+ */
 void 
-eric_pathloss_on_gpu (const double tx_east_coord,
-                      const double tx_north_coord,
-                      const int tx_east_idx,
-                      const int tx_north_idx,
-                      const double antenna_height_AGL,
-                      const double total_tx_height,
-                      const int beam_direction,
-                      const int mechanical_tilt,
-                      const double frequency,
-                      const double radius,  
-                      const double rx_height_AGL,
-                      const int nrows,       
-                      const int ncols,      
-                      const double map_west,
-                      const double map_north,
-                      const double map_ew_res,  
-                      const double map_ns_res,  
-                      const float  null_value,
-                      GPU_parameters *gpu_params,
-                      double **m_dem,          
-                      double **m_clut,
-                      double **m_loss);
+eric_pathloss_on_gpu (Parameters    *params,
+                      Tx_parameters *tx_params,
+                      const double  *eric_params);
 
+/**
+ * Calculates the path loss using E/// 9999 model implementation on CPU.
+ *
+ */
 int 
-EricPathLossSub (double **Raster, 
+EricPathLossSub (double **Obst_high,
+                 double **Obst_dist,
+                 double **Offset,
+                 double **Raster, 
                  double **Clutter, 
                  double **PathLoss, 
                  struct StructEric *IniEric);

@@ -1,36 +1,6 @@
 #ifndef _COVERAGE_CALCULATION_IN_GRASS_H_
 #define _COVERAGE_CALCULATION_IN_GRASS_H_
 
-#define _CHAR_BUFFER_SIZE_          1024
-#define _COVERAGE_MASTER_RANK_      0
-#define _WORKER_IS_IDLE_TAG_        100
-#define _WORKER_KEEP_WORKING_TAG_   105
-#define _WORKER_SHUTDOWN_TAG_       110
-#define _WORKER_OPTIMIZE_TAG_       115
-
-//
-// whether the target point is whithin the main antenna beam or not
-//
-#define _RADIO_ZONE_MAIN_BEAM_ON_       0x01
-#define _RADIO_ZONE_MAIN_BEAM_OFF_      0xfe
-//
-// whether the target point is within the distance limit of the prediction model
-//
-#define _RADIO_ZONE_SECONDARY_BEAM_ON_  0x02
-#define _RADIO_ZONE_SECONDARY_BEAM_OFF_ 0xfd
-//
-// whether the target point is within the distance limit of the prediction model
-//
-#define _RADIO_ZONE_MODEL_DISTANCE_ON_  0x04
-#define _RADIO_ZONE_MODEL_DISTANCE_OFF_ 0xfb
-
-//
-// dimensions of the search vector - only used for optimization
-//
-#define _SEARCH_VECTOR_DIMENSIONS_  4
-
-
-
 #include <mpi.h>
 #include <time.h>
 #include <math.h>
@@ -57,6 +27,7 @@
 #include <ocl_common.h>
 
 #include "worker/ini.h"
+#include "worker/constants.h"
 
 
 
@@ -80,9 +51,9 @@ struct Tx_parameters
     double  tx_east_coord;
     double  tx_north_coord;
 
-    // 2D RADIUS area matrix indeces of the geographical coordinates
-    int tx_east_coord_idx;
-    int tx_north_coord_idx;
+    // 2D RADIUS area matrix indices of the geographical coordinates
+    int     tx_east_coord_idx;
+    int     tx_north_coord_idx;
 
     // transmit pilot power 
     double  tx_power;
@@ -106,7 +77,7 @@ struct Tx_parameters
     double map_south;
     double map_west;
 
-    // 2D RADIUS area matrix indeces of the geographical limits
+    // 2D RADIUS area matrix indices of the geographical limits
     int map_north_idx;
     int map_east_idx;
     int map_south_idx;
@@ -133,9 +104,47 @@ struct Tx_parameters
     // 2D RADIUS area matrix where radio zones are marked; 
     // each element is a bit mask of _RADIO_ZONE_* constants
     char **m_radio_zone;
+
+    // 2D RADIUS area matrix where the obstacle heights are saved
+    // (used for line-of-sight calculation)
+    double **m_obst_height;
+
+    // 2D RADIUS area matrix where the obstacle distances are saved
+    // (used for line-of-sight calculation)
+    double **m_obst_dist;
+       
+    // 2D RADIUS area matrix for obstacle distance offsets 
+    // (used for line-of-sight calculation)
+    double **m_obst_offset;
+
+    //////
+    // GPU-specific parameters follow
+    //
+    
+    // a structure holding OpenCL specific data (platform, device, kernel, ...) 
+    // as defined in the OCL_Common library
+    OCL_object *ocl_obj;
+
+    // GPU mapping of the various 2D RADIUS area matrices defined above
+    cl_mem      *m_dem_dev;
+    cl_mem      *m_clut_dev;
+    cl_mem      *m_field_meas_dev;
+    cl_mem      *m_loss_dev;
+    cl_mem      *m_antenna_loss_dev;
+    cl_mem      *m_radio_zone_dev;
+
+    // GPU matrix holding the heights of the obstacles around the transmitter
+    // (only used for the line-of-sight calculation)
+    cl_mem      *m_obst_height_dev;
+
+    // GPU matrix holding the distances to the obstacles around the transmitter
+    // (only used for the line-of-sight calculation)
+    cl_mem      *m_obst_dist_dev;
+
 } __attribute__((__packed__));
 
 typedef struct Tx_parameters Tx_parameters;
+
 
 /**
  * Handles name=value pairs read from the INI file inside 'tx_section'.
@@ -210,18 +219,6 @@ static int tx_params_handler (void *user_struct,
     return 1;
 }
 
-//
-// A structure to hold all GPU-specific data
-//
-struct GPU_parameters
-{
-    OCL_objects *ocl_obj;
-    cl_mem      *m_dem_dev;
-    cl_mem      *m_clut_dev;
-    cl_mem      *m_loss_dev;
-} __attribute__((__packed__));
-
-typedef struct GPU_parameters GPU_parameters;
 
 //
 // A structure to hold all common configuration parameters and
@@ -229,10 +226,6 @@ typedef struct GPU_parameters GPU_parameters;
 //
 struct Parameters
 {
-    //
-    // run-time parameters
-    //
-
     // number of transmitters being processed
     int ntx;
 
@@ -251,6 +244,10 @@ struct Parameters
     // 2D area matrix where the path-loss predictions are saved
     double **m_loss;
     
+    // 2D area matrix where the field measurements are kept
+    // before dispatching them to the workers, e.g. a buffer
+    double **m_field_meas;
+
     //
     // common parameters to all transmitters
     //
@@ -284,10 +281,10 @@ struct Parameters
     // a flag to indicate the framework starts in optimization mode
     char    use_opt;
 
-    // a flag to indicate the GPU should be used
-    char            use_gpu;
-    // GPU-specific data is kept in this structure
-    GPU_parameters *gpu_params;
+    // a flag to indicate the GPU should be used 
+    // on the worker side, if available
+    char    use_gpu;
+
 } __attribute__((__packed__));
 
 typedef struct Parameters Parameters;
@@ -369,8 +366,8 @@ worker (const int rank,
  *
  */
 void 
-coverage (const Parameters     *params,
-          const Tx_parameters  *tx_params,
+coverage (Parameters           *params,
+          Tx_parameters        *tx_params,
           const double         *eric_params, 
           const unsigned int   eric_params_len);
 

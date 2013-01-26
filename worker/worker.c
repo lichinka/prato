@@ -4,6 +4,80 @@
 
 
 /**
+ * Allocates a 2D matrix of the specified dimensions as a continous
+ * chunck of memory. Despite this, the matrix can be referenced with
+ * two indices as `matrix[i][j]`.
+ * This function returns the target pointer to where the memory has 
+ * been allocated.
+ *
+ * nrows    the number of rows of the matrix;
+ * ncols    the number of columns in the matrix;
+ * m_ptr    target pointer, where the address of the allocated memory
+ *          is saved (output parameter).-
+ *
+ */
+static double **
+allocate_double_matrix (const int    nrows,
+                        const int    ncols,
+                        double     **m_ptr)
+{
+    int r;
+
+    //
+    // only allocate new memory if the target pointer is NULL
+    //
+    if (m_ptr == NULL)
+     {
+        double *m_ptr_data = (double *) calloc (nrows * ncols, 
+                                                sizeof (double));
+        m_ptr = (double **) calloc (nrows,
+                                    sizeof (double *));
+        for (r = 0; r < nrows; r ++)
+            m_ptr[r] = &(m_ptr_data[r * ncols]);
+    }
+    return m_ptr;
+}
+
+
+
+/**
+ * Allocates a 2D matrix of the specified dimensions as a continous
+ * chunck of memory. Despite this, the matrix can be referenced with
+ * two indices as `matrix[i][j]`.
+ * This function returns the target pointer to where the memory has 
+ * been allocated.
+ *
+ * nrows    the number of rows of the matrix;
+ * ncols    the number of columns in the matrix;
+ * m_ptr    target pointer, where the address of the allocated memory
+ *          is saved (output parameter).-
+ *
+ */
+static char **
+allocate_char_matrix (const int    nrows,
+                      const int    ncols,
+                      char       **m_ptr)
+{
+    int r;
+
+    //
+    // only allocate new memory if the target pointer is NULL
+    //
+    if (m_ptr == NULL)
+    {
+        char *m_ptr_data = (char *) calloc (nrows * ncols, 
+                                            sizeof (char));
+        m_ptr = (char **) calloc (nrows,
+                                  sizeof (char *));
+        for (r = 0; r < nrows; r ++)
+            m_ptr[r] = &(m_ptr_data[r * ncols]);
+    }
+    return m_ptr;
+}
+
+
+
+/**
  * Receives data distributed by the master process, that is common
  * to all transmitters.
  *
@@ -26,11 +100,18 @@ receive_common_data (Parameters *params,
                comm);
     //
     // the worker doesn't use these matrices;
-    // it uses a reduced version of them, which are received from master
+    // it uses a reduced version of them, which relevant data are 
+    // received from master; 
+    // they are kept in the `Tx_parameters` structure
     //
-    params->m_dem  = NULL;
-    params->m_clut = NULL;
-    params->m_loss = NULL;
+    params->m_dem     = NULL;
+    params->m_clut    = NULL;
+    params->m_loss    = NULL;
+
+    //
+    // mark the `Tx_parameters` structure as uninitialized
+    //
+    params->tx_params = NULL;
 
     //
     // the worker doesn't parse the INI file content, it
@@ -48,6 +129,12 @@ receive_common_data (Parameters *params,
     else
         fprintf (stdout, 
                  "*** INFO: Coverage prediction mode enabled\n");
+    //
+    // check flag indicating whether to use the GPU if available
+    //
+    if (params->use_gpu)
+        fprintf (stdout, 
+                 "*** INFO: GPU hardware will be used on the workers, if available\n");
 }
 
 
@@ -65,15 +152,25 @@ static void
 receive_tx_data (Parameters *params,
                  MPI_Comm comm)
 {
+    char          uninitialized_pointers;
     Tx_parameters *tx_params;
     MPI_Status     status;
 
     //
-    // receive the transmitter-specific parameters
+    // allocate the `Tx_parameters` structure, if we haven't already,
+    // and mark all its pointers as uninitialized
     //
     if (params->tx_params == NULL)
+    {
         params->tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
+        uninitialized_pointers = 1;
+    }
+    else
+        uninitialized_pointers = 0;
 
+    //
+    // receive the transmitter-specific parameters
+    //
     MPI_Recv (params->tx_params,
               sizeof (Tx_parameters),
               MPI_BYTE,
@@ -81,29 +178,54 @@ receive_tx_data (Parameters *params,
               MPI_ANY_TAG,
               comm,
               &status);
-
     if (status.MPI_ERROR)
         fprintf (stderr, 
                  "*** ERROR: Transmitter parameters incorrectly received\n");
     else
+    {
+        //
+        // an alias for less writing
+        //
         tx_params = params->tx_params;
+
+        //
+        // after receiving the `Tx_parameters` structure, all contained
+        // pointer are invalid, because they contain addresses mapped 
+        // within the master process; make sure we clean this up
+        //
+        if (uninitialized_pointers)
+        {
+            tx_params->m_dem              = NULL;
+            tx_params->m_dem_dev          = NULL;
+            tx_params->m_clut             = NULL;
+            tx_params->m_clut_dev         = NULL;
+            tx_params->m_field_meas       = NULL;
+            tx_params->m_field_meas_dev   = NULL;
+            tx_params->m_loss             = NULL;
+            tx_params->m_loss_dev         = NULL;
+            tx_params->m_antenna_loss     = NULL;
+            tx_params->m_antenna_loss_dev = NULL;
+            tx_params->m_radio_zone       = NULL;
+            tx_params->m_radio_zone_dev   = NULL;
+            tx_params->m_obst_height      = NULL;
+            tx_params->m_obst_dist        = NULL;
+            tx_params->m_obst_offset      = NULL;
+            tx_params->ocl_obj            = NULL;
+        }
+    }
 
     //
     // allocate memory for the transmitter matrices;
-    // they contain strictly the data needed for the calculation inside 
-    // the user-defined calculation radius (params->radius)
+    // they contain strictly the data needed for calculation, i.e. 
+    // within the user-defined calculation radius (params->radius)
     //
-    int r;
 
     //
     // digital elevation model
     //
-    double *m_dem_data = (double *) calloc (tx_params->nrows * tx_params->ncols, 
-                                            sizeof (double));
-    tx_params->m_dem = (double **) calloc (tx_params->nrows,
-                                           sizeof (double *));
-    for (r = 0; r < tx_params->nrows; r ++)
-        tx_params->m_dem[r] = &(m_dem_data[r * tx_params->ncols]);
+    tx_params->m_dem = allocate_double_matrix (tx_params->nrows,
+                                               tx_params->ncols,
+                                               tx_params->m_dem);
     //
     // receive DEM data from master
     //
@@ -121,12 +243,9 @@ receive_tx_data (Parameters *params,
     //
     // clutter data
     //
-    double *m_clut_data = (double *) calloc (tx_params->nrows * tx_params->ncols,
-                                             sizeof (double));
-    tx_params->m_clut = (double **) calloc (tx_params->nrows,
-                                            sizeof (double *));
-    for (r = 0; r < tx_params->nrows; r ++)
-        tx_params->m_clut[r] = &(m_clut_data[r * tx_params->ncols]);
+    tx_params->m_clut = allocate_double_matrix (tx_params->nrows,
+                                                tx_params->ncols,
+                                                tx_params->m_clut);
     //
     // receive clutter data from master
     //
@@ -140,52 +259,53 @@ receive_tx_data (Parameters *params,
     if (status.MPI_ERROR)
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of clutter data\n");
-
     //
-    // radio zones - only allocation
+    // radio zones 
     //
-    char *m_radio_zone_data = (char *) calloc (tx_params->nrows * tx_params->ncols, 
-                                               sizeof (char));
-    tx_params->m_radio_zone = (char **) calloc (tx_params->nrows,
-                                                sizeof (char *));
-    for (r = 0; r < tx_params->nrows; r ++)
-        tx_params->m_radio_zone[r] = &(m_radio_zone_data[r * tx_params->ncols]);
-
+    tx_params->m_radio_zone = allocate_char_matrix (tx_params->nrows,
+                                                    tx_params->ncols,
+                                                    tx_params->m_radio_zone);
     //
-    // antenna losses - only allocation
+    // antenna-introduced losses
     //
-    double *m_antenna_loss_data = (double *) calloc (tx_params->nrows * tx_params->ncols, 
-                                                     sizeof (double));
-    tx_params->m_antenna_loss = (double **) calloc (tx_params->nrows,
-                                                    sizeof (double *));
-    for (r = 0; r < tx_params->nrows; r ++)
-        tx_params->m_antenna_loss[r] = &(m_antenna_loss_data[r * tx_params->ncols]);
-
+    tx_params->m_antenna_loss = allocate_double_matrix (tx_params->nrows,
+                                                        tx_params->ncols,
+                                                        tx_params->m_antenna_loss);
     //
-    // path loss - only allocation
+    // path loss
     //
-    double *m_loss_data = (double *) calloc (tx_params->nrows * tx_params->ncols, 
-                                             sizeof (double));
-    tx_params->m_loss = (double **) calloc (tx_params->nrows,
-                                            sizeof (double *));
-    for (r = 0; r < tx_params->nrows; r ++)
-        tx_params->m_loss[r] = &(m_loss_data[r * tx_params->ncols]);
-
+    tx_params->m_loss = allocate_double_matrix (tx_params->nrows,
+                                                tx_params->ncols,
+                                                tx_params->m_loss);
     //
-    // antenna losses, radio zones and field-measurements matrices 
-    // are only used in optimization mode
+    // heights of obstacles - line-of-sight
+    //
+    tx_params->m_obst_height = allocate_double_matrix (tx_params->nrows,
+                                                       tx_params->ncols,
+                                                       tx_params->m_obst_height);
+    //
+    // distances to obstacles - line-of-sight
+    //
+    tx_params->m_obst_dist = allocate_double_matrix (tx_params->nrows,
+                                                     tx_params->ncols,
+                                                     tx_params->m_obst_dist);
+    //
+    // offset distances to obstacles - line-of-sight
+    //
+    tx_params->m_obst_offset = allocate_double_matrix (tx_params->nrows,
+                                                       tx_params->ncols,
+                                                       tx_params->m_obst_offset);
+    //
+    // field-measurements matrix is only used in optimization mode
     //
     if (params->use_opt)
     {
         //
         // field measurements
         //
-        double *m_field_meas_data = (double *) calloc (tx_params->nrows * tx_params->ncols,
-                                                       sizeof (double));
-        tx_params->m_field_meas = (double **) calloc (tx_params->nrows, 
-                                                      sizeof (double *));
-        for (r = 0; r < tx_params->nrows; r ++)
-            tx_params->m_field_meas[r] = &(m_field_meas_data[r * tx_params->ncols]);
+        tx_params->m_field_meas = allocate_double_matrix (tx_params->nrows,
+                                                          tx_params->ncols,
+                                                          tx_params->m_field_meas);
         //
         // receive field-measurement data from master
         //
@@ -216,7 +336,7 @@ void worker (const int rank,
 {
     int has_finished;
     MPI_Status status;
-    double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
+
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
 
     //
@@ -224,7 +344,6 @@ void worker (const int rank,
     //
     MPI_Barrier (comm);
     receive_common_data (params, comm);
-    params->tx_params = NULL;
 
     //
     // sync point: common data distribution finished 
@@ -276,6 +395,8 @@ void worker (const int rank,
             }
             else
             {
+                double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
+
                 //
                 // calculate coverage for the received transmitter
                 //
@@ -300,10 +421,25 @@ void worker (const int rank,
         free (&(params->tx_params->m_field_meas[0][0]));
         free (params->tx_params->m_field_meas);
     }
+    if (params->use_gpu)
+    {
+        free (params->tx_params->ocl_obj);
+        free (params->tx_params->m_dem_dev);
+        free (params->tx_params->m_clut_dev);
+        free (params->tx_params->m_loss_dev);
+        free (params->tx_params->m_obst_height_dev);
+        free (params->tx_params->m_obst_dist_dev);
+    }
     free (&(params->tx_params->m_antenna_loss[0][0]));
     free (params->tx_params->m_antenna_loss);
     free (&(params->tx_params->m_radio_zone[0][0]));
     free (params->tx_params->m_radio_zone);
+    free (&(params->tx_params->m_obst_height[0][0]));
+    free (params->tx_params->m_obst_height);
+    free (&(params->tx_params->m_obst_dist[0][0]));
+    free (params->tx_params->m_obst_dist);
+    free (&(params->tx_params->m_obst_offset[0][0]));
+    free (params->tx_params->m_obst_offset);
     free (&(params->tx_params->m_loss[0][0]));
     free (params->tx_params->m_loss);
     free (&(params->tx_params->m_dem[0][0]));

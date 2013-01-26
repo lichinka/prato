@@ -353,7 +353,8 @@ init_coverage_for_tx (FILE          *ini_file,
     if (params->use_opt)
     {
         //
-        // allocate memory for the field-measurement matrix
+        // allocate memory for the field-measurement buffer matrix,
+        // if we haven't already
         //
         if (tx_params->m_field_meas == NULL)
         {
@@ -365,9 +366,6 @@ init_coverage_for_tx (FILE          *ini_file,
             for (i = 0; i < params->nrows; i ++)
                 tx_params->m_field_meas[i] = &(m_field_meas_data[i * params->ncols]);
         }
-        else
-            fprintf (stderr, 
-                     "*** WARNING: Not initializing field measurements matrix\n");
         //
         // load the measurements from a raster map
         //
@@ -457,12 +455,7 @@ init_coverage (FILE       *ini_file,
     params->m_dem        = NULL;
     params->m_clut       = NULL;
     params->m_loss       = NULL;
-
-    //
-    // GPU-specific parameters are kept here
-    //
-    params->gpu_params = (GPU_parameters *) malloc (sizeof (GPU_parameters));
-    params->gpu_params->ocl_obj = NULL;
+    params->m_field_meas = NULL;
 
     //
     // parse the INI file containing the common configuration values
@@ -678,7 +671,6 @@ init_coverage (FILE       *ini_file,
                                                   sizeof (Tx_parameters));
     for (i = 0; i < params->ntx; i ++)
     {
-        params->tx_params[i].m_field_meas = NULL;
         init_coverage_for_tx (ini_file,
                               tx_sections[i],
                               params,

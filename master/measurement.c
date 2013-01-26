@@ -61,7 +61,8 @@ load_field_measurements_from_map (const char *mapname,
             (window->ew_res != metadata->ew_res) ||
             (window->ns_res != metadata->ns_res))
             fprintf (stderr, 
-                     "*** WARNING: Metadata of field measurements map does not match with DEM.\n");
+                     "*** WARNING: Metadata of field measurements <%s> does not match with DEM.\n",
+                     mapname);
         else
         {
             //

@@ -20,28 +20,11 @@
  *
  */
 void 
-coverage (const Parameters     *params,
-          const Tx_parameters  *tx_params,
+coverage (Parameters           *params,
+          Tx_parameters        *tx_params,
           const double         *eric_params, 
           const unsigned int   eric_params_len)
 {
-    //
-    // initialize the structure variables for Ericsson 9999 model
-    //
-    struct StructEric IniEric = {tx_params->tx_east_coord_idx,
-                                 tx_params->tx_north_coord_idx,
-                                 tx_params->antenna_height_AGL, 
-                                 params->rx_height_AGL,
-                                 tx_params->ncols,
-                                 tx_params->nrows,
-                                 params->map_ew_res,
-                                 params->frequency, 
-                                 (double) eric_params[0],
-                                 (double) eric_params[1],
-                                 (double) eric_params[2], 
-                                 (double) eric_params[3], 
-                                 1, 
-                                 params->radius};
     //
     // execute the path-loss calculation on CPU or GPU?
     //
@@ -50,35 +33,36 @@ coverage (const Parameters     *params,
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on GPU");
 #endif
-        eric_pathloss_on_gpu (tx_params->tx_east_coord,
-                              tx_params->tx_north_coord,
-                              tx_params->tx_east_coord_idx,
-                              tx_params->tx_north_coord_idx,
-                              tx_params->antenna_height_AGL,
-                              tx_params->total_tx_height,
-                              tx_params->beam_direction,
-                              tx_params->mechanical_tilt,
-                              params->frequency,
-                              params->radius,  
-                              params->rx_height_AGL,
-                              tx_params->nrows,       
-                              tx_params->ncols,      
-                              tx_params->map_west,
-                              tx_params->map_north,
-                              params->map_ew_res,  
-                              params->map_ns_res,  
-                              params->null_value,
-                              params->gpu_params,
-                              tx_params->m_dem,          
-                              tx_params->m_clut,
-                              tx_params->m_loss);
+        eric_pathloss_on_gpu (params,
+                              tx_params,
+                              eric_params);
     }
     else
     {
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif
-        EricPathLossSub (tx_params->m_dem, 
+        //
+        // initialize the structure variables for Ericsson 9999 model
+        //
+        struct StructEric IniEric = {tx_params->tx_east_coord_idx,
+                                     tx_params->tx_north_coord_idx,
+                                     tx_params->antenna_height_AGL, 
+                                     params->rx_height_AGL,
+                                     tx_params->ncols,
+                                     tx_params->nrows,
+                                     params->map_ew_res,
+                                     params->frequency, 
+                                     (double) eric_params[0],
+                                     (double) eric_params[1],
+                                     (double) eric_params[2], 
+                                     (double) eric_params[3], 
+                                     1, 
+                                     params->radius};
+        EricPathLossSub (tx_params->m_obst_height,
+                         tx_params->m_obst_dist,
+                         tx_params->m_obst_offset,
+                         tx_params->m_dem, 
                          tx_params->m_clut, 
                          tx_params->m_loss, 
                          &IniEric);
@@ -87,58 +71,35 @@ coverage (const Parameters     *params,
     measure_time (NULL);
 #endif
 
-    /*
-    // DEBUG memory
-    //
-    for (r=0;r<mini_nrows;r++)
-    {
-        for (c=0;c<mini_ncols;c++)
-        {
-            printf ("%.5f\t", mini_m_loss[r][c]);
-        }
-        printf ("\n");
-    }
-    exit (1);
-    */
-
     //
     // calculate the antenna influence, 
     // overwriting the isotrophic path-loss
     //
 #ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Antenna", 1);
+    measure_time ("Antenna influence");
 #endif
-    calculate_antenna_influence (params->use_gpu,
-                                 tx_params->tx_east_coord,
-                                 tx_params->tx_north_coord,
-                                 tx_params->antenna_height_AGL,
-                                 tx_params->total_tx_height,
-                                 tx_params->beam_direction,
-                                 tx_params->mechanical_tilt,
-                                 params->frequency,
-                                 params->radius,  
-                                 params->rx_height_AGL,
-                                 tx_params->nrows,       
-                                 tx_params->ncols,      
-                                 tx_params->map_west,
-                                 tx_params->map_north,
-                                 params->map_ew_res,  
-                                 params->map_ns_res,  
-                                 params->null_value,
-                                 params->antenna_diagram_dir,
-                                 tx_params->antenna_diagram_file, 
-                                 params->main_zone_horiz,
-                                 params->main_zone_vert,
-                                 params->sec_zone_horiz,
-                                 params->sec_zone_vert,
-                                 params->gpu_params,
-                                 tx_params->m_dem,          
-                                 tx_params->m_loss,
-                                 tx_params->m_radio_zone,
-                                 tx_params->m_antenna_loss);
+    calculate_antenna_influence (params,
+                                 tx_params);
 #ifdef _PERFORMANCE_METRICS_
-    measure_flops ("Antenna", 0);
+    measure_time (NULL);
 #endif
+
+    /*
+    // DEBUG memory
+    //
+    int r, c;
+    for (r = 0; r < tx_params->nrows; r ++)
+    {
+        for (c = 0; c < tx_params->ncols; c++)
+        {
+            fprintf (stdout,
+                     "%.5f\t", tx_params->m_antenna_loss[r][c]);
+        }
+        fprintf (stdout, "\n");
+    }
+    fflush (stdout);
+    exit (-1);
+    */
 }
 
 

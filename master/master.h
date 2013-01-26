@@ -15,30 +15,10 @@
  * params           the output parameter, into which everything is saved.-
  *
  */
-extern void
+void
 init_coverage (FILE       *ini_file,
                char       *tx_sections_list,
                Parameters *params);
-
-
-/**
- * Calculates the coverage prediction for one transmitter.
- *
- * params           a structure holding configuration parameters which are common
- *                  to all transmitters;
- * tx_params        the output parameter: a structure holding transmitter-specific
- *                  configuration parameters needed for calculation;
- * eric_params      contains the four tunning parameters for the Ericsson 9999 
- *                  model;
- * eric_params_len  the number of parameters within the received vector, four 
- *                  in this case (A0, A1, A2 and A3);
- *
- */
-extern void
-coverage (const Parameters     *params,
-          const Tx_parameters  *tx_params,
-          const double         *eric_params, 
-          const unsigned int   eric_params_len);
 
 
 /**
@@ -49,7 +29,7 @@ coverage (const Parameters     *params,
  * params           a structure holding all parameters needed for calculation.-
  *
  */
-extern void
+void
 coverage_mpi (int argc, 
               char *argv [],
               Parameters *params);

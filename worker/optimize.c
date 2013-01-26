@@ -23,30 +23,104 @@ obj_func (Parameters    *params,
     int r, c, count = 0;
     double ret_value = 0;
 
+    if (params->use_gpu)
+    {
 #ifdef _PERFORMANCE_METRICS_
+        measure_time ("E/// on GPU");
+#endif
+        eric_pathloss_on_gpu (params,
+                              tx_params,
+                              sol_vector);
+
+        /*
+        // FIXME: move this part to a separate function inside `antenna.c`
+        //
+
+        //
+        // activate the kernel, 
+        // to sum the antenna loss to the isotrophic path-loss
+        // 
+        activate_kernel (tx_params->ocl_obj,
+                         "vector_sum_kern");
+        //
+        // define a 2D execution range for the kernel ...
+        //
+        double radius_in_meters = params->radius * 1000;
+        int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
+        int diameter_in_pixels  = 2 * radius_in_pixels;
+        size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
+        size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
+                                  ntile * _WORK_ITEMS_PER_DIMENSION_};
+        size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
+                                 _WORK_ITEMS_PER_DIMENSION_};
+
+        // set pointer kernel parameters
+        set_kernel_mem_arg (tx_params->ocl_obj,
+                            0,
+                            tx_params->m_antenna_loss_dev);
+        set_kernel_mem_arg (tx_params->ocl_obj,
+                            1,
+                            tx_params->m_loss_dev);
+        // reserve local memory on the device
+        lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
+                    _WORK_ITEMS_PER_DIMENSION_ *
+                    sizeof (double);
+        set_local_mem (tx_params->ocl_obj,
+                       2,
+                       lmem_size);
+        //
+        // execute the sum kernel
+        //
+        run_kernel_2D_blocking (tx_params->ocl_obj,
+                                0,
+                                NULL,
+                                global_sizes,
+                                local_sizes);
+        //
+        // sync memory
+        //
+        read_buffer_blocking (tx_params->ocl_obj,
+                              0,
+                              tx_params->m_loss_dev,
+                              ant_buff_size,
+                              tx_params->m_loss[0]);
+                              */
+    }
+    else
+    {
+#ifdef _PERFORMANCE_METRICS_
+        measure_time ("E/// on CPU");
+#endif
+        //
+        // recalculate the isotrophic prediction using the received solution
+        //
+        struct StructEric IniEric = {tx_params->tx_east_coord_idx,
+                                     tx_params->tx_north_coord_idx,
+                                     tx_params->antenna_height_AGL, 
+                                     params->rx_height_AGL,
+                                     tx_params->ncols,
+                                     tx_params->nrows,
+                                     params->map_ew_res,
+                                     params->frequency, 
+                                     (double) sol_vector[0],
+                                     (double) sol_vector[1],
+                                     (double) sol_vector[2], 
+                                     (double) sol_vector[3], 
+                                     1, 
+                                     params->radius};
+        EricPathLossSub (tx_params->m_obst_height,
+                         tx_params->m_obst_dist,
+                         tx_params->m_obst_offset,
+                         tx_params->m_dem, 
+                         tx_params->m_clut, 
+                         tx_params->m_loss, 
+                         &IniEric);
+    }
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
     measure_time ("Objective function evaluation on CPU");
 #endif
-    //
-    // recalculate the isotrophic prediction using the received solution
-    //
-    struct StructEric IniEric = {tx_params->tx_east_coord_idx,
-                                 tx_params->tx_north_coord_idx,
-                                 tx_params->antenna_height_AGL, 
-                                 params->rx_height_AGL,
-                                 tx_params->ncols,
-                                 tx_params->nrows,
-                                 params->map_ew_res,
-                                 params->frequency, 
-                                 (double) sol_vector[0],
-                                 (double) sol_vector[1],
-                                 (double) sol_vector[2], 
-                                 (double) sol_vector[3], 
-                                 1, 
-                                 params->radius};
-    EricPathLossSub (tx_params->m_dem, 
-                     tx_params->m_clut, 
-                     tx_params->m_loss, 
-                     &IniEric);
     //
     // for each point in the path loss matrix ...
     //
@@ -134,15 +208,13 @@ de (Parameters     *params,
 
     /* Printing out information about optimization process for the user	*/
 
-    printf("Program parameters: ");
-    printf("NP = %d, Gmax = %d, CR = %.2f, F = %.2f\n",
-    NP, Gmax, CR, F);
+    printf ("*** INFO: DE parameters\t");
+    printf ("NP = %d, Gmax = %d, CR = %.2f, F = %.2f\n",
+            NP, Gmax, CR, F);
 
-    printf("Dimension of the problem: %d\n", D);
-
+    printf("*** INFO: Optimization problem dimension is %d.\n", D);
 
     /* Starting timer    */
-
     starttime = clock();
 
 
@@ -267,7 +339,6 @@ de (Parameters     *params,
     endtime = clock();
     totaltime = (double)(endtime - starttime);
 
-
     //
     // output the final population
     //
@@ -299,6 +370,7 @@ de (Parameters     *params,
     printf ("[Solution]\n");
     for (i=0; i < D; i++)
       printf("p%d = %.15f\n", i, popul[index][i]);
+
 
     printf ("\nObjective function value: ");
     printf ("%.15f\n", popul[index][D]);
@@ -346,7 +418,6 @@ optimize (Parameters    *params,
               tx_params,
               search_low,
               _SEARCH_VECTOR_DIMENSIONS_);
-
     //
     // start optimization
     //

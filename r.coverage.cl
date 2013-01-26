@@ -1,6 +1,6 @@
 #if defined(cl_amd_fp64) || defined(cl_khr_fp64)
 
-#define PI  3.14159265358979
+#include "worker/constants.h"
 
 
 
@@ -14,7 +14,7 @@ typedef float2	  real2;
 typedef float4    real4;
  *
  */
-	
+    
 /**
  * Double precision arithmetics
  */
@@ -77,8 +77,8 @@ void seed_random(random_state *r, ulong seed)
  *                        and height, are saved here.
  */
 real path_loss_hata_urban (const int pixel_res,
-							const real raster_north,
-							const real raster_west,
+                            const real raster_north,
+                            const real raster_west,
                             const int ncols, 
                             const real4 tx_data, const int2 tx_offset,
                             const real rx_height, const real frequency, 
@@ -94,9 +94,9 @@ real path_loss_hata_urban (const int pixel_res,
     
     // receiver coordinates in meters
     real2 rec_coord = (real2) ((real) px_coord.x * pixel_res + raster_west,
-    							 (real) raster_north - px_coord.y * pixel_res); 
+                                 (real) raster_north - px_coord.y * pixel_res); 
     real2 tx_coord = (real2) ((real) tx_data.x,
-    							(real) tx_data.y);
+                                (real) tx_data.y);
     
     // calculate the distance between transmitter and receiver
     dist = distance (tx_coord, rec_coord);
@@ -321,8 +321,8 @@ __kernel void coverage_kern (const int ntx,
  *                        are saved here.
  *
 __kernel void hata_urban_interference (const int pixel_res,
-									   const real raster_north,
-									   const real raster_west,
+                                       const real raster_north,
+                                       const real raster_west,
                                        const int ncols, 
                                        const real4 tx_data, const int2 tx_offset,
                                        const real rx_height, const real frequency, 
@@ -333,8 +333,8 @@ __kernel void hata_urban_interference (const int pixel_res,
 {
     // calculate the path-loss value on the current location
     real pl_db = path_loss_hata_urban (pixel_res,
-    									raster_north,
-    									raster_west,
+                                        raster_north,
+                                        raster_west,
                                         ncols,
                                         tx_data, tx_offset,
                                         rx_height, frequency, 
@@ -389,6 +389,7 @@ __kernel void eric_per_tx (const real pixel_res,
                            const int2 tile_offset,
                            const real rx_height,
                            const real frequency,
+                           const real4 ericsson_params,
                            __global real *obst_height_in,
                            __global real *obst_dist_in,
                            __global real *dem_in,
@@ -396,22 +397,17 @@ __kernel void eric_per_tx (const real pixel_res,
                            __global real *pl_out,
                            __local real2 *pblock)
 {
-    double4 ericsson_params = {38.0, 32.0, -12.0, 0.1};
-    real dist_Tx_Rx_in_km;
-	double AntHeightBS;
-	double Lambda = 300.0 / frequency;			//	wave lenght
-	double ZObs2LOS = 0;
-	double DistObs2BS = 0;
-	double ZoTransBS,ZoTransMS;
-	double log10Zeff;
-	double log10DistBS2MSKm;
-	double tiltBS2MS;
-	double PathLossFreq;
-	double PathLossTmp = 0;
+    double AntHeightBS;
+    double Lambda = 300.0 / frequency;			//	wave lenght
+    double ZObs2LOS = 0;
+    double DistObs2BS = 0;
+    double ZoTransBS,ZoTransMS;
+    double tiltBS2MS;
+    double PathLossTmp = 0;
     double Zeff;
-	double PathLossAntHeightBS;
-	double DistBS2MSNorm, DistBS2MSKm;
-	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
+    double DistBS2MSNorm, DistBS2MSKm;
+    double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
+    
     uint element_idx = get_global_id(1) * get_global_size(0) + 
                        get_global_id(0);
  
@@ -421,26 +417,38 @@ __kernel void eric_per_tx (const real pixel_res,
     
     // receiver coordinates in meters
     real2 rx_coord_in_meters = (real2) ((real) rx_coord_in_pixels.x * pixel_res + raster_west,
-    						   (real) raster_north - rx_coord_in_pixels.y * pixel_res); 
+                               (real) raster_north - rx_coord_in_pixels.y * pixel_res); 
     real2 tx_coord_in_meters = (real2) ((real) tx_data.x,
-    						            (real) tx_data.y);
+                                        (real) tx_data.y);
     //
     // calculate the distance between the Tx and Rx
     //
-    dist_Tx_Rx_in_km  = distance (tx_coord_in_meters, 
+    double dist_Tx_Rx_km;
+    dist_Tx_Rx_km  = distance (tx_coord_in_meters, 
                                   rx_coord_in_meters);
-    dist_Tx_Rx_in_km /= 1000;
+    dist_Tx_Rx_km /= 1000;
 
-    /*
-    // this is the less accurate distance, as calculated in the CPU version,
-    // based on indices instead of actual coordinates in meters
     //
-    dist_Tx_Rx_in_km = (199 - rx_coord_in_pixels.x) *
-                       (199 - rx_coord_in_pixels.x);
-    dist_Tx_Rx_in_km += (199 - rx_coord_in_pixels.y) *
-                        (199 - rx_coord_in_pixels.y);
-    dist_Tx_Rx_in_km = sqrt (dist_Tx_Rx_in_km) * pixel_res / 1000;
-    */
+    // my HOA calculation
+    //
+    double HOA, HEBK, Rx_corrected_height;
+
+    Rx_corrected_height  = (dist_Tx_Rx_km * 1000) * (dist_Tx_Rx_km * 1000);
+    Rx_corrected_height /= (8/3) * (6.37 * 1000);
+    
+    HEBK = tx_data.z - dem_in[element_idx] - Rx_corrected_height;
+
+    // prevent log(HEBK) going toward `inf`
+    if ((-tx_data.w < HEBK) && (HEBK < tx_data.w))
+        HEBK = tx_data.w;
+
+    HOA  = ericsson_params.x;
+    HOA += ericsson_params.y * log10 (dist_Tx_Rx_km);
+    HOA += ericsson_params.z * log10 (HEBK);
+    HOA += ericsson_params.w * log10 (dist_Tx_Rx_km) * log10 (HEBK);
+    HOA -=   3.2 * log10 (11.75 * rx_height) * log10 (11.75 * rx_height);
+    HOA += 44.49 * log10 (frequency);
+    HOA -=  4.78 * log10 (frequency) * log10 (frequency);
 
     //
     // path-loss calculation starts here
@@ -449,8 +457,8 @@ __kernel void eric_per_tx (const real pixel_res,
     ZoTransMS = dem_in[element_idx] + rx_height;
     AntHeightBS = tx_data.w;
     Zeff = ZoTransBS - ZoTransMS;
-    DistBS2MSKm = dist_Tx_Rx_in_km;
-    DistBS2MSNorm = (dist_Tx_Rx_in_km * 1000) / pixel_res;
+    DistBS2MSKm = dist_Tx_Rx_km;
+    DistBS2MSNorm = (dist_Tx_Rx_km * 1000) / pixel_res;
     if (DistBS2MSKm < 0.01)
         DistBS2MSKm = 0.01;
 
@@ -461,20 +469,7 @@ __kernel void eric_per_tx (const real pixel_res,
     if (- AntHeightBS < Zeff && Zeff < AntHeightBS)
         Zeff = AntHeightBS;		
     
-    log10Zeff=log10(fabs(Zeff));
-
-    //log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
-    log10DistBS2MSKm=log10(DistBS2MSKm);			
-
-	PathLossAntHeightBS = 3.2 * pow (log10 (11.75 * AntHeightBS), 2);
-
-	// loss due to carrier frequency
-    PathLossFreq = 44.49 * log10(frequency) - 4.78 * pow (log10 (frequency), 2);
-
-    PathLossTmp = ericsson_params.x + ericsson_params.y * log10DistBS2MSKm; 
-    PathLossTmp += ericsson_params.z * log10Zeff;
-    PathLossTmp += ericsson_params.w * log10DistBS2MSKm*log10Zeff;
-    PathLossTmp -= PathLossAntHeightBS + PathLossFreq;
+    PathLossTmp = HOA;
 
     // Calc position of the height and position of the highest obstacle
     tiltBS2MS = ZoTransBS - ZoTransMS;
@@ -549,53 +544,69 @@ __kernel void eric_per_tx (const real pixel_res,
     PathLossTmp += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
     
     // write data to pathloss
-    pl_out[element_idx] = PathLossTmp + clut_in[element_idx];
+    pl_out[element_idx] = PathLossTmp; // + clut_in[element_idx]; 
 }
 
 
 
+
 /**
- * Calculates the sectorization path-loss, as per antenna diagram.
+ * Calculates the losses introduced by the antenna, taking into account its
+ * horizontal and vertical diagrams.
  * All coordinates are expressed in raster pixels.
  *
- * int pixel_res ............. size of one raster pixel (in meters);
- * real raster_north ......... northern limit of the raster area (in meters);
- * real raster_west .......... western limit of the raster area (in meters);
- * int ncols ................. total number of columns in the area;
- * real4 tx_data ............. coordinates, elevation and anthenna height of 
+ * pixel_res ................. size of one raster pixel (in meters);
+ * raster_north .............. northern limit of the raster area (in meters);
+ * raster_west ............... western limit of the raster area (in meters);
+ * ncols ..................... total number of columns in the area;
+ * rx_height ................. height of the receiver above ground (in mts);
+ * frequency ................. transmitter frequency in Mhz;
+ * gain ...................... gain (in dB), relative to the isotropic antenna;
+ * beam_dir .................. direction of the antenna beam;
+ * mech_tilt ................. whether antenna mechanical tilt is present;
+ * main_zone_horiz ........... indicates the horizontal loss that defines the
+ *                             main antenna beam;
+ * main_zone_vert ............ indicates the vertical loss that defines the 
+ *                             main antenna beam;
+ * sec_zone_horiz ............ indicates the horizontal loss that defines the
+ *                             secondary antenna beam;
+ * sec_zone_vert ............. indicates the vertical loss that defines the
+ *                             secondary antenna beam;
+ * tx_data ................... coordinates, elevation and anthenna height of 
  *                             the transmitter (coordinates expressed in meters);
- * int2 tx_offset ............ offset of the current transmitter within the
+ * tx_offset ................. offset of the current transmitter within the
  *                             area, including the calculation radius (in raster
  *                             pixels);
- * real rx_height ............ height of the receiver above ground (in mts);
- * real frequency ............ transmitter frequency in Mhz;
- * real gain ................. gain (in dB), relative to the isotropic antenna;
- * int  beam_dir ............. direction of the antenna beam;
- * int  mech_tilt ............ whether antenna mechanical tilt is present;
  * __gl float horiz_diag_in .. horizontal antenna diagram;
  * __gl float vert_diag_in ... vertical antenna diagram;
  * __gl float dem_in ......... digital elevation model data for the area;
- * __gl float sect_out ....... sectorized data where the results are saved;
+ * __gl float radio_zone_out . indicates the radio zone to which each point belongs;
+ * __gl float ant_loss_out ... indicates the loss, introduced by the antenna, on every point;
  * __lo real2 pblock ......... pointer to local memory, used to speed up the
  *                             whole process. Intermediate numbers, like 
  *                             distance and height, are saved here.
  */
-__kernel void sector_kern (const real pixel_res,
-                           const real raster_north,
-                           const real raster_west,
-                           const int ncols, 
-                           const real4 tx_data, 
-                           const int2 tile_offset,
-                           const real rx_height,
-                           const real frequency,
-                           const real gain, 
-                           const int beam_dir,
-                           const int mech_tilt,
-                           __global real *horiz_diag_in,
-                           __global real *vert_diag_in,
-                           __global real *dem_in,
-                           __global real *sect_out,
-                           __local real2 *pblock)
+__kernel void antenna_influence_kern (const real pixel_res,
+                                      const real raster_north,
+                                      const real raster_west,
+                                      const int ncols, 
+                                      const real rx_height,
+                                      const real frequency,
+                                      const real gain, 
+                                      const int beam_dir,
+                                      const int mech_tilt,
+                                      const int main_zone_horiz,
+                                      const int main_zone_vert,
+                                      const int sec_zone_horiz,
+                                      const int sec_zone_vert,
+                                      const real4 tx_data, 
+                                      const int2 tile_offset,
+                                      __global real *horiz_diag_in,
+                                      __global real *vert_diag_in,
+                                      __global real *dem_in,
+                                      __global char *radio_zone_out,
+                                      __global real *ant_loss_out,
+                                      __local real2 *pblock)
 {
     real height_diff;
     real angle;
@@ -612,9 +623,9 @@ __kernel void sector_kern (const real pixel_res,
     
     // receiver coordinates in meters
     real2 rx_coord_in_meters = (real2) ((real) rx_coord_in_pixels.x * pixel_res + raster_west,
-    						   (real) raster_north - rx_coord_in_pixels.y * pixel_res); 
+                               (real) raster_north - rx_coord_in_pixels.y * pixel_res); 
     real2 tx_coord_in_meters = (real2) ((real) tx_data.x,
-    						            (real) tx_data.y);
+                                        (real) tx_data.y);
     
     // calculate the distance using the raster coordinates
     dist_Tx_Rx_in_km  = distance (tx_coord_in_meters, 
@@ -633,18 +644,18 @@ __kernel void sector_kern (const real pixel_res,
     if (angle < 0)
         angle = -angle;
 
-	// take care of the orientation
-	if ((dist.x >= 0) && (dist.y >= 0))
-		horiz_angle = angle;
-	else if ((dist.x < 0) && (dist.y >= 0))
-		horiz_angle = 2*PI - angle;
-	else if ((dist.x < 0) && (dist.y < 0))
-		horiz_angle = PI + angle;
-	else // (dist.y < 0 && dist.x >= 0)
-		horiz_angle = PI - angle;
+    // take care of the orientation
+    if ((dist.x >= 0) && (dist.y >= 0))
+        horiz_angle = angle;
+    else if ((dist.x < 0) && (dist.y >= 0))
+        horiz_angle = 2*_PI_ - angle;
+    else if ((dist.x < 0) && (dist.y < 0))
+        horiz_angle = _PI_ + angle;
+    else // (dist.y < 0 && dist.x >= 0)
+        horiz_angle = _PI_ - angle;
 
     // convert from radians to degrees and substract the beam direction
-    horiz_angle  = (horiz_angle * 180 / PI) - beam_dir;
+    horiz_angle  = (horiz_angle * 180 / _PI_) - beam_dir;
     horiz_angle += (horiz_angle < 0) ? 360 : 0;
 
     // avoid to reading unallocated data (antenna diagram comprises 0 to 359 deg.)
@@ -655,7 +666,7 @@ __kernel void sector_kern (const real pixel_res,
     int index = (int) floor (horiz_angle);
     horiz_loss  = horiz_diag_in[index];
     horiz_loss += ((horiz_diag_in[(int) angle] - horiz_diag_in[index]) *
-    		       (horiz_angle - floor (horiz_angle)));
+                   (horiz_angle - floor (horiz_angle)));
 
     //
     // continue with the vertical angle and loss calculation
@@ -667,7 +678,7 @@ __kernel void sector_kern (const real pixel_res,
     height_diff = tx_data.z - dem_in[dem_idx] - rx_height;
 
     vert_angle  = atan (height_diff / (dist_Tx_Rx_in_km * 1000));
-    vert_angle  = vert_angle * 180 / PI;
+    vert_angle  = vert_angle * 180 / _PI_;
 
     // impact of the mechanical tilt with respect to the horizontal angle
     real mech_tilt_impact;
@@ -703,10 +714,61 @@ __kernel void sector_kern (const real pixel_res,
     // wait for other work items to cache their values
     barrier (CLK_LOCAL_MEM_FENCE);
 
+    // mark the radio zone based on the distances defined by E/// propagation;
+    // we should mark the pixels which are too close for calculation 
+    // (less than 200 mts), and those within distances for which the 
+    // propagation model is defined
+    if (dist_Tx_Rx_in_km < 0.2)
+        radio_zone_out[element_idx] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
+    else 
+        radio_zone_out[element_idx] |= _RADIO_ZONE_MODEL_DISTANCE_ON_;
+
+    // check if this point is within the main antenna beam, i.e. 
+    // horizontally and vertically introduced loss is within threshold
+    if ((pblock[local_idx].x <= (real) main_zone_horiz) && 
+        (pblock[local_idx].y <= (real) main_zone_vert))
+        radio_zone_out[element_idx] |= _RADIO_ZONE_MAIN_BEAM_ON_;
+    // check if this point is within the secondary main antenna beam, i.e. 
+    // a larger main antenna beam not including the main one (only the difference)
+    else if ((pblock[local_idx].x <= (real) sec_zone_horiz) && 
+             (pblock[local_idx].y <= (real) sec_zone_vert))
+        radio_zone_out[element_idx] |= _RADIO_ZONE_SECONDARY_BEAM_ON_;
+
     // combine pathloss with determined diagram angles and antenna gain
-    sect_out[element_idx] += (real) (horiz_loss + vert_loss - gain);
+    ant_loss_out[element_idx] = (real) (horiz_loss + vert_loss - gain);
 }
 
+
+
+/**
+ * Sums the contents of the first vector to the second one.
+ *
+ * __gl vect_in ........ the first vector;
+ * __gl vect_out ....... the second and output vector, to which the first
+ *                       one will be sumed;
+ * __lo pblock ......... pointer to local memory, used to speed up the
+ *                       whole process. Intermediate results are saved
+ *                       here.
+ */
+__kernel void vector_sum_kern (__global real *vect_in,
+                               __global real *vect_out,
+                               __local  real *pblock)
+{
+    uint element_idx = get_global_id(1) * get_global_size(0) + 
+                       get_global_id(0);
+    uint local_idx = get_local_id(1) * get_local_size(0) + 
+                     get_local_id(0);
+
+    // cache the sum to achieve coallesced memory access
+    pblock[local_idx]  = vect_in[element_idx];
+    pblock[local_idx] += vect_out[element_idx];
+
+    // wait for other work items to cache their values
+    barrier (CLK_LOCAL_MEM_FENCE);
+
+    // output all at once
+    vect_out[element_idx] = pblock[local_idx];
+}
 
 #endif
 

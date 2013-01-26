@@ -14,8 +14,9 @@
  * content_buffer   the buffer to which the read data is saved.-
  *
  */
-static int read_file_into_memory (const char *file_name,
-                                  char *content_buffer)
+static int 
+read_file_into_memory (const char *file_name,
+                       char *content_buffer)
 {
     char *read_ptr = &(content_buffer[0]);
     FILE *fr = fopen (file_name, "r");
@@ -84,7 +85,7 @@ int main (int argc, char *argv [])
 
     use_gpu = G_define_flag ( );
     use_gpu->key = 'g';
-    use_gpu->description = "Whether to use the GPU implementation";
+    use_gpu->description = "Whether to use the GPU implementation. Implies -p.";
 
     use_opt = G_define_flag ( );
     use_opt->key = 't';
@@ -110,14 +111,17 @@ int main (int argc, char *argv [])
     params->use_gpu = use_gpu->answer;
     params->use_opt = use_opt->answer;
 
+    if (params->use_gpu)
+    {
+        use_mpi->answer = 1;
+        fprintf (stdout, 
+                 "*** INFO: GPU hardware will be used on the workers, if available\n");
+    }
     if (params->use_opt)
     {
         use_mpi->answer = 1;
-        if (params->use_gpu)
-            G_fatal_error ("Sorry, GPU is not supported in optimization mode");
-        else
-            fprintf (stdout, "*** INFO: Optimization mode enabled\n");
-
+        fprintf (stdout, 
+                 "*** INFO: Optimization mode enabled\n");
     }
 
     //
@@ -153,8 +157,6 @@ int main (int argc, char *argv [])
     //
     // ... and execute it
     //
-    double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
-
     if (use_mpi->answer)
     {
         coverage_mpi (argc,
@@ -163,6 +165,8 @@ int main (int argc, char *argv [])
     }
     else
     {
+        double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
+
         if (params->ntx > 1)
             fprintf (stderr, 
                      "WARNING Only the first transmitter will be processed\n");
