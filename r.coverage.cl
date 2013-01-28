@@ -439,7 +439,7 @@ __kernel void eric_per_tx (const real pixel_res,
     HEBK = tx_data.z - dem_in[element_idx] - Rx_corrected_height;
 
     // prevent log(HEBK) going toward `inf`
-    if ((-tx_data.w < HEBK) && (HEBK < tx_data.w))
+    if (isinf ((float) HEBK) != 0)
         HEBK = tx_data.w;
 
     HOA  = ericsson_params.x;
@@ -541,7 +541,13 @@ __kernel void eric_per_tx (const real pixel_res,
     else
         JDFR = 0;
 
-    PathLossTmp += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
+    PathLossTmp += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
+
+    //
+    // FIXME: check if this is correct, since path loss should always be a number
+    //
+    if (isinf ((float) PathLossTmp) != 0)
+        PathLossTmp = 255.0;
     
     // write data to pathloss
     pl_out[element_idx] = PathLossTmp; // + clut_in[element_idx]; 

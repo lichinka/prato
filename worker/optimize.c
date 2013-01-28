@@ -129,6 +129,12 @@ obj_func (Parameters    *params,
         for (c = 0; c < tx_params->ncols; c ++)
         {
             //
+            // FIXME normally, the path-loss value should be a number,
+            //       check we this is sometimes not true
+            //
+            if (isnan (tx_params->m_loss[r][c]))
+                continue;
+            //
             // ... apply the previously calculated antenna losses
             //
             tx_params->m_loss[r][c] += tx_params->m_antenna_loss[r][c];
@@ -345,7 +351,7 @@ de (Parameters     *params,
     for (i=0; i < NP; i++)
     {
         for (j=0; j <= D; j++)
-            fprintf (stdout, "%.15e ", popul[i][j]);
+            fprintf (stdout, "%.15f ", popul[i][j]);
         fprintf (stdout, "\n");
     }
 

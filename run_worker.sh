@@ -13,9 +13,9 @@ if [ "${REDIR}" = "-db" ]; then
     ${CMD} | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
 else
     if [ -z "${REDIR}" ]; then
-        #${CMD} > /tmp/worker.log
-        ${CMD} | grep '^[0-9]' - | grep -v 'inf' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 
-        v.to.rast input=temp type=point output=temp use=z --overwrite
+        ${CMD} > /tmp/worker.log
+        #${CMD} | grep '^[0-9]' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 
+        #v.to.rast input=temp type=point output=temp use=z --overwrite
     else
         echo "Usage: $0 [-db]"
         echo "Starts a worker process."
