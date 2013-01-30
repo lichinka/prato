@@ -239,6 +239,12 @@ receive_tx_data (Parameters *params,
     if (status.MPI_ERROR)
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of DEM data\n");
+    //
+    // transmitter height above sea level
+    //
+    tx_params->total_tx_height  = tx_params->m_dem[tx_params->tx_east_coord_idx]
+                                                  [tx_params->tx_north_coord_idx];
+    tx_params->total_tx_height += tx_params->antenna_height_AGL;
 
     //
     // clutter data

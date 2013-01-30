@@ -276,57 +276,6 @@ init_coverage_for_tx (FILE          *ini_file,
         G_fatal_error ("Can't parse INI memory buffer\n");
 
     //
-    // returns NULL if the map was not found in any mapset
-    //
-    int infd, tr_row, tr_col;
-    char *mapset = G_find_cell2 (params->dem_map, "");
-
-    if (mapset == NULL)
-        G_fatal_error ("DEM raster map <%s> not found", 
-                       params->dem_map);
-    //
-    // returns file descriptor to the raster map
-    //
-    if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
-        G_fatal_error ("Unable to open DEM raster map <%s>",
-                       params->dem_map);
-    //
-    // check if the specified transmitter location is inside the DEM map
-    // 
-    if (tx_params->tx_east_coord  < params->map_west || 
-        tx_params->tx_east_coord  > params->map_east ||
-        tx_params->tx_north_coord > params->map_north || 
-        tx_params->tx_north_coord < params->map_south)
-        G_fatal_error ("Specified TX coordinates are outside the DEM map.");
-   
-    //
-    // map array coordinates for transmitter
-    //
-    tr_row = (params->map_north - tx_params->tx_north_coord) / params->map_ns_res;
-    tr_col = (tx_params->tx_east_coord - params->map_west) / params->map_ew_res;
-
-    //
-    // allocate the reading buffer for DEM 
-    //
-    void *inrast = G_allocate_raster_buf (FCELL_TYPE);
-
-    //
-    // total height of transmitter 
-    // 
-    if (G_get_raster_row (infd, inrast, tr_row, FCELL_TYPE) < 0)
-        G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, 
-                                                                tr_row);
-    FCELL trans_elev = ((FCELL *) inrast)[tr_col];
-
-    //
-    // check if transmitter is on DEM
-    //
-    if (isnan ((double) trans_elev))							
-        G_fatal_error ("Transmitter outside DEM raster map.");
-
-    tx_params->total_tx_height = (double) trans_elev + tx_params->antenna_height_AGL;
-  
-    //
     // calculate the subregion (within the area) where this transmitter is 
     // located, taking into account its location and the calculation radius
     //
@@ -338,14 +287,14 @@ init_coverage_for_tx (FILE          *ini_file,
     tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
     tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
     tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
-    tx_params->map_north_idx      = (int) ceil ((params->map_north - tx_params->map_north) /
-                                                 params->map_ns_res);
+    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
+                                            params->map_ns_res);
     tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
     tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
-    tx_params->map_west_idx       = (int) floor ((tx_params->map_west - params->map_west) / 
-                                                  params->map_ew_res);
-    tx_params->tx_east_coord_idx  = radius_in_pixels - 1;
-    tx_params->tx_north_coord_idx = radius_in_pixels - 1;
+    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
+                                            params->map_ew_res);
+    tx_params->tx_north_coord_idx = radius_in_pixels;
+    tx_params->tx_east_coord_idx  = radius_in_pixels;
 
     //
     // if in optimization mode, load the field measurements of this Tx
@@ -375,16 +324,6 @@ init_coverage_for_tx (FILE          *ini_file,
     else
         fprintf (stdout, 
                  "*** INFO: Not loading transmitter measurements in coverage prediction mode\n");
-
-    //
-    // free the read buffer for DEM data
-    //
-    G_free (inrast);
-    
-    //
-    // close raster maps
-    //
-    G_close_cell (infd);
 }
 
 

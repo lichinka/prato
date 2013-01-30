@@ -6,31 +6,38 @@
 #
 # Start MPI jobs
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -gt ini_file=./parameters.ini tx_ini_sections=CVELEA : -np 1 --hostfile hostfile.local ./run_worker.sh
+mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -tg ini_file=./parameters.ini tx_ini_sections=SBANOVA : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 
 ############
 ## GPU-CPU comparison test-case follows
 
 #
-# Start MPI jobs
+# Start MPI jobs for GPU
 #
-#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -g ini_file=./parameters.ini tx_ini_sections=CTOPOLA : -np 1 --hostfile hostfile.local ./run_worker.sh
+#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -g ini_file=./parameters.ini tx_ini_sections=CVELEA : -np 1 --hostfile hostfile.local ./run_worker.sh
 #
 # Spare the output of the GPU job
 #
 #cat /tmp/worker.log > /tmp/worker.gpu
 
 #
-# Start MPI jobs
+# Start job for CPU
 #
-#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -p ini_file=./parameters.ini tx_ini_sections=CTOPOLA : -np 1 --hostfile hostfile.local ./run_worker.sh
+#r.ericsson inputDEM=dem100i_mo@PERMANENT clutter=clut100_mo@PERMANENT output=temp1 A0=38 A1=32 A2=-12 A3=0.1 coordinate=509535,135169 ant_height=30.65 radius=8 frequency=2040 --overwrite
+
+#r.mapcalc diff=temp-temp1
+#r.info diff
+#r.colors map=diff color=elevation
+
 #
 # Spare the output of the CPU job
 #
 #cat /tmp/worker.log > /tmp/worker.cpu
 
 #echo "***"
+#echo "* $( wc -l /tmp/worker.cpu )"
+#echo "* $( wc -l /tmp/worker.gpu )"
 #echo "* GPU and CPU outputs differ in $( diff /tmp/worker.cpu /tmp/worker.gpu | wc -l )/$( wc -l /tmp/worker.cpu | cut -d' ' -f1 ) lines."
 #echo "***"
 

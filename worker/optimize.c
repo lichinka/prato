@@ -1,4 +1,5 @@
 #include "worker/optimize.h"
+#include "worker/antenna.h"
 #include "worker/eric.h"
 
 
@@ -31,60 +32,12 @@ obj_func (Parameters    *params,
         eric_pathloss_on_gpu (params,
                               tx_params,
                               sol_vector);
-
-        /*
-        // FIXME: move this part to a separate function inside `antenna.c`
-        //
-
-        //
-        // activate the kernel, 
-        // to sum the antenna loss to the isotrophic path-loss
-        // 
-        activate_kernel (tx_params->ocl_obj,
-                         "vector_sum_kern");
-        //
-        // define a 2D execution range for the kernel ...
-        //
-        double radius_in_meters = params->radius * 1000;
-        int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
-        int diameter_in_pixels  = 2 * radius_in_pixels;
-        size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
-        size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
-                                  ntile * _WORK_ITEMS_PER_DIMENSION_};
-        size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
-                                 _WORK_ITEMS_PER_DIMENSION_};
-
-        // set pointer kernel parameters
-        set_kernel_mem_arg (tx_params->ocl_obj,
-                            0,
-                            tx_params->m_antenna_loss_dev);
-        set_kernel_mem_arg (tx_params->ocl_obj,
-                            1,
-                            tx_params->m_loss_dev);
-        // reserve local memory on the device
-        lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
-                    _WORK_ITEMS_PER_DIMENSION_ *
-                    sizeof (double);
-        set_local_mem (tx_params->ocl_obj,
-                       2,
-                       lmem_size);
-        //
-        // execute the sum kernel
-        //
-        run_kernel_2D_blocking (tx_params->ocl_obj,
-                                0,
-                                NULL,
-                                global_sizes,
-                                local_sizes);
-        //
-        // sync memory
-        //
-        read_buffer_blocking (tx_params->ocl_obj,
-                              0,
-                              tx_params->m_loss_dev,
-                              ant_buff_size,
-                              tx_params->m_loss[0]);
-                              */
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+        measure_time ("Apply antenna losses on GPU");
+#endif
+        apply_antenna_influence_gpu (params,
+                                     tx_params);
     }
     else
     {
@@ -129,21 +82,10 @@ obj_func (Parameters    *params,
         for (c = 0; c < tx_params->ncols; c ++)
         {
             //
-            // FIXME normally, the path-loss value should be a number,
-            //       check we this is sometimes not true
-            //
-            if (isnan (tx_params->m_loss[r][c]))
-                continue;
-            //
-            // ... apply the previously calculated antenna losses
-            //
-            tx_params->m_loss[r][c] += tx_params->m_antenna_loss[r][c];
-
-            //
             // look for the target radio zone ...
             //
             char rz = tx_params->m_radio_zone[r][c];
-            if ((rz & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
+            if ((rz & radio_zone) > 0)
             {
                 //
                 // ... and a field measurement there
@@ -382,8 +324,7 @@ de (Parameters     *params,
     printf ("%.15f\n", popul[index][D]);
 
 
-    /* Freeing dynamically allocated memory	*/
-
+    /* Freeing dynamically allocated memory	*/ 
     for (i=0; i < NP; i++)
     {
       free(popul[i]);
@@ -430,8 +371,8 @@ optimize (Parameters    *params,
     de (params,
         tx_params,
         _SEARCH_VECTOR_DIMENSIONS_,
-        10 * _SEARCH_VECTOR_DIMENSIONS_,
-        10,
+        20 * _SEARCH_VECTOR_DIMENSIONS_,
+        1000,
         0.9,
         0.9,
         1,

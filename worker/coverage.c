@@ -129,6 +129,21 @@ output_to_stdout (const Parameters *params,
     fprintf (stdout,
              "\\COPY coverage_%s (east, north, pl) FROM STDIN WITH DELIMITER '|'\n",
              tx_params->tx_name);
+   
+    //
+    // bring the data from the GPU if it has been used
+    //
+    if (params->use_gpu)
+    {
+        size_t buff_size = tx_params->nrows * 
+                           tx_params->ncols * 
+                           sizeof (tx_params->m_loss[0][0]);
+        read_buffer_blocking (tx_params->ocl_obj,
+                              0,
+                              tx_params->m_loss_dev,
+                              buff_size,
+                              tx_params->m_loss[0]);
+    }
 
     //
     // output the data

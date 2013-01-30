@@ -39,6 +39,20 @@ static Diagram *diagram = NULL;
 
 
 /**
+ * Applies (sums) the losses introduced by the antenna over the isotrophic 
+ * path-loss values.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ *
+ */
+void
+apply_antenna_influence_gpu (Parameters    *params,
+                             Tx_parameters *tx_params);
+
+/**
  * Calculates additional gain/pathloss according to the antenna's
  * 3-dimensional diagram.
  *

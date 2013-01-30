@@ -420,12 +420,6 @@ eric_pathloss_on_gpu (Parameters    *params,
                       const double  *eric_params)
 {
     //
-    // size of all buffers used in this function
-    //
-    size_t buffer_size = tx_params->nrows * 
-                         tx_params->ncols * 
-                         sizeof (double);
-    //
     // we use this pointer as a flag, indicating that we are about to
     // run this function for the first time
     //
@@ -488,10 +482,10 @@ eric_pathloss_on_gpu (Parameters    *params,
     // set prediction model parameters
     //
     cl_double4 model_params;
-    model_params.s[0] = eric_params[0];
-    model_params.s[1] = eric_params[1];
-    model_params.s[2] = eric_params[2];
-    model_params.s[3] = eric_params[3];
+    model_params.s[0] = (double) eric_params[0];
+    model_params.s[1] = (double) eric_params[1];
+    model_params.s[2] = (double) eric_params[2];
+    model_params.s[3] = (double) eric_params[3];
     set_kernel_value_arg (tx_params->ocl_obj,
                           7,
                           sizeof (cl_double4),
@@ -518,7 +512,7 @@ eric_pathloss_on_gpu (Parameters    *params,
     // reserve local memory on the device
     size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
                        _WORK_ITEMS_PER_DIMENSION_ *
-                       sizeof (cl_float2);
+                       sizeof (tx_params->m_loss[0][0]);
     set_local_mem (tx_params->ocl_obj,
                    13,
                    lmem_size);
@@ -588,14 +582,6 @@ eric_pathloss_on_gpu (Parameters    *params,
                             NULL,
                             global_sizes,
                             local_sizes);
-    //
-    // sync memory
-    //
-    read_buffer_blocking (tx_params->ocl_obj,
-                          0,
-                          tx_params->m_loss_dev,
-                          buffer_size,
-                          tx_params->m_loss[0]);
 }
 
 
@@ -668,7 +654,7 @@ EricPathLossSub (double **Obst_high,
 
 	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
 									/*POPRAVJNEO (4.2.2010)*/	
-	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightBS),2);
+	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightMS),2);
 
     //
     // calculate the terrain profile if we haven't already
@@ -826,7 +812,7 @@ EricPathLossSub (double **Obst_high,
             else{
                 JDFR = 0;
             }
-            
+           
             PathLossTmp = PathLossTmp + sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
 
             // write data to pathloss

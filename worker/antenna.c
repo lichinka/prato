@@ -377,10 +377,78 @@ antenna_influence_cpu (Parameters    *params,
 
 
 
+/**
+ * Applies (sums) the losses introduced by the antenna over the isotrophic 
+ * path-loss values.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ *
+ */
+void
+apply_antenna_influence_gpu (Parameters    *params,
+                             Tx_parameters *tx_params)
+{
+    //
+    // activate the kernel, 
+    // to sum the antenna loss to the isotrophic path-loss
+    // 
+    activate_kernel (tx_params->ocl_obj,
+                     "vector_sum_kern");
+    //
+    // define a 2D execution range for the kernel ...
+    //
+    double radius_in_meters = params->radius * 1000;
+    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
+    int diameter_in_pixels  = 2 * radius_in_pixels;
+    size_t ntile            = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
+    size_t global_sizes []  = {ntile * _WORK_ITEMS_PER_DIMENSION_,
+                               ntile * _WORK_ITEMS_PER_DIMENSION_};
+    size_t local_sizes []   = {_WORK_ITEMS_PER_DIMENSION_,
+                               _WORK_ITEMS_PER_DIMENSION_};
+
+    // set pointer kernel parameters
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        0,
+                        tx_params->m_antenna_loss_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        1,
+                        tx_params->m_loss_dev);
+    // reserve local memory on the device
+    size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
+                       _WORK_ITEMS_PER_DIMENSION_ *
+                       sizeof (double);
+    set_local_mem (tx_params->ocl_obj,
+                   2,
+                   lmem_size);
+    //
+    // execute the sum kernel
+    //
+    run_kernel_2D_blocking (tx_params->ocl_obj,
+                            0,
+                            NULL,
+                            global_sizes,
+                            local_sizes);
+    /*
+    // no need to sync memory: everything is kept on the GPU 
+    // until the last moment
+    //
+    read_buffer_blocking (tx_params->ocl_obj,
+                          0,
+                          tx_params->m_loss_dev,
+                          ant_buff_size,
+                          tx_params->m_loss[0]);
+                          */
+}
+
 
 
 /**
  * GPU version of the antenna influence algorithm.
+ * The losses introduced by the antenna are kept in a separate matrix, ready
+ * to be applied over the isotrophic path loss values.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
@@ -612,14 +680,14 @@ antenna_influence_gpu (Parameters    *params,
                             global_sizes,
                             local_sizes);
     //
-    // sync memory
+    // no need to sync memory, since everything is calculated on the GPU
     //
     read_buffer (tx_params->ocl_obj,
                  0,
                  tx_params->m_radio_zone_dev,
                  rad_buff_size,
                  tx_params->m_radio_zone[0]);
-    read_buffer (tx_params->ocl_obj,
+    /*read_buffer (tx_params->ocl_obj,
                  0,
                  tx_params->m_antenna_loss_dev,
                  ant_buff_size,
@@ -629,6 +697,7 @@ antenna_influence_gpu (Parameters    *params,
                           tx_params->m_loss_dev,
                           ant_buff_size,
                           tx_params->m_loss[0]);
+                          */
 }
 
 
@@ -691,8 +760,12 @@ calculate_antenna_influence (Parameters    *params,
     // calculate the antenna influence
     //
     if (params->use_gpu)
+    {
         antenna_influence_gpu (params,
                                tx_params);
+        apply_antenna_influence_gpu (params,
+                                     tx_params);
+    }
     else
         antenna_influence_cpu (params,
                                tx_params);

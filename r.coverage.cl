@@ -395,22 +395,18 @@ __kernel void eric_per_tx (const real pixel_res,
                            __global real *dem_in,
                            __global real *clut_in,
                            __global real *pl_out,
-                           __local real2 *pblock)
+                           __local  real *pblock)
 {
-    double AntHeightBS;
-    double Lambda = 300.0 / frequency;			//	wave lenght
-    double ZObs2LOS = 0;
-    double DistObs2BS = 0;
-    double ZoTransBS,ZoTransMS;
-    double tiltBS2MS;
-    double PathLossTmp = 0;
-    double Zeff;
-    double DistBS2MSNorm, DistBS2MSKm;
-    double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
-    
     uint element_idx = get_global_id(1) * get_global_size(0) + 
                        get_global_id(0);
- 
+    uint local_idx   = get_local_id(1) * get_local_size(0) + 
+                       get_local_id(0);
+
+    double AntHeightBS;
+    double Lambda = 300.0 / frequency;			//	wave lenght
+    double tiltBS2MS;
+    double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
+    
     // receiver coordinates in pixels 
     int2 rx_coord_in_pixels  = (int2) ((int)tile_offset.x + get_global_id (0),
                                        (int)tile_offset.y + get_global_id (1));
@@ -421,66 +417,95 @@ __kernel void eric_per_tx (const real pixel_res,
     real2 tx_coord_in_meters = (real2) ((real) tx_data.x,
                                         (real) tx_data.y);
     //
-    // calculate the distance between the Tx and Rx
+    // access the needed data from global memory
     //
-    double dist_Tx_Rx_km;
-    dist_Tx_Rx_km  = distance (tx_coord_in_meters, 
-                                  rx_coord_in_meters);
-    dist_Tx_Rx_km /= 1000;
+    double ZObs2LOS            = obst_height_in[element_idx];
+    double DistObs2BS          = obst_dist_in[element_idx];
+    double rx_corrected_height = dem_in[element_idx];
 
     //
-    // my HOA calculation
+    // cache the partial path-loss value
     //
-    double HOA, HEBK, Rx_corrected_height;
+    pblock[local_idx] = (real) (clut_in[element_idx]);
 
-    Rx_corrected_height  = (dist_Tx_Rx_km * 1000) * (dist_Tx_Rx_km * 1000);
-    Rx_corrected_height /= (8/3) * (6.37 * 1000);
+    // wait for other work items to cache their values
+    barrier (CLK_LOCAL_MEM_FENCE);
+
+    rx_corrected_height += rx_height;
+
+    //
+    // calculate the distance between the Tx and Rx in kilometers
+    //
+    double dist_tx_rx_km;
+    dist_tx_rx_km  = distance (tx_coord_in_meters, 
+                               rx_coord_in_meters);
+    dist_tx_rx_km /= 1000;
+
+    //
+    // calculate the distance between the Tx and Rx in pixels
+    //
+    double dist_tx_rx_px;
+    dist_tx_rx_px = (tx_data.x - rx_coord_in_meters.x) *
+                    (tx_data.x - rx_coord_in_meters.x);
+    dist_tx_rx_px += (tx_data.y - rx_coord_in_meters.y) *
+                     (tx_data.y - rx_coord_in_meters.y);
+    dist_tx_rx_px = sqrt (dist_tx_rx_px) / pixel_res;
+
+    //
+    // prevent prediction of receiver points that are too near the antenna
+    //
+    if (dist_tx_rx_km < 0.01)
+    {
+        dist_tx_rx_km = 0.01;
+        dist_tx_rx_px = round ((dist_tx_rx_km * 1000) / pixel_res);
+    }
+
+    //
+    // HOA, HEBK calculation
+    //
+    double HOA, HEBK;
     
-    HEBK = tx_data.z - dem_in[element_idx] - Rx_corrected_height;
+    //
+    // effective antenna height
+    //
+    HEBK  = tx_data.z - rx_corrected_height;
 
-    // prevent log(HEBK) going toward `inf`
-    if (isinf ((float) HEBK) != 0)
+    //
+    // height correction due to earth curvature
+    //
+    HEBK += (dist_tx_rx_km * dist_tx_rx_km) / ((6370 * 8000) / 3);
+
+    //
+    // prevent the influence of this term exceeding the limit 
+    // of the prediction model; `tx_data.w` is the height of the 
+    // antenna above ground level
+    //
+    if ((HEBK < tx_data.w) && (HEBK > -tx_data.w))
         HEBK = tx_data.w;
+    else
+        HEBK = fabs (HEBK);
 
     HOA  = ericsson_params.x;
-    HOA += ericsson_params.y * log10 (dist_Tx_Rx_km);
+    HOA += ericsson_params.y * log10 (dist_tx_rx_km);
     HOA += ericsson_params.z * log10 (HEBK);
-    HOA += ericsson_params.w * log10 (dist_Tx_Rx_km) * log10 (HEBK);
+    HOA += ericsson_params.w * log10 (dist_tx_rx_km) * log10 (HEBK);
     HOA -=   3.2 * log10 (11.75 * rx_height) * log10 (11.75 * rx_height);
     HOA += 44.49 * log10 (frequency);
     HOA -=  4.78 * log10 (frequency) * log10 (frequency);
 
+    // partial path-loss value
+    pblock[local_idx] += HOA;
+
     //
-    // path-loss calculation starts here
+    // calculate the height and position of the highest obstacle
     //
-    ZoTransBS = tx_data.z;
-    ZoTransMS = dem_in[element_idx] + rx_height;
-    AntHeightBS = tx_data.w;
-    Zeff = ZoTransBS - ZoTransMS;
-    DistBS2MSKm = dist_Tx_Rx_km;
-    DistBS2MSNorm = (dist_Tx_Rx_km * 1000) / pixel_res;
-    if (DistBS2MSKm < 0.01)
-        DistBS2MSKm = 0.01;
+    tiltBS2MS = tx_data.z - rx_corrected_height;
 
-    // height correction due to earth sphere
-    Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; 
-
-    // prevent Log10(Zeff) to go toward -inf
-    if (- AntHeightBS < Zeff && Zeff < AntHeightBS)
-        Zeff = AntHeightBS;		
-    
-    PathLossTmp = HOA;
-
-    // Calc position of the height and position of the highest obstacle
-    tiltBS2MS = ZoTransBS - ZoTransMS;
-
-    if (DistBS2MSNorm > 0) 
-        tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+    if (dist_tx_rx_px > 0) 
+        tiltBS2MS = -tiltBS2MS / dist_tx_rx_px;
     else 
         tiltBS2MS = 0; 
     
-    ZObs2LOS = obst_height_in[element_idx];
-    DistObs2BS = obst_dist_in[element_idx];
 
     // Calculate path loss due to NLOS conditions
     ElevAngCos = cos ( atan (tiltBS2MS / pixel_res) );
@@ -489,9 +514,9 @@ __kernel void eric_per_tx (const real pixel_res,
     if (ElevAngCos != 0) 
         Ddot = DistObs2BS/ElevAngCos;
 
-    Ddotdot = DistBS2MSNorm - Ddot;
+    Ddotdot = dist_tx_rx_px - Ddot;
     if (ElevAngCos != 0)
-        Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
+        Ddotdot = dist_tx_rx_px / ElevAngCos - Ddot;
 
     // Obstacle height korrection due to earth sphere
     if (Ddot <= Ddotdot)
@@ -507,7 +532,7 @@ __kernel void eric_per_tx (const real pixel_res,
     if (Ddot > 0 && Ddotdot > 0)
     { 
         // First Fresnel elipsoid radius
-        Fresnel=sqrt((Lambda*Ddot*Ddotdot*pixel_res)/(Ddot+Ddotdot));
+        Fresnel = sqrt ( (Lambda*Ddot*Ddotdot*pixel_res) / (Ddot+Ddotdot) );
 
         PathLossDiff = Hdot/Fresnel;
 
@@ -533,7 +558,7 @@ __kernel void eric_per_tx (const real pixel_res,
     // Spherical earth diffraction komponent JDFR
     if (Hdot > 0)
     {
-        JDFR = 20 + 0.112 * pow(frequency/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
+        JDFR = 20 + 0.112 * pow(frequency/(16/9),1/3) * (dist_tx_rx_km - sqrt(12.73 * 4/3) * ( sqrt(tx_data.z) + sqrt(rx_corrected_height) )  );
     
         if (JDFR < 0)
             JDFR=0;
@@ -541,16 +566,15 @@ __kernel void eric_per_tx (const real pixel_res,
     else
         JDFR = 0;
 
-    PathLossTmp += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
+    pblock[local_idx] += sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
+
+    // wait for other work items to finish their calculations
+    barrier (CLK_LOCAL_MEM_FENCE);
 
     //
-    // FIXME: check if this is correct, since path loss should always be a number
+    // output all at once
     //
-    if (isinf ((float) PathLossTmp) != 0)
-        PathLossTmp = 255.0;
-    
-    // write data to pathloss
-    pl_out[element_idx] = PathLossTmp; // + clut_in[element_idx]; 
+    pl_out[element_idx] = pblock[local_idx];
 }
 
 
@@ -643,9 +667,9 @@ __kernel void antenna_influence_kern (const real pixel_res,
     // calculate the horizontal angle between transmitter and receiver;
     // the arctan cannot be calculated if any of the involved numbers is 0
     if (dist.x == 0)
-        dist.x = 0.01;
+        dist.x = 0.001;
     if (dist.y == 0)
-        dist.y = 0.01;
+        dist.y = 0.001;
     angle = atan (dist.x / dist.y);
     if (angle < 0)
         angle = -angle;
