@@ -1,12 +1,12 @@
 #
 # Sync cubo
 #
-#rsync -avz ${HOME}/etc/dr/tun_par/prato/ luka@192.168.1.100:${HOME}/etc/dr/tun_par/prato/
+#rsync -avz ${HOME}/etc/dr/tun_par/prato/ luka@192.168.1.102:${HOME}/etc/dr/tun_par/prato/
 
 #
 # Start MPI jobs
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -tg ini_file=./parameters.ini tx_ini_sections=SBANOVA : -np 1 --hostfile hostfile.local ./run_worker.sh
+mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 
 ############
