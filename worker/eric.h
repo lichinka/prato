@@ -52,6 +52,9 @@ EricPathLossSub (double **Obst_high,
                  double **Raster, 
                  double **Clutter, 
                  double **PathLoss, 
+                 double **Meritve,
+                 double **AntLoss,
+                 char **RadioZone,
                  struct StructEric *IniEric);
 
 #endif

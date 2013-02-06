@@ -65,6 +65,9 @@ coverage (Parameters           *params,
                          tx_params->m_dem, 
                          tx_params->m_clut, 
                          tx_params->m_loss, 
+                         tx_params->m_field_meas,
+                         tx_params->m_antenna_loss,
+                         tx_params->m_radio_zone,
                          &IniEric);
     }
 #ifdef _PERFORMANCE_METRICS_

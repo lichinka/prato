@@ -582,6 +582,17 @@ eric_pathloss_on_gpu (Parameters    *params,
                             NULL,
                             global_sizes,
                             local_sizes);
+    //
+    // move the path-loss matrix from the device to the host
+    //
+    size_t buff_size = tx_params->nrows * 
+                       tx_params->ncols * 
+                       sizeof (tx_params->m_loss[0][0]);
+    read_buffer_blocking (tx_params->ocl_obj,
+                          0,
+                          tx_params->m_loss_dev,
+                          buff_size,
+                          tx_params->m_loss[0]);
 }
 
 
@@ -594,6 +605,9 @@ EricPathLossSub (double **Obst_high,
                  double **Raster, 
                  double **Clutter, 
                  double **PathLoss, 
+                 double **Meritve,
+                 double **AntLoss,
+                 char **RadioZone,
                  struct StructEric *IniEric)
 
 /*************************************************************************************************
@@ -644,7 +658,7 @@ EricPathLossSub (double **Obst_high,
 	int ix; int iy;	
 	int DiffX, DiffY;
     double Zeff;			// Difference in X and Y direction
-	double PathLossAntHeightBS;
+	double PathLossAntHeightMS;
 	double DistBS2MSNorm, DistBS2MSKm;		// distance between MS and BS in Km sqrt(x2+y2+z2) * scale / 1000
 							// normalized distance between MS and BS in xy plan sqrt(x2+y2)
 	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
@@ -654,7 +668,7 @@ EricPathLossSub (double **Obst_high,
 
 	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
 									/*POPRAVJNEO (4.2.2010)*/	
-	PathLossAntHeightBS = 3.2*pow(log10(11.75*AntHeightMS),2);
+	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
 
     //
     // calculate the terrain profile if we haven't already
@@ -678,147 +692,169 @@ EricPathLossSub (double **Obst_high,
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("E/// on CPU");
 #endif
-    for (ix = 0; ix < xN; ix++)
-    {
-        for (iy = 0; iy < yN; iy++)
-        {
-            // Path Loss due to Hata model
-            DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
-            // ZoMS = Raster[ix][iy];
-            ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
-            Zeff = ZoTransBS - ZoTransMS;		// ??
-            DistBS2MSKm = sqrt (DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
-            DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
+
+#ifdef _DEBUG_INFO_
+    //
+    // DEBUG: parameter dump titles 
+    //
+    printf ("xi|yi|log(d)|log(HEBK)|-k0+k1|clut|nlos|field_meas|antenna\n");
+#endif
+
+	for (ix = 0; ix < xN; ix++)
+	{
+		for (iy = 0; iy < yN; iy++)
+		{
+			// Path Loss due to Hata model
+			DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
+			// ZoMS = Raster[ix][iy];
+			ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
+			Zeff = ZoTransBS - ZoTransMS;		// ??
+			DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
+			DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
 //			if(ZoBS <= Raster[ix][iy]) 
 //			{
 //				Zeff = AntHeightBS;  // ZoMS
 //			}
-            if (DistBS2MSKm < 0.01)
-            {
-                DistBS2MSKm = 0.01;
-            }
+			if (DistBS2MSKm < 0.01)
+			{
+				DistBS2MSKm = 0.01;
+			}
 
-            /**
-             * 
-            if (DistBS2MSKm > radi)
-            {    
-                    continue;
-            }
-            */
+			if ((DistBS2MSKm) > radi)
+		    	{    
+			      	continue;
+		    	}
 
-            Zeff += (DistBS2MSKm*DistBS2MSKm)/(2 * 4/3 * 6370)*1000; //height correction due to earth sphere
-            
-            if (-AntHeightBS < Zeff && Zeff < AntHeightBS){
-                Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
-            }
-            
-            log10Zeff = log10 (fabs (Zeff));
+			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3); //height correction due to earth sphere
+			
+			if (- AntHeightBS < Zeff && Zeff < AntHeightBS){
+				Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
+			}
+			
+			log10Zeff=log10(abs(Zeff));
 
-            //log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
-            log10DistBS2MSKm=log10(DistBS2MSKm);			
+			//log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
+			log10DistBS2MSKm=log10(DistBS2MSKm);			
 
-            PathLossTmp = A0 + A1*log10DistBS2MSKm; 
+			PathLossTmp = A0 + A1*log10DistBS2MSKm; 
+			PathLossTmp = PathLossTmp + A2*log10Zeff ;
+            PathLossTmp = PathLossTmp + A3*log10DistBS2MSKm*log10Zeff;
+			PathLossTmp = PathLossTmp - PathLossAntHeightMS + PathLossFreq;
 
-            PathLossTmp += A2*log10Zeff + A3*log10DistBS2MSKm*log10Zeff;
-            PathLossTmp -= PathLossAntHeightBS + PathLossFreq;
+			// Calc position of the height and position of the highest obstacle
 
-            // Calc position of the height and position of the highest obstacle
-            tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena 
+		
+			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
 
-            if (DistBS2MSNorm > 0) 
-            {
-                tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
-            }
-            else 
-            {
-                tiltBS2MS = 0; 
-            }
-            
-            //DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
-            ZObs2LOS = Obst_high[ix][iy];
-            DistObs2BS = Obst_dist[ix][iy];
+			if (DistBS2MSNorm > 0) {
+				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; }
+			else {
+				tiltBS2MS = 0; 
+			}
+			
+			//DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
+			ZObs2LOS = Obst_high[ix][iy];
+			DistObs2BS = Obst_dist[ix][iy];
+			// Calc path loss due to NLOS conditions
+/*Patrik/scale*/	ElevAngCos = cos(atan(tiltBS2MS/scale));
 
-            // Calculate path loss due to NLOS conditions
-            ElevAngCos = cos ( atan (tiltBS2MS / scale) );
+			Ddot = DistObs2BS; 
+			if (ElevAngCos != 0) 
+			{	
+				Ddot = DistObs2BS/ElevAngCos;
+			}
+			Ddotdot = DistBS2MSNorm - Ddot;
+			if (ElevAngCos != 0) {
+				Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
+			}
 
-            Ddot = DistObs2BS; 
-            if (ElevAngCos != 0) 
-            {	
-                Ddot = DistObs2BS/ElevAngCos;
-            }
+//Obstacle height korrection due to earth sphere
+			if (Ddot <= Ddotdot){
+				ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
+			}
+			else{
+				ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
+			}
 
-            Ddotdot = DistBS2MSNorm - Ddot;
-            if (ElevAngCos != 0) {
-                Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
-            }
+//Hight correction due to BS2MS line angle
+			Hdot = ZObs2LOS*ElevAngCos;
 
-//Obstacle height correction due to earth sphere
-            if (Ddot <= Ddotdot){
-                ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
-            }
-            else{
-                ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
-            }
+			PathLossDiff = 0;
+			KDFR = 0;
+			if (Ddot > 0 && Ddotdot > 0) {
+				Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
 
-//Height correction due to BS2MS line angle
-            Hdot = ZObs2LOS*ElevAngCos;
-
-            PathLossDiff = 0;
-            KDFR = 0;
-            if (Ddot > 0 && Ddotdot > 0) 
-            {
-                // First Fresnel elipsoid radius
-                Fresnel = sqrt ( (Lambda*Ddot*Ddotdot*scale) / (Ddot + Ddotdot) );
-
-                PathLossDiff = Hdot / Fresnel;
+				PathLossDiff = Hdot/Fresnel;
 
 // NLOS komponent calculation KDFR
 
-                if (PathLossDiff < -0.49 ) {
-                    KDFR = 0; 
-                }
-                else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
-                    KDFR = 6 + 12.2 * PathLossDiff;
-                }
-                else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
-                    KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
-                }
-                else if(2 <= PathLossDiff) {
-                    KDFR = 16 + 20 * log10(PathLossDiff);
-                }
+				if (PathLossDiff < -0.49 ) {
+					KDFR = 0; 
+				}
+				else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
+					KDFR = 6 + 12.2 * PathLossDiff;
+				}
+				else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
+					KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
+				}
+				else if(2 <= PathLossDiff) {
+					KDFR = 16 + 20 * log10(PathLossDiff);
+				}
 
 // Alfa correction factor
-                
-                if (Hdot > Fresnel/2){
-                    Alfa = 1;
-                }
-                else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2){
-                    Alfa = 4 * Hdot/Fresnel - 1;
-                }
-                else if (Hdot < Fresnel/4){
-                    Alfa = 0;
-                }
-            
-            }
+				
+				if (Hdot > Fresnel/2){
+					Alfa = 1;
+				}
+				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2){
+					Alfa = 4 * Hdot/Fresnel - 1;
+				}
+				else if (Hdot < Fresnel/4){
+					Alfa = 0;
+				}
+			
+			}
 
 //Spherical earth diffraction komponent JDFR
-            if (Hdot > 0){
-                JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
-            
-                if (JDFR < 0){
-                    JDFR=0;
-                }
-            }
-            else{
-                JDFR = 0;
-            }
-           
-            PathLossTmp = PathLossTmp + sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));		
+			if (Hdot > 0){
+				JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
+			
+				if (JDFR < 0){
+					JDFR=0;
+				}
+			}
+			else{
+				JDFR = 0;
+			}
 
-            // write data to pathloss
-            PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
-        } // end irow
-    } // end icol
+            double nlos = sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
+
+			PathLossTmp += nlos;
+
+			// write data to pathloss
+			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
+
+#ifdef _DEBUG_INFO_
+            //
+            // DEBUG: parameter dump for approximation using least squares
+            //
+            if (! isnan (Meritve[ix][iy]))
+                if ((RadioZone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
+                    printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
+                            ix,
+                            iy,
+                            log10DistBS2MSKm,
+                            log10Zeff,
+                            -PathLossAntHeightMS+PathLossFreq,
+                            Clutter[ix][iy],
+                            nlos,
+                            Meritve[ix][iy],
+                            AntLoss[ix][iy]);
+#endif
+		} // end irow
+	} // end icol
+
+    printf ("--------\n");
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);

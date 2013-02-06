@@ -28,6 +28,7 @@ typedef double	real;
 typedef double2	real2;
 typedef double4 real4;
 
+
 /**
  * A simple random number number generator as defined in Benedičič et. al. !ref!.-
  */
@@ -402,10 +403,9 @@ __kernel void eric_per_tx (const real pixel_res,
     uint local_idx   = get_local_id(1) * get_local_size(0) + 
                        get_local_id(0);
 
-    double AntHeightBS;
-    double Lambda = 300.0 / frequency;			//	wave lenght
-    double tiltBS2MS;
-    double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
+    real Lambda = 300.0 / frequency;			//	wave lenght
+    real tiltBS2MS;
+    real ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
     
     // receiver coordinates in pixels 
     int2 rx_coord_in_pixels  = (int2) ((int)tile_offset.x + get_global_id (0),
@@ -419,9 +419,9 @@ __kernel void eric_per_tx (const real pixel_res,
     //
     // access the needed data from global memory
     //
-    double ZObs2LOS            = obst_height_in[element_idx];
-    double DistObs2BS          = obst_dist_in[element_idx];
-    double rx_corrected_height = dem_in[element_idx];
+    real ZObs2LOS            = obst_height_in[element_idx];
+    real DistObs2BS          = obst_dist_in[element_idx];
+    real rx_corrected_height = dem_in[element_idx];
 
     //
     // cache the partial path-loss value
@@ -436,7 +436,7 @@ __kernel void eric_per_tx (const real pixel_res,
     //
     // calculate the distance between the Tx and Rx in kilometers
     //
-    double dist_tx_rx_km;
+    real dist_tx_rx_km;
     dist_tx_rx_km  = distance (tx_coord_in_meters, 
                                rx_coord_in_meters);
     dist_tx_rx_km /= 1000;
@@ -444,7 +444,7 @@ __kernel void eric_per_tx (const real pixel_res,
     //
     // calculate the distance between the Tx and Rx in pixels
     //
-    double dist_tx_rx_px;
+    real dist_tx_rx_px;
     dist_tx_rx_px = (tx_data.x - rx_coord_in_meters.x) *
                     (tx_data.x - rx_coord_in_meters.x);
     dist_tx_rx_px += (tx_data.y - rx_coord_in_meters.y) *
@@ -463,7 +463,7 @@ __kernel void eric_per_tx (const real pixel_res,
     //
     // HOA, HEBK calculation
     //
-    double HOA, HEBK;
+    real HOA, HEBK;
     
     //
     // effective antenna height
