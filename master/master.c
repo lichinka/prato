@@ -450,21 +450,15 @@ init_coverage (FILE       *ini_file,
         //
         // check the size of a map cell in bytes, so that later casts won't fail
         //
-        if (metadata->format == 0)
+        if (metadata->format == sizeof (params->null_value) - 1)
+            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
+	else
         {
             fprintf (stdout, 
                      "*** WARNING: DEM map-cell format (%d) is not recognized.\n",
                      metadata->format);
             fprintf (stdout, 
                      "\tMake sure it is of type FCELL to avoid undefined behaviour!\n");
-        }
-        else
-        {
-            if (metadata->format != sizeof (params->null_value) - 1)
-                G_fatal_error ("DEM: the number of bytes per map-cell (%d) is not castable to `float`", 
-                               metadata->format);
-            else
-                G_set_f_null_value ((FCELL *) &(params->null_value), 1);
         }
         //
         // get map metadata
@@ -490,21 +484,15 @@ init_coverage (FILE       *ini_file,
         //
         // check the size of a map cell in bytes, so that later casts won't fail
         //
-        if (metadata->format == 0)
+        if (metadata->format == sizeof (params->null_value) - 1)
+            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
+	else
         {
             fprintf (stdout, 
                      "*** WARNING: Clutter map-cell format (%d) is not recognized.\n",
                      metadata->format);
             fprintf (stdout, 
                      "\tMake sure it is of type FCELL to avoid undefined behaviour!\n");
-        }
-        else
-        {
-            if (metadata->format != sizeof (params->null_value) - 1)
-                G_fatal_error ("Clutter: the number of bytes per map-cell (%d) is not castable to `float`", 
-                               metadata->format);
-            else
-                G_set_f_null_value ((FCELL *) &(params->null_value), 1);
         }
 
         if (!(params->map_east >= metadata->east &&
