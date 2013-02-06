@@ -38,9 +38,9 @@ obj_func (Parameters    *params,
 #endif
         apply_antenna_influence_gpu (params,
                                      tx_params);
-    }
+     }
     else
-    {
+     {
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif
@@ -67,6 +67,9 @@ obj_func (Parameters    *params,
                          tx_params->m_dem, 
                          tx_params->m_clut, 
                          tx_params->m_loss, 
+                         tx_params->m_field_meas,
+                         tx_params->m_antenna_loss,
+                         tx_params->m_radio_zone,
                          &IniEric);
     }
 
@@ -82,20 +85,27 @@ obj_func (Parameters    *params,
         for (c = 0; c < tx_params->ncols; c ++)
         {
             //
-            // look for the target radio zone ...
+            // use only valid path-loss values
             //
-            char rz = tx_params->m_radio_zone[r][c];
-            if ((rz & radio_zone) > 0)
+            double pl = tx_params->m_loss[r][c];
+            if (! isnan (pl))
             {
                 //
-                // ... and a field measurement there
+                // look for the target radio zone ...
                 //
-                float fm = (float) tx_params->m_field_meas[r][c];
-                if ((!isnan (fm)) && (fm != params->null_value))
+                char rz = tx_params->m_radio_zone[r][c];
+                if ((rz & radio_zone) > 0)
                 {
-                    count ++;
-                    ret_value += ((tx_params->tx_power - tx_params->m_loss[r][c]) - fm) *
-                                 ((tx_params->tx_power - tx_params->m_loss[r][c]) - fm);
+                    //
+                    // ... and a field measurement there
+                    //
+                    double fm = tx_params->m_field_meas[r][c];
+                    if ((!isnan (fm)) && (fm != params->null_value))
+                    {
+                        count ++;
+                        ret_value += (tx_params->tx_power - pl - fm) *
+                                     (tx_params->tx_power - pl - fm);
+                    }
                 }
             }
         }
@@ -154,13 +164,13 @@ de (Parameters     *params,
     if (reset_seed)
         srand (time (0));
 
-    /* Printing out information about optimization process for the user	*/
+    // Printing out information about optimization process for the user	
 
     printf ("*** INFO: DE parameters\t");
     printf ("NP = %d, Gmax = %d, CR = %.2f, F = %.2f\n",
             NP, Gmax, CR, F);
 
-    printf("*** INFO: Optimization problem dimension is %d.\n", D);
+    printf ("*** INFO: Optimization problem dimension is %d.\n", D);
 
     /* Starting timer    */
     starttime = clock();
@@ -207,7 +217,7 @@ de (Parameters     *params,
       for (i=0; i < NP; i++)	/* Going through whole population	*/
       {
 
-         /* Selecting random indeces r1, r2, and r3 to individuls of
+         /* Selecting random indeces r1, r2, and r3 to individuals of
             the population such that i != r1 != r2 != r3	*/
 
          do
@@ -251,7 +261,7 @@ de (Parameters     *params,
                           U);
          numofFE++;
 
-         //printf ("Generation %d/%d, score %20.10f\n", k, Gmax, U[D]);
+         printf ("Generation %d/%d\tscore %20.10f\n", k, Gmax, U[D]);
 
          /* Comparing the trial vector 'U' and the old individual
             'next[i]' and selecting better one to continue in the
@@ -266,7 +276,7 @@ de (Parameters     *params,
          else
          {
             for (j=0; j <= D; j++)
-            next[i][j] = popul[i][j];
+                next[i][j] = popul[i][j];
          }
 
       }	/* End of the going through whole population	*/
@@ -278,7 +288,6 @@ de (Parameters     *params,
       popul = next;
       next = ptr;
 
-      printf ("Generation %d/%d\n", k, Gmax);
     }	/* End of the main loop		*/
 
 
@@ -355,16 +364,33 @@ optimize (Parameters    *params,
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = { 0.0,  0.0, -24.0, 0.0};
-    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = {76.0, 64.0,   0.0, 0.2};
+    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {20.0, 20.0, -15.0, -0.1};
+    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = {40.0, 40.0,  -5.0,  0.2};
 
     //
     // calculate the coverage for the first time to initialize all needed structures
     //
     coverage (params,
               tx_params,
-              search_low,
+              search_low, 
               _SEARCH_VECTOR_DIMENSIONS_);
+
+#ifdef _DEBUG_INFO_
+    //
+    // DEBUG: run only one iteration of the optimization process
+    //
+    de (params,
+        tx_params,
+        _SEARCH_VECTOR_DIMENSIONS_,
+        _SEARCH_VECTOR_DIMENSIONS_,
+        1,
+        0.9,
+        0.9,
+        1,
+        _RADIO_ZONE_MAIN_BEAM_ON_,
+        search_low,
+        search_up);
+#else
     //
     // start optimization
     //
@@ -372,12 +398,13 @@ optimize (Parameters    *params,
         tx_params,
         _SEARCH_VECTOR_DIMENSIONS_,
         20 * _SEARCH_VECTOR_DIMENSIONS_,
-        1000,
+        200,
         0.9,
         0.9,
         1,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
         search_up);
+#endif
 }
 
