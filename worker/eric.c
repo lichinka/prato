@@ -697,7 +697,7 @@ EricPathLossSub (double **Obst_high,
     //
     // DEBUG: parameter dump titles 
     //
-    printf ("xi|yi|log(d)|log(HEBK)|-k0+k1|clut|nlos|field_meas|antenna\n");
+    printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
 #endif
 
 	for (ix = 0; ix < xN; ix++)
@@ -721,17 +721,19 @@ EricPathLossSub (double **Obst_high,
 			}
 
 			if ((DistBS2MSKm) > radi)
-		    	{    
-			      	continue;
-		    	}
+		   	{    
+			    continue;
+		    }
 
-			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3); //height correction due to earth sphere
-			
-			if (- AntHeightBS < Zeff && Zeff < AntHeightBS){
+            //height correction due to earth sphere
+			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3);
+		
+			if ((- AntHeightBS < Zeff) && (Zeff < AntHeightBS))
+            {
 				Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
 			}
 			
-			log10Zeff=log10(abs(Zeff));
+			log10Zeff=log10(fabs(Zeff));
 
 			//log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
 			log10DistBS2MSKm=log10(DistBS2MSKm);			
@@ -832,7 +834,8 @@ EricPathLossSub (double **Obst_high,
 			PathLossTmp += nlos;
 
 			// write data to pathloss
-			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
+			//PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
+			PathLoss[ix][iy] = PathLossTmp;
 
 #ifdef _DEBUG_INFO_
             //
@@ -840,14 +843,20 @@ EricPathLossSub (double **Obst_high,
             //
             if (! isnan (Meritve[ix][iy]))
                 if ((RadioZone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
-                    printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
+                    printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
                             ix,
                             iy,
                             log10DistBS2MSKm,
+                            fabs (Zeff),
                             log10Zeff,
+                            KDFR,
+                            A0,
+                            A1,
+                            A2,
+                            A3,
                             -PathLossAntHeightMS+PathLossFreq,
                             Clutter[ix][iy],
-                            nlos,
+                            PathLoss[ix][iy],
                             Meritve[ix][iy],
                             AntLoss[ix][iy]);
 #endif

@@ -56,7 +56,7 @@ coverage (Parameters           *params,
                                      (double) eric_params[0],
                                      (double) eric_params[1],
                                      (double) eric_params[2], 
-                                     (double) eric_params[3], 
+                                     (double) eric_params[3],
                                      1, 
                                      params->radius};
         EricPathLossSub (tx_params->m_obst_height,

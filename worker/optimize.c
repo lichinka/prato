@@ -55,10 +55,14 @@ obj_func (Parameters    *params,
                                      tx_params->nrows,
                                      params->map_ew_res,
                                      params->frequency, 
+                                     /*36.0883185300743,
+                                     -8.69953059242079,
+                                     -0.760090245843437,
+                                     9.55413445652782,*/
                                      (double) sol_vector[0],
                                      (double) sol_vector[1],
                                      (double) sol_vector[2], 
-                                     (double) sol_vector[3], 
+                                     (double) sol_vector[3],
                                      1, 
                                      params->radius};
         EricPathLossSub (tx_params->m_obst_height,
@@ -364,15 +368,16 @@ optimize (Parameters    *params,
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {20.0, 20.0, -15.0, -0.1};
-    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = {40.0, 40.0,  -5.0,  0.2};
+    double e_default  [_SEARCH_VECTOR_DIMENSIONS_] = {38.0, 32.0, -12.0, 0.1};
+    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {-40.0, -40.0, -15.0, -15.0};
+    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = {40.0,  40.0,  15.0,  15.0};
 
     //
     // calculate the coverage for the first time to initialize all needed structures
     //
     coverage (params,
               tx_params,
-              search_low, 
+              e_default,
               _SEARCH_VECTOR_DIMENSIONS_);
 
 #ifdef _DEBUG_INFO_
@@ -398,7 +403,7 @@ optimize (Parameters    *params,
         tx_params,
         _SEARCH_VECTOR_DIMENSIONS_,
         20 * _SEARCH_VECTOR_DIMENSIONS_,
-        200,
+        20,
         0.9,
         0.9,
         1,
