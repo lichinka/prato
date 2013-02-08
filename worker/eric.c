@@ -748,11 +748,10 @@ EricPathLossSub (double **Obst_high,
 		
 			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
 
-			if (DistBS2MSNorm > 0) {
-				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; }
-			else {
+			if (DistBS2MSNorm > 0) 
+				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+			else
 				tiltBS2MS = 0; 
-			}
 			
 			//DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
 			ZObs2LOS = Obst_high[ix][iy];
@@ -818,14 +817,14 @@ EricPathLossSub (double **Obst_high,
 			}
 
 //Spherical earth diffraction komponent JDFR
-			if (Hdot > 0){
+			if (Hdot > 0)
+            {
 				JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
-			
-				if (JDFR < 0){
+				if (JDFR < 0)
 					JDFR=0;
-				}
 			}
-			else{
+			else
+            {
 				JDFR = 0;
 			}
 
@@ -834,8 +833,7 @@ EricPathLossSub (double **Obst_high,
 			PathLossTmp += nlos;
 
 			// write data to pathloss
-			//PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
-			PathLoss[ix][iy] = PathLossTmp;
+			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
 
 #ifdef _DEBUG_INFO_
             //

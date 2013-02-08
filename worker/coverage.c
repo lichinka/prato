@@ -147,7 +147,6 @@ output_to_stdout (const Parameters *params,
                               buff_size,
                               tx_params->m_loss[0]);
     }
-
     //
     // output the data
     //

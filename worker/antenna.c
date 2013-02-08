@@ -365,7 +365,8 @@ antenna_influence_cpu (Parameters    *params,
                                             params->sec_zone_vert,
                                             &(tx_params->m_radio_zone[r][c]),
                                             &(tx_params->m_antenna_loss[r][c]));
-                loss_out = (float) (tx_params->m_loss[r][c] + tx_params->m_antenna_loss[r][c]);
+                loss_out = (float) (tx_params->m_loss[r][c] + 
+                                    tx_params->m_antenna_loss[r][c]);
             }
             // 
             // save the result in the output matrix
@@ -433,7 +434,6 @@ apply_antenna_influence_gpu (Parameters    *params,
                             local_sizes);
     /*
     // no need to sync memory: everything is kept on the GPU 
-    // until the last moment
     //
     read_buffer_blocking (tx_params->ocl_obj,
                           0,
@@ -607,7 +607,7 @@ antenna_influence_gpu (Parameters    *params,
     tx_data.s[0] = (double) tx_params->tx_east_coord;   // transmitter coordinate
     tx_data.s[1] = (double) tx_params->tx_north_coord;  // transmitter coordinate
     tx_data.s[2] = (double) tx_params->total_tx_height; // antenna height above sea level
-    tx_data.s[3] = (double) -1.0;            // not used
+    tx_data.s[3] = (double) -1.0;                       // not used
 
     // set kernel parameters, specific for this transmitter
     set_kernel_value_arg (tx_params->ocl_obj,
@@ -650,36 +650,7 @@ antenna_influence_gpu (Parameters    *params,
                             NULL,
                             global_sizes,
                             local_sizes);
-    //
-    // activate the kernel, 
-    // to sum the antenna loss to the isotrophic path-loss
-    // 
-    activate_kernel (tx_params->ocl_obj,
-                     "vector_sum_kern");
-
-    // set pointer kernel parameters
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        0,
-                        tx_params->m_antenna_loss_dev);
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        1,
-                        tx_params->m_loss_dev);
-    // reserve local memory on the device
-    lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
-                _WORK_ITEMS_PER_DIMENSION_ *
-                sizeof (double);
-    set_local_mem (tx_params->ocl_obj,
-                   2,
-                   lmem_size);
-    //
-    // execute the sum kernel
-    //
-    run_kernel_2D_blocking (tx_params->ocl_obj,
-                            0,
-                            NULL,
-                            global_sizes,
-                            local_sizes);
-    //
+    /*
     // no need to sync memory, since everything is calculated on the GPU
     //
     read_buffer (tx_params->ocl_obj,
@@ -687,7 +658,7 @@ antenna_influence_gpu (Parameters    *params,
                  tx_params->m_radio_zone_dev,
                  rad_buff_size,
                  tx_params->m_radio_zone[0]);
-    /*read_buffer (tx_params->ocl_obj,
+    read_buffer (tx_params->ocl_obj,
                  0,
                  tx_params->m_antenna_loss_dev,
                  ant_buff_size,
@@ -765,7 +736,7 @@ calculate_antenna_influence (Parameters    *params,
                                tx_params);
         apply_antenna_influence_gpu (params,
                                      tx_params);
-    }
+     }
     else
         antenna_influence_cpu (params,
                                tx_params);

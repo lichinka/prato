@@ -92,7 +92,7 @@ obj_func (Parameters    *params,
             // use only valid path-loss values
             //
             double pl = tx_params->m_loss[r][c];
-            if (! isnan (pl))
+            if (!isnan (pl))
             {
                 //
                 // look for the target radio zone ...
