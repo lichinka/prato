@@ -8,33 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "worker/coverage.h"
-
-
-
-//
-// A structure to hold all the antenna diagram and
-// in-run data for the antenna-calculation process
-//
-struct Diagram
-{
-    //
-    // Horizontal antenna diagram
-    //
-    double *horizontal;
-    //
-    // Vertical antenna diagram
-    //
-    double *vertical;
-    //
-    // Antenna gain
-    //
-    double  gain;
-} __attribute__((__packed__));
-
-typedef struct Diagram Diagram;
-
-static Diagram *diagram = NULL;
+#include "worker/gpu.h"
 
 
 

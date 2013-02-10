@@ -32,14 +32,42 @@
 
 
 //
-// A structure to hold all transmitter-specific configuration parameters
+// A structure to hold the antenna diagram and
+// runtime data for the antenna-calculation process
+//
+struct Diagram
+{
+    //
+    // Horizontal antenna diagram
+    //
+    double *horizontal;
+    //
+    // Vertical antenna diagram
+    //
+    double *vertical;
+    //
+    // Antenna gain
+    //
+    double  gain;
+} __attribute__((__packed__));
+
+typedef struct Diagram Diagram;
+
+
+//
+// A structure to hold transmitter-specific configuration and runtime parameters
 //
 struct Tx_parameters
 {
     // antenna azimuth
     int     beam_direction;
+    
+    // antenna tilt
     int     electrical_tilt;
     int     mechanical_tilt;
+
+    // antenna diagram
+    Diagram *diagram;
 
     // antenna height above ground level
     double  antenna_height_AGL;
@@ -140,6 +168,11 @@ struct Tx_parameters
     // GPU matrix holding the distances to the obstacles around the transmitter
     // (only used for the line-of-sight calculation)
     cl_mem      *m_obst_dist_dev;
+
+    // GPU vector where the partial sum by row is saved
+    // (only used for the objective-funcion calculation)
+    double      *v_partial_sum;
+    cl_mem      *v_partial_sum_dev;
 
 } __attribute__((__packed__));
 

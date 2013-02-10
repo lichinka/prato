@@ -5,6 +5,137 @@
 
 
 /**
+ * Objective function evaluation, executed on the GPU, if available.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration 
+ *              parameters;
+ * radio_zone   radio zone for which the objective function is calculated;
+ * sol_vector   solution vector over which the objective function is calculated;
+ *
+ */
+static double
+obj_func_on_gpu (Parameters    *params,
+                 Tx_parameters *tx_params,
+                 const char    radio_zone)
+{ 
+    //
+    // check if the needed buffers are already on the device
+    //
+    if (tx_params->m_field_meas_dev == NULL)
+    {
+        //
+        // not yet ... create a device buffer for the field measurements
+        //
+        size_t fm_buff_size = tx_params->nrows * 
+                              tx_params->ncols * 
+                              sizeof (tx_params->m_field_meas[0][0]);
+        tx_params->m_field_meas_dev = (cl_mem *) malloc (sizeof (cl_mem));
+        *(tx_params->m_field_meas_dev) = create_buffer (tx_params->ocl_obj,
+                                                        CL_MEM_READ_ONLY, 
+                                                        fm_buff_size);
+        //
+        // create a device buffer for the by-row partial sum 
+        //
+        size_t ps_buff_size = tx_params->nrows *
+                              sizeof (tx_params->m_loss[0][0]);
+        tx_params->v_partial_sum = (double *) malloc (ps_buff_size);
+        tx_params->v_partial_sum_dev = (cl_mem *) malloc (sizeof (cl_mem));
+        *(tx_params->v_partial_sum_dev) = create_buffer (tx_params->ocl_obj,
+                                                         CL_MEM_READ_WRITE,
+                                                         ps_buff_size);
+        //
+        // send the buffers data to the device
+        //
+        write_buffer (tx_params->ocl_obj,
+                      0,
+                      tx_params->v_partial_sum_dev,
+                      ps_buff_size,
+                      tx_params->v_partial_sum);
+        write_buffer_blocking (tx_params->ocl_obj,
+                               0,
+                               tx_params->m_field_meas_dev,
+                               fm_buff_size,
+                               tx_params->m_field_meas[0]);
+    }
+    //
+    // activate the kernel 
+    // 
+    activate_kernel (tx_params->ocl_obj,
+                     "obj_func_kern");
+
+    // set kernel parameters
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           0,
+                           &tx_params->tx_power);
+    set_kernel_value_arg (tx_params->ocl_obj,
+                          1,
+                          sizeof (radio_zone),
+                          &radio_zone);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        2,
+                        tx_params->m_field_meas_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        3,
+                        tx_params->m_radio_zone_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        4,
+                        tx_params->m_loss_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        5,
+                        tx_params->v_partial_sum_dev);
+    //
+    // define a 1D execution range for the kernel ...
+    //
+    size_t global_size = tx_params->nrows * tx_params->ncols,
+           local_size  = tx_params->ncols;
+
+    // reserve local memory on the device
+    size_t lmem_size = local_size * 
+                       sizeof (double);
+    set_local_mem (tx_params->ocl_obj,
+                   6,
+                   lmem_size);
+    //
+    // ... and execute it
+    //
+    run_kernel_1D_blocking (tx_params->ocl_obj,
+                            0,
+                            NULL,
+                            &global_size,
+                            &local_size);
+    //
+    // no need to sync memory: everything is kept on the GPU
+    //
+    size_t ps_buff_size = tx_params->nrows * 
+                          sizeof (tx_params->v_partial_sum[0]);
+    read_buffer_blocking (tx_params->ocl_obj,
+                          0,
+                          tx_params->v_partial_sum_dev,
+                          ps_buff_size,
+                          tx_params->v_partial_sum);
+#ifdef _DEBUG_INFO_
+    //
+    // DEBUG memory
+    //
+    int r;
+    for (r = 0; r < tx_params->nrows; r ++)
+    {
+        fprintf (stdout,
+                 "v_partial_sum\t%d\t%.5f\n", r,
+                                              tx_params->v_partial_sum[r]);
+    }
+    fprintf (stdout,
+             "v_partial_sum\t-----------------\n");
+#endif
+
+    return 0;
+}
+
+
+
+/**
  * Objective function evaluation, used by the optimization algorithm.
  *
  * params       a structure holding configuration parameters which are 
@@ -19,10 +150,22 @@ static double
 obj_func (Parameters    *params,
           Tx_parameters *tx_params,
           const char     radio_zone,
-          const double  *sol_vector)
+          //const double  *sol_vector)
+          double  *sol_vector)
 {
     int r, c, count = 0;
     double ret_value = 0;
+
+#ifdef _DEBUG_INFO_
+    //
+    // a fixed solution for testing
+    // score is 101.0050757267
+    //
+    sol_vector[0] = 36.0883185300743;
+    sol_vector[1] = -8.69953059242079;
+    sol_vector[2] = -0.760090245843437;
+    sol_vector[3] = 9.55413445652782;
+#endif
 
     if (params->use_gpu)
     {
@@ -38,9 +181,16 @@ obj_func (Parameters    *params,
 #endif
         apply_antenna_influence_gpu (params,
                                      tx_params);
-     }
+#ifdef _PERFORMANCE_METRICS_
+        measure_time (NULL);
+        measure_time ("Objective function on GPU");
+#endif
+        ret_value = obj_func_on_gpu (params,
+                                     tx_params,
+                                     radio_zone);
+    }
     else
-     {
+    {
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif
@@ -55,13 +205,9 @@ obj_func (Parameters    *params,
                                      tx_params->nrows,
                                      params->map_ew_res,
                                      params->frequency, 
-                                     /*36.0883185300743,
-                                     -8.69953059242079,
-                                     -0.760090245843437,
-                                     9.55413445652782,*/
                                      (double) sol_vector[0],
                                      (double) sol_vector[1],
-                                     (double) sol_vector[2], 
+                                     (double) sol_vector[2],
                                      (double) sol_vector[3],
                                      1, 
                                      params->radius};
@@ -75,49 +221,54 @@ obj_func (Parameters    *params,
                          tx_params->m_antenna_loss,
                          tx_params->m_radio_zone,
                          &IniEric);
-    }
-
 #ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-    measure_time ("Objective function evaluation on CPU");
+        measure_time (NULL);
+        measure_time ("Apply antenna losses and objective function on CPU");
 #endif
-    //
-    // for each point in the path loss matrix ...
-    //
-    for (r = 0; r < tx_params->nrows; r ++)
-    {
-        for (c = 0; c < tx_params->ncols; c ++)
+        //
+        // objective function calculation, for 
+        // each point in the path loss matrix ...
+        //
+        for (r = 0; r < tx_params->nrows; r ++)
         {
-            //
-            // use only valid path-loss values
-            //
-            double pl = tx_params->m_loss[r][c];
-            if (!isnan (pl))
+            for (c = 0; c < tx_params->ncols; c ++)
             {
                 //
-                // look for the target radio zone ...
+                // use only valid path-loss values
                 //
-                char rz = tx_params->m_radio_zone[r][c];
-                if ((rz & radio_zone) > 0)
+                double pl = tx_params->m_loss[r][c];
+                if (!isnan (pl))
                 {
                     //
-                    // ... and a field measurement there
+                    // apply the antenna loss
                     //
-                    double fm = tx_params->m_field_meas[r][c];
-                    if ((!isnan (fm)) && (fm != params->null_value))
+                    pl += tx_params->m_antenna_loss[r][c];
+
+                    //
+                    // look for the target radio zone ...
+                    //
+                    char rz = tx_params->m_radio_zone[r][c];
+                    if ((rz & radio_zone) > 0)
                     {
-                        count ++;
-                        ret_value += (tx_params->tx_power - pl - fm) *
-                                     (tx_params->tx_power - pl - fm);
+                        //
+                        // ... and a field measurement there
+                        //
+                        double fm = tx_params->m_field_meas[r][c];
+                        if (!isnan (fm))
+                        {
+                            count ++;
+                            ret_value += (tx_params->tx_power - pl - fm) *
+                                         (tx_params->tx_power - pl - fm);
+                        }
                     }
                 }
             }
         }
+        //
+        // mean square error
+        //
+        ret_value /= count;
     }
-    //
-    // mean square error
-    //
-    ret_value /= count;
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
 #endif

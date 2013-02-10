@@ -83,3 +83,51 @@ init_gpu (Tx_parameters *tx_params)
     }
 }
 
+
+/**
+ * Defines a 2D execution range for a kernel, consisting of square tiles,
+ * which size is based on the execution capabilities of the available GPU 
+ * hardware, i.e. the number of concurrent threads it can handle.
+ *
+ * params   a structure holding configuration parameters which are 
+ *          common to all transmitters;
+ * global_sizes the two-dimensional global execution range (output parameter);
+ * local_sizes  the two-dimensional local execution range (output parameter).-
+ *
+ */
+void 
+define_2D_range (const Parameters *params,
+                 size_t *global_sizes,
+                 size_t *local_sizes)
+{
+    double radius_in_meters = params->radius * 1000;
+    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
+    int diameter_in_pixels  = 2 * radius_in_pixels;
+    size_t ntile            = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
+
+    //
+    // number of processing tiles, based on the received radius 
+    //
+    if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
+    {
+        fprintf (stderr, 
+                 "*** ERROR: Cannot execute on GPU. Increase the calculation radius and try again.\n");
+        exit (1);
+    }
+    if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
+    {
+        fprintf (stderr, 
+                 "*** ERROR: Cannot execute on GPU. Try setting a calculation radius multiple of %d.\n",
+                 _WORK_ITEMS_PER_DIMENSION_);
+        exit (1);
+    }
+
+    //
+    // define the execution range with global and local dimensions
+    //
+    global_sizes[0] = ntile * _WORK_ITEMS_PER_DIMENSION_;
+    global_sizes[1] = ntile * _WORK_ITEMS_PER_DIMENSION_;
+    local_sizes[0]  = _WORK_ITEMS_PER_DIMENSION_;
+    local_sizes[1]  = _WORK_ITEMS_PER_DIMENSION_;
+}
+

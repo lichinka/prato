@@ -517,11 +517,9 @@ eric_pathloss_on_gpu (Parameters    *params,
                    13,
                    lmem_size);
     //
-    // calculation radius and diameter
+    // calculation radius in meters
     //
     double radius_in_meters = params->radius * 1000;
-    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
-    int diameter_in_pixels  = 2 * radius_in_pixels;
 
     //
     // calculation tile offset within the target area, given in pixel coordinates
@@ -551,29 +549,13 @@ eric_pathloss_on_gpu (Parameters    *params,
                           sizeof (cl_int2),
                           &tile_offset);
     //
-    // number of processing tiles needed around each transmitter 
-    //
-    if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
-    {
-        fprintf (stderr, 
-                 "*** ERROR: Increase the calculation radius and try again.\n");
-        exit (-1);
-    }
-    if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
-    {
-        fprintf (stderr, 
-                 "*** ERROR: Try to setting a calculation radius multiple of %d.\n",
-                 _WORK_ITEMS_PER_DIMENSION_);
-        exit (-1);
-    }
-    //
     // define a 2D execution range for the kernel ...
     //
-    size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
-    size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
-                              ntile * _WORK_ITEMS_PER_DIMENSION_};
-    size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
-                             _WORK_ITEMS_PER_DIMENSION_};
+    size_t global_sizes [2],
+           local_sizes  [2];
+    define_2D_range (params,
+                     global_sizes,
+                     local_sizes);
     //
     // ... and execute it
     //
@@ -697,7 +679,7 @@ EricPathLossSub (double **Obst_high,
     //
     // DEBUG: parameter dump titles 
     //
-    printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
+    //printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
 #endif
 
 	for (ix = 0; ix < xN; ix++)
@@ -836,7 +818,7 @@ EricPathLossSub (double **Obst_high,
 			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
 
 #ifdef _DEBUG_INFO_
-            //
+            /*
             // DEBUG: parameter dump for approximation using least squares
             //
             if (! isnan (Meritve[ix][iy]))
@@ -856,7 +838,7 @@ EricPathLossSub (double **Obst_high,
                             Clutter[ix][iy],
                             PathLoss[ix][iy],
                             Meritve[ix][iy],
-                            AntLoss[ix][iy]);
+                            AntLoss[ix][iy]);*/
 #endif
 		} // end irow
 	} // end icol

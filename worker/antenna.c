@@ -1,18 +1,3 @@
-#include <assert.h>
-//
-// From the performance metrics library
-//  
-//      https://github.com/lichinka/performance_metrics
-//
-#include <performance_metric.h>
-
-//
-// From the OpenCL common library
-//
-//      https://github.com/lichinka/ocl_common
-//
-#include <ocl_common.h>
-
 #include "worker/antenna.h"
 
 
@@ -358,7 +343,7 @@ antenna_influence_cpu (Parameters    *params,
                                             dem_in,
                                             params->rx_height_AGL,
                                             dist_Tx_Rx,
-                                            diagram,
+                                            tx_params->diagram,
                                             params->main_zone_horiz,
                                             params->main_zone_vert,
                                             params->sec_zone_horiz,
@@ -398,17 +383,6 @@ apply_antenna_influence_gpu (Parameters    *params,
     // 
     activate_kernel (tx_params->ocl_obj,
                      "vector_sum_kern");
-    //
-    // define a 2D execution range for the kernel ...
-    //
-    double radius_in_meters = params->radius * 1000;
-    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
-    int diameter_in_pixels  = 2 * radius_in_pixels;
-    size_t ntile            = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
-    size_t global_sizes []  = {ntile * _WORK_ITEMS_PER_DIMENSION_,
-                               ntile * _WORK_ITEMS_PER_DIMENSION_};
-    size_t local_sizes []   = {_WORK_ITEMS_PER_DIMENSION_,
-                               _WORK_ITEMS_PER_DIMENSION_};
 
     // set pointer kernel parameters
     set_kernel_mem_arg (tx_params->ocl_obj,
@@ -425,7 +399,15 @@ apply_antenna_influence_gpu (Parameters    *params,
                    2,
                    lmem_size);
     //
-    // execute the sum kernel
+    // define a 2D execution range for the kernel ...
+    //
+    size_t global_sizes [2],
+           local_sizes [2];
+    define_2D_range (params,
+                     global_sizes,
+                     local_sizes);
+    //
+    // ... and execute it
     //
     run_kernel_2D_blocking (tx_params->ocl_obj,
                             0,
@@ -435,12 +417,32 @@ apply_antenna_influence_gpu (Parameters    *params,
     /*
     // no need to sync memory: everything is kept on the GPU 
     //
+    size_t buff_size = tx_params->nrows * 
+                       tx_params->ncols * 
+                       sizeof (tx_params->m_loss[0][0]);
     read_buffer_blocking (tx_params->ocl_obj,
                           0,
                           tx_params->m_loss_dev,
-                          ant_buff_size,
+                          buff_size,
                           tx_params->m_loss[0]);
-                          */
+#ifdef _DEBUG_INFO_
+    //
+    // DEBUG memory
+    //
+    int r, c;
+    for (r = 0; r < tx_params->nrows; r ++)
+    {
+        for (c = 0; c < tx_params->ncols; c++)
+            fprintf (stdout,
+                     "m_loss\t%d\t%d\t%.5f\n", r,
+                                               c,
+                                               tx_params->m_loss[r][c]);
+    }
+    fprintf (stdout,
+             "m_loss\t-----------------\n");
+    exit (-1);
+#endif
+    */
 }
 
 
@@ -460,30 +462,31 @@ static void
 antenna_influence_gpu (Parameters    *params,
                        Tx_parameters *tx_params)
 {
+    cl_mem horiz_diag_in_dev, vert_diag_in_dev;
+
     // activate the kernel
     activate_kernel (tx_params->ocl_obj,
                      "antenna_influence_kern");
-
     //
-    // create OpenCL buffers
+    // create the OpenCL buffers, if we are executing this function
+    // for the first time
     //
-    size_t diagram_size = _DIAGRAM_SIZE_ *
-                          sizeof (diagram->horizontal[0]);
-    size_t ant_buff_size = tx_params->nrows * 
-                           tx_params->ncols * 
-                           sizeof (tx_params->m_antenna_loss[0][0]);
-    size_t rad_buff_size = tx_params->nrows *
-                           tx_params->ncols *
-                           sizeof (tx_params->m_radio_zone[0][0]);
-
-    cl_mem horiz_diag_in_dev = create_buffer (tx_params->ocl_obj,
-                                              CL_MEM_READ_ONLY, 
-                                              diagram_size);
-    cl_mem vert_diag_in_dev = create_buffer (tx_params->ocl_obj,
-                                             CL_MEM_READ_ONLY, 
-                                             diagram_size);
     if (tx_params->m_antenna_loss_dev == NULL)
     {
+        //
+        // sizes of the OpenCL buffers ...
+        //
+        size_t diagram_size = _DIAGRAM_SIZE_ *
+                               sizeof (tx_params->diagram->horizontal[0]);
+        size_t ant_buff_size = tx_params->nrows * 
+                               tx_params->ncols * 
+                               sizeof (tx_params->m_antenna_loss[0][0]);
+        size_t rad_buff_size = tx_params->nrows *
+                               tx_params->ncols *
+                               sizeof (tx_params->m_radio_zone[0][0]);
+        //
+        // ... before defining them
+        //
         tx_params->m_antenna_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
         tx_params->m_radio_zone_dev   = (cl_mem *) malloc (sizeof (cl_mem));
 
@@ -493,19 +496,25 @@ antenna_influence_gpu (Parameters    *params,
         *(tx_params->m_radio_zone_dev) = create_buffer (tx_params->ocl_obj,
                                                         CL_MEM_WRITE_ONLY,
                                                         rad_buff_size);
+        horiz_diag_in_dev = create_buffer (tx_params->ocl_obj,
+                                           CL_MEM_READ_ONLY, 
+                                           diagram_size);
+        vert_diag_in_dev = create_buffer (tx_params->ocl_obj,
+                                          CL_MEM_READ_ONLY, 
+                                          diagram_size);
         //
-        // send input data to the device
+        // send buffers data to the device
         //
         write_buffer (tx_params->ocl_obj,
                       0,
                       &horiz_diag_in_dev,
                       diagram_size,
-                      diagram->horizontal);
+                      tx_params->diagram->horizontal);
         write_buffer (tx_params->ocl_obj,
                       0,
                       &vert_diag_in_dev,
                       diagram_size,
-                      diagram->vertical);
+                      tx_params->diagram->vertical);
         write_buffer (tx_params->ocl_obj,
                       0,
                       tx_params->m_antenna_loss_dev,
@@ -517,8 +526,9 @@ antenna_influence_gpu (Parameters    *params,
                                rad_buff_size,
                                tx_params->m_radio_zone[0]);
     }
-
-    // set constant kernel parameters 
+    //
+    // set scalar kernel parameters 
+    //
     set_kernel_double_arg (tx_params->ocl_obj,
                            0,
                            &params->map_ew_res);
@@ -539,7 +549,7 @@ antenna_influence_gpu (Parameters    *params,
                            &params->frequency);
     set_kernel_double_arg (tx_params->ocl_obj,
                            6,
-                           &(diagram->gain));
+                           &(tx_params->diagram->gain));
     set_kernel_int_arg    (tx_params->ocl_obj,
                            7,
                            &tx_params->beam_direction);
@@ -588,8 +598,6 @@ antenna_influence_gpu (Parameters    *params,
     // calculation radius and diameter
     //
     double radius_in_meters = params->radius * 1000;
-    int radius_in_pixels    = (int) (radius_in_meters / params->map_ew_res);
-    int diameter_in_pixels  = 2 * radius_in_pixels;
 
     //
     // calculation tile offset within the target area, given in pixel coordinates
@@ -618,30 +626,14 @@ antenna_influence_gpu (Parameters    *params,
                           14,
                           sizeof (cl_int2),
                           &tile_offset);
-
-    // number of processing tiles needed around each transmitter 
-    if (diameter_in_pixels < _WORK_ITEMS_PER_DIMENSION_)
-    {
-        fprintf (stderr, 
-                 "*** ERROR: Cannot execute on GPU. Increase the calculation radius and try again.\n");
-        exit (1);
-    }
-    if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
-    {
-        fprintf (stderr, 
-                 "*** ERROR: Cannot execute on GPU. Try setting a calculation radius multiple of %d.\n",
-                 _WORK_ITEMS_PER_DIMENSION_);
-        exit (1);
-    }
     //
     // define a 2D execution range for the kernel ...
     //
-    size_t ntile = diameter_in_pixels / _WORK_ITEMS_PER_DIMENSION_;
-    size_t global_sizes [] = {ntile * _WORK_ITEMS_PER_DIMENSION_,
-                              ntile * _WORK_ITEMS_PER_DIMENSION_};
-    size_t local_sizes [] = {_WORK_ITEMS_PER_DIMENSION_,
-                             _WORK_ITEMS_PER_DIMENSION_};
-
+    size_t global_sizes [2], 
+           local_sizes [2];
+    define_2D_range (params,
+                     global_sizes,
+                     local_sizes);
     //
     // ... and execute it
     //
@@ -695,14 +687,14 @@ calculate_antenna_influence (Parameters    *params,
     //
     // do we have to load the antenna diagram?
     //
-    if (diagram == NULL)
+    if (tx_params->diagram == NULL)
     {
         // allocate memory for the horizontal and vertical diagrams
-        diagram = (Diagram *) malloc (sizeof (Diagram));
-        diagram->horizontal = (double *) calloc (_DIAGRAM_SIZE_, 
-                                                 sizeof (double));
-        diagram->vertical = (double *) calloc (_DIAGRAM_SIZE_, 
-                                               sizeof (double));
+        tx_params->diagram = (Diagram *) malloc (sizeof (Diagram));
+        tx_params->diagram->horizontal = (double *) calloc (_DIAGRAM_SIZE_, 
+                                                            sizeof (double));
+        tx_params->diagram->vertical = (double *) calloc (_DIAGRAM_SIZE_, 
+                                                          sizeof (double));
 
         // get antenna's gain and directional diagrams
         char fileName [1000];
@@ -720,9 +712,9 @@ calculate_antenna_influence (Parameters    *params,
         }
         strcat (fileName, tx_params->antenna_diagram_file);
 
-        diagram->gain = read_antenna_diagram (fileName,
-                                              diagram->horizontal,
-                                              diagram->vertical);
+        tx_params->diagram->gain = read_antenna_diagram (fileName,
+                                                         tx_params->diagram->horizontal,
+                                                         tx_params->diagram->vertical);
     }
     // the horizontal and vertical resolution of one raster pixel should match
     assert (params->map_ew_res == params->map_ns_res);

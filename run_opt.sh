@@ -6,7 +6,7 @@
 #
 # Start MPI jobs
 #
-#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -pt ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -gt ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 #mpirun --mca btl_tcp_if_include 192.168.1.0/24 -np 1 -host k100 r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 
@@ -16,28 +16,27 @@
 #
 # Start MPI jobs for GPU
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -g ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -g ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 #
 # Spare the output of the GPU job
 #
-mv /tmp/worker.log /tmp/worker.gpu
+#mv /tmp/worker.log /tmp/worker.gpu
 
 #
 # Start job for CPU
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 #
 # Spare the output of the CPU job
 #
-mv /tmp/worker.log /tmp/worker.cpu
+#mv /tmp/worker.log /tmp/worker.cpu
 
-echo "***"
-echo "* $( wc -l /tmp/worker.cpu )"
-echo "* $( wc -l /tmp/worker.gpu )"
-echo "* GPU and CPU outputs differ in $( diff /tmp/worker.cpu /tmp/worker.gpu | wc -l )/$( wc -l /tmp/worker.cpu | cut -d' ' -f1 ) lines."
-echo "***"
-
+#echo "***"
+#echo "* $( wc -l /tmp/worker.cpu )"
+#echo "* $( wc -l /tmp/worker.gpu )"
+#echo "* GPU and CPU outputs differ in $( diff /tmp/worker.cpu /tmp/worker.gpu | wc -l )/$( wc -l /tmp/worker.cpu | cut -d' ' -f1 ) lines."
+#echo "***"
 
 #r.mapcalc diff=temp-temp1
 #r.info diff

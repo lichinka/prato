@@ -780,9 +780,10 @@ __kernel void antenna_influence_kern (const real pixel_res,
  *                       whole process. Intermediate results are saved
  *                       here.
  */
-__kernel void vector_sum_kern (__global real *vect_in,
-                               __global real *vect_out,
-                               __local  real *pblock)
+__kernel void 
+vector_sum_kern (__global real *vect_in,
+                 __global real *vect_out,
+                 __local  real *pblock)
 {
     uint element_idx = get_global_id(1) * get_global_size(0) + 
                        get_global_id(0);
@@ -798,6 +799,74 @@ __kernel void vector_sum_kern (__global real *vect_in,
 
     // output all at once
     vect_out[element_idx] = pblock[local_idx];
+}
+
+
+
+/**
+ * Calculate the objective function, i.e. mean square error of the path-loss
+ * prediction against field measurements per radio zone.
+ *
+ * tx_power ............... transmitting power at the antenna, in dBm;
+ * __gl m_field_meas_in ... the field-measurements matrix;
+ * __gl m_radio_zone_in ... the radio-zone matrix;
+ * __gl m_loss_in ......... the path-loss matrix;
+ * __gl v_partial_sum_out . the vector where the sum of the elements in each
+ *                          row is saved;
+ * __lo pblock ............ pointer to local memory, used to speed up the
+ *                          whole process. Intermediate results are saved
+ *                          here.
+ */
+__kernel void 
+obj_func_kern (const real     tx_power,
+               const char     radio_zone,
+               __global real *m_field_meas_in,
+               __global char *m_radio_zone_in,
+               __global real *m_loss_in,
+               __global real *v_partial_sum_out,
+               __local  real *pblock)
+{
+    uint element_idx = get_global_id (0);
+    uint local_idx = get_local_id (0);
+
+    // get the data from global memory
+    char rz = m_radio_zone_in[element_idx];
+    pblock[local_idx]  = tx_power;
+    pblock[local_idx] -= m_loss_in[element_idx];
+    pblock[local_idx] -= m_field_meas_in[element_idx];
+
+    // make sure the calculated value is valid
+    if (isnan (pblock[local_idx]))
+    {
+        // value is not a number
+        pblock[local_idx] = 0;
+    }
+    else
+    {
+        // make sure we are within the target radio zone
+        if ((rz & radio_zone) > 0)
+            // within the radio zone
+            pblock[local_idx] *= pblock[local_idx];
+        else
+            // out of the radio zone
+            pblock[local_idx] = 0;
+    }
+    // wait for other work items to calculate their values
+    barrier (CLK_LOCAL_MEM_FENCE);
+
+    // calculate the sum of this row with only one thread
+    if (local_idx == 0)
+    {
+        uint i, local_size = get_local_size (0);
+        
+        // accumulate the sum of the rest of the elements
+        for (i = local_idx; i < local_size; i ++)
+            pblock[local_idx] += pblock[i];
+
+        // save the calculated value
+        uint out_element_idx = element_idx / local_size;
+        v_partial_sum_out[out_element_idx] = pblock[local_idx];
+    }
 }
 
 #endif

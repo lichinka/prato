@@ -87,22 +87,6 @@ coverage (Parameters           *params,
     measure_time (NULL);
 #endif
 
-    /*
-    // DEBUG memory
-    //
-    int r, c;
-    for (r = 0; r < tx_params->nrows; r ++)
-    {
-        for (c = 0; c < tx_params->ncols; c++)
-        {
-            fprintf (stdout,
-                     "%.5f\t", tx_params->m_antenna_loss[r][c]);
-        }
-        fprintf (stdout, "\n");
-    }
-    fflush (stdout);
-    exit (-1);
-    */
 }
 
 

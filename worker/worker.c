@@ -195,6 +195,7 @@ receive_tx_data (Parameters *params,
         //
         if (uninitialized_pointers)
         {
+            tx_params->diagram            = NULL;
             tx_params->m_dem              = NULL;
             tx_params->m_dem_dev          = NULL;
             tx_params->m_clut             = NULL;
@@ -426,6 +427,12 @@ void worker (const int rank,
     {
         free (&(params->tx_params->m_field_meas[0][0]));
         free (params->tx_params->m_field_meas);
+        if (params->use_gpu)
+        {
+            free (params->tx_params->m_field_meas_dev);
+            free (params->tx_params->v_partial_sum_dev);
+            free (params->tx_params->v_partial_sum);
+        }
     }
     if (params->use_gpu)
     {
@@ -433,6 +440,8 @@ void worker (const int rank,
         free (params->tx_params->m_dem_dev);
         free (params->tx_params->m_clut_dev);
         free (params->tx_params->m_loss_dev);
+        free (params->tx_params->m_radio_zone_dev);
+        free (params->tx_params->m_antenna_loss_dev);
         free (params->tx_params->m_obst_height_dev);
         free (params->tx_params->m_obst_dist_dev);
     }
