@@ -195,6 +195,10 @@ receive_tx_data (Parameters *params,
         //
         if (uninitialized_pointers)
         {
+            tx_params->eric_params[0]     = 38.0;
+            tx_params->eric_params[1]     = 32.0;
+            tx_params->eric_params[2]     = -12.0;
+            tx_params->eric_params[3]     = 0.1;
             tx_params->diagram            = NULL;
             tx_params->m_dem              = NULL;
             tx_params->m_dem_dev          = NULL;
@@ -402,15 +406,11 @@ void worker (const int rank,
             }
             else
             {
-                double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
-
                 //
                 // calculate coverage for the received transmitter
                 //
                 coverage (params,
-                          params->tx_params,
-                          ericsson_params,
-                          4);
+                          params->tx_params);
                 //
                 // start result dump
                 //

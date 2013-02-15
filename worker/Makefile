@@ -2,7 +2,7 @@ include ../Makefile.inc
 
 CFLAGS  = $(PRJCFLAGS) -fPIC
 INCS    = $(PRJINCS) -I../$(OCL_COMMON_LIB_DIR) -I../$(PERFORMANCE_LIB_DIR) -I..
-LIBS    = $(PRJLIBS) -L.. -loclcommon -lperformance -lOpenCL
+LIBS    = $(PRJLIBS) -L.. -loclcommon -lperformance -lOpenCL -lgsl -lgslcblas -lm
 SRCS    = $(wildcard *.c)
 OBJS    = $(SRCS:.c=.o)
 BIN		= worker

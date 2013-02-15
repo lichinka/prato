@@ -25,6 +25,27 @@
  *
  *
  *****************************************************************************/
+/****************************************************************************
+ *
+ * MODULE:       E/// on GPU and parameter_fine_tuning for E///
+ * AUTHOR(S):    Lucas Benedicic, Telekom Slovenije                
+ *
+ * PURPOSE:      Fine tunes the various parameters of the prediction model in 
+ *               order to minimize the mean square error with field 
+ *               measurements
+ *
+ * COPYRIGHT:    GNU GPL
+ *
+ *
+ *****************************************************************************/
+
+//
+// From the GSL library
+//
+//      http://www.gnu.org/software/gsl/
+//
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_linalg.h>
 
 //
 // From the performance metrics library
@@ -409,15 +430,12 @@ static int DoProfile (double **Obst_high,
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
- * eric_params      the A0, A1, A2, A3 tuning parameters of the prediction 
- *                  model;
+ *                  parameters.-
  *
  */
 void 
 eric_pathloss_on_gpu (Parameters    *params,
-                      Tx_parameters *tx_params,
-                      const double  *eric_params)
+                      Tx_parameters *tx_params)
 {
     //
     // we use this pointer as a flag, indicating that we are about to
@@ -482,10 +500,10 @@ eric_pathloss_on_gpu (Parameters    *params,
     // set prediction model parameters
     //
     cl_double4 model_params;
-    model_params.s[0] = (double) eric_params[0];
-    model_params.s[1] = (double) eric_params[1];
-    model_params.s[2] = (double) eric_params[2];
-    model_params.s[3] = (double) eric_params[3];
+    model_params.s[0] = tx_params->eric_params[0];
+    model_params.s[1] = tx_params->eric_params[1];
+    model_params.s[2] = tx_params->eric_params[2];
+    model_params.s[3] = tx_params->eric_params[3];
     set_kernel_value_arg (tx_params->ocl_obj,
                           7,
                           sizeof (cl_double4),
@@ -565,8 +583,9 @@ eric_pathloss_on_gpu (Parameters    *params,
                             global_sizes,
                             local_sizes);
     //
-    // move the path-loss matrix from the device to the host
+    // no need to bring the path-loss matrix from the device to the host
     //
+    /*
     size_t buff_size = tx_params->nrows * 
                        tx_params->ncols * 
                        sizeof (tx_params->m_loss[0][0]);
@@ -575,22 +594,413 @@ eric_pathloss_on_gpu (Parameters    *params,
                           tx_params->m_loss_dev,
                           buff_size,
                           tx_params->m_loss[0]);
+     */
 }
 
 
 
 
-int 
-EricPathLossSub (double **Obst_high,
-                 double **Obst_dist,
-                 double **Offset,
-                 double **Raster, 
-                 double **Clutter, 
-                 double **PathLoss, 
-                 double **Meritve,
-                 double **AntLoss,
-                 char **RadioZone,
-                 struct StructEric *IniEric)
+/**
+ * Fine tunes the A0...A3 E/// parameters to best fit a set of measurements 
+ * within a given radio zone. The result is saved in the 
+ * `tx_params->eric_params` vector.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ */
+void
+parameter_fine_tuning (Parameters    *params,
+                       Tx_parameters *tx_params)
+{
+	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
+	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	double AntHeightBS = tx_params->antenna_height_AGL;	// antenna height of BS [m]
+	double AntHeightMS = params->rx_height_AGL;	        // antenna height of MS [m]
+	int xN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
+	int yN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	double scale       = params->map_ew_res;            // terrain resolution (in mts)
+	double A0          = tx_params->eric_params[0];		// model parameters
+	double A1          = tx_params->eric_params[1];		// model parameters
+	double A2          = tx_params->eric_params[2];		// model parameters
+	double A3          = tx_params->eric_params[3];	    // model parameters
+	double freq        = params->frequency;             // carrier frequency
+	double radi        = params->radius;			    // calculation radius around transmiter
+	double Lambda      = 300.0 / freq;			        //	wave lenght
+
+	double ZoBS;					// BS and MS height about the sea level
+	double ZObs2LOS = 0;
+	double DistObs2BS = 0;
+	double ZoTransBS,ZoTransMS;
+	double log10Zeff;
+	double log10DistBS2MSKm;
+	double tiltBS2MS;				// (ZoBS-ZoMS)/distBS2MSNorm	
+	double PathLossFreq = 0;	    // path loss due to carrier frequency
+	double PathLossTmp = 0;			// tmp path loss
+	int ix; int iy;	
+	int DiffX, DiffY;
+    double Zeff;			        // Difference in X and Y direction
+	double PathLossAntHeightMS;
+	double DistBS2MSNorm;           // normalized distance between MS and BS
+    double DistBS2MSKm;		        // distance between MS and BS in km
+							
+	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff;
+    double KDFR, Alfa, Fresnel, JDFR;
+
+    //
+    // define and initialize matrices for solving the linear system
+    // of equations that will return the best-fiting parameters
+    // for the prediction model
+    //
+    //  A x = b
+    //
+    const int Dim = 4;
+    gsl_matrix *A = gsl_matrix_alloc (Dim, Dim);
+    gsl_vector *b = gsl_vector_alloc (Dim);
+    double A_data [Dim] [Dim];
+    double b_data [Dim];
+
+    gsl_matrix_set_zero (A);
+    gsl_vector_set_zero (b);
+
+    for (ix = 0; ix < Dim; ix ++)
+    {
+        for (iy = 0; iy < Dim; iy ++)
+            A_data[ix][iy] = 0;
+        b_data[ix] = 0;
+    }
+
+	// BS height above the sea level calculated from raster DEM file
+	ZoBS = tx_params->m_dem[(int)BSxIndex][(int)BSyIndex];
+
+	// BS transmitter height above the sea level
+	ZoTransBS = ZoBS + AntHeightBS;
+
+	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
+									/*POPRAVJNEO (4.2.2010)*/	
+	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
+
+    //
+    // calculate the terrain profile if we haven't already
+    // 
+    if ((tx_params->m_obst_height == NULL) && (tx_params->m_obst_dist == NULL) && (tx_params->m_obst_offset == NULL))
+    {
+        DoProfile (tx_params->m_obst_height,
+                   tx_params->m_obst_dist,
+                   tx_params->m_obst_offset,
+                   1,
+                   tx_params->m_dem,
+                   BSxIndex,
+                   BSyIndex,
+                   ZoTransBS,
+                   xN,
+                   yN,
+                   scale,
+                   radi);
+    }
+
+    //
+    // reset the counter of valid field measurements
+    //
+    tx_params->field_meas_count = 0;
+
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("E/// parameter fine tuning on CPU");
+#endif
+	for (ix = 0; ix < xN; ix++)
+	{
+		for (iy = 0; iy < yN; iy++)
+		{
+			// Path Loss due to Hata model
+			DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
+			// ZoMS = tx_params->m_dem[ix][iy];
+			ZoTransMS = tx_params->m_dem[ix][iy]+AntHeightMS;  // ZoMS
+			Zeff = ZoTransBS - ZoTransMS;		// ??
+			DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
+			DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
+//			if(ZoBS <= tx_params->m_dem[ix][iy]) 
+//			{
+//				Zeff = AntHeightBS;  // ZoMS
+//			}
+			if (DistBS2MSKm < 0.01)
+			{
+				DistBS2MSKm = 0.01;
+			}
+
+			if ((DistBS2MSKm) > radi)
+		   	{    
+			    continue;
+		    }
+
+            //height correction due to earth sphere
+			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3);
+		
+			if ((- AntHeightBS < Zeff) && (Zeff < AntHeightBS))
+            {
+				Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
+			}
+			
+			log10Zeff=log10(fabs(Zeff));
+
+			//log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
+			log10DistBS2MSKm=log10(DistBS2MSKm);			
+
+			PathLossTmp = A0 + A1*log10DistBS2MSKm; 
+			PathLossTmp = PathLossTmp + A2*log10Zeff ;
+            PathLossTmp = PathLossTmp + A3*log10DistBS2MSKm*log10Zeff;
+			PathLossTmp = PathLossTmp - PathLossAntHeightMS + PathLossFreq;
+
+            //
+			// Calc position of the height and position of the highest obstacle
+            // 
+			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
+
+			if (DistBS2MSNorm > 0) 
+				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
+			else
+				tiltBS2MS = 0; 
+			
+			ZObs2LOS = tx_params->m_obst_height[ix][iy];
+			DistObs2BS = tx_params->m_obst_dist[ix][iy];
+			// Calc path loss due to NLOS conditions
+/*Patrik/scale*/	ElevAngCos = cos(atan(tiltBS2MS/scale));
+
+			Ddot = DistObs2BS; 
+			if (ElevAngCos != 0) 
+			{	
+				Ddot = DistObs2BS/ElevAngCos;
+			}
+			Ddotdot = DistBS2MSNorm - Ddot;
+			if (ElevAngCos != 0) {
+				Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
+			}
+
+// Obstacle height korrection due to earth sphere
+			if (Ddot <= Ddotdot){
+				ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
+			}
+			else{
+				ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
+			}
+
+//Hight correction due to BS2MS line angle
+			Hdot = ZObs2LOS*ElevAngCos;
+
+			PathLossDiff = 0;
+			KDFR = 0;
+			if (Ddot > 0 && Ddotdot > 0) {
+				Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
+
+				PathLossDiff = Hdot/Fresnel;
+
+// NLOS komponent calculation KDFR
+
+				if (PathLossDiff < -0.49 ) {
+					KDFR = 0; 
+				}
+				else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
+					KDFR = 6 + 12.2 * PathLossDiff;
+				}
+				else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
+					KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
+				}
+				else if(2 <= PathLossDiff) {
+					KDFR = 16 + 20 * log10(PathLossDiff);
+				}
+
+// Alfa correction factor
+				
+				if (Hdot > Fresnel/2)
+                {
+					Alfa = 1;
+				}
+				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2)
+                {
+					Alfa = 4 * Hdot/Fresnel - 1;
+				}
+				else if (Hdot < Fresnel/4)
+                {
+					Alfa = 0;
+				}
+			}
+
+//Spherical earth diffraction komponent JDFR
+			if (Hdot > 0)
+            {
+				JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
+				if (JDFR < 0)
+					JDFR=0;
+			}
+			else
+            {
+				JDFR = 0;
+			}
+
+            double nlos = sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
+
+			PathLossTmp += nlos;
+
+			// write data to pathloss
+			tx_params->m_loss[ix][iy] = PathLossTmp + tx_params->m_clut[ix][iy];
+
+            //
+            // accumulate the elements for solving the linear system of equations,
+            // only where there are valid field measurements
+            //
+            if (! isnan (tx_params->m_field_meas[ix][iy]))
+            {
+                if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
+                {
+                    //
+                    // valid field measurement and prediction within the user-defined radio zone
+                    //
+                    tx_params->field_meas_count ++;
+
+                    //
+                    // matrix-element accumulation
+                    //
+                    A_data[0][1] += log10DistBS2MSKm;
+                    A_data[0][2] += log10Zeff;
+                    A_data[0][3] += log10DistBS2MSKm * log10Zeff;
+
+                    A_data[1][0] += log10DistBS2MSKm;
+                    A_data[1][1] += log10DistBS2MSKm * log10DistBS2MSKm;
+                    A_data[1][2] += log10DistBS2MSKm * log10Zeff;
+                    A_data[1][3] += log10DistBS2MSKm * log10DistBS2MSKm * log10Zeff;
+
+                    A_data[2][0] += log10Zeff;
+                    A_data[2][1] += log10Zeff * log10DistBS2MSKm;
+                    A_data[2][2] += log10Zeff * log10Zeff;
+                    A_data[2][3] += log10Zeff * log10Zeff * log10DistBS2MSKm;
+
+                    A_data[3][0] += log10Zeff * log10DistBS2MSKm;
+                    A_data[3][1] += log10DistBS2MSKm * (log10Zeff * log10DistBS2MSKm);
+                    A_data[3][2] += log10Zeff * (log10Zeff * log10DistBS2MSKm);
+                    A_data[3][3] += (log10Zeff * log10DistBS2MSKm) * (log10Zeff * log10DistBS2MSKm);
+
+                    b_data[0] += tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                              - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
+                              - tx_params->m_field_meas[ix][iy];
+                    b_data[1] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                              - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
+                              - tx_params->m_field_meas[ix][iy]) * log10DistBS2MSKm;
+                    b_data[2] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                              - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
+                              - tx_params->m_field_meas[ix][iy]) * log10Zeff;
+                    b_data[3] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                              - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
+                              - tx_params->m_field_meas[ix][iy]) * (log10Zeff * log10DistBS2MSKm);
+                }
+            }
+		}
+	}
+    //
+    // the only matrix element that does not need accumulation
+    //
+    A_data[0][0] = tx_params->field_meas_count;
+    
+    //
+    // use the GSL library to solve the linear system of equations
+    //
+    int s;
+    gsl_vector      *x  = gsl_vector_alloc (Dim);
+    gsl_vector      *r  = gsl_vector_alloc (Dim);
+    gsl_permutation *p  = gsl_permutation_alloc (Dim);
+
+    //
+    // copy the accumulated sums into the matrices
+    //
+    for (ix = 0; ix < Dim; ix ++)
+    {
+        for (iy = 0; iy < Dim; iy ++)
+            gsl_matrix_set (A, ix, iy, A_data[ix][iy]);
+        gsl_vector_set (b, ix, b_data[ix]);
+    }
+
+    //
+    // solve the linear system
+    //
+    gsl_linalg_LU_decomp (A, p, &s);
+    gsl_linalg_LU_solve  (A, p, b, x);
+
+    //
+    // copy the original values back into A, i.e.
+    // the values before the decomposition
+    //
+    for (ix = 0; ix < Dim; ix ++)
+        for (iy = 0; iy < Dim; iy ++)
+            gsl_matrix_set (A, ix, iy, A_data[ix][iy]);
+
+    //
+    // r = A * x - b
+    //
+    gsl_blas_dgemv (CblasNoTrans, 1.0, A, x, 0.0, r);
+    gsl_vector_sub (r, b);
+
+    // 
+    // if the norm of the residual is not 0 (zero), then the system
+    // does not have a unique solution
+    //
+    double residual_norm = gsl_blas_dnrm2 (r);
+
+    if (residual_norm != 0)
+        fprintf (stderr,
+                 "*** WARNING: the linear system of equations does not have a unique solution (residual is %g)\n",
+                 residual_norm);
+    //
+    // save the solution in the parameters of the propagation model
+    //
+    fprintf (stdout,
+             "*** INFO: found optimal values for E///\n");
+    for (ix = 0; ix < Dim; ix ++)
+    {
+        tx_params->eric_params[ix] = gsl_vector_get (x, ix);
+        fprintf (stdout,
+                 "\tA%d\t%g\n",
+                 ix,
+                 tx_params->eric_params[ix]);
+    }
+
+#ifdef _DEBUG_INFO_
+    //
+    // dump the matrices
+    //
+    printf ("A = \n");
+    for (ix = 0; ix < Dim; ix ++)
+    {
+        for (iy = 0; iy < Dim; iy ++)
+            printf ("%.5f\t", gsl_matrix_get (A, ix, iy));
+        printf ("\n");
+    }
+
+    printf ("b = \n");
+    for (ix = 0; ix < Dim; ix ++)
+        printf ("%.5f\t", gsl_vector_get (b, ix));
+
+    printf ("\nx = \n");
+    for (ix = 0; ix < Dim; ix ++)
+        printf ("%.5f\t", gsl_vector_get (x, ix));
+    printf ("\n");
+#endif
+
+    //
+    // free allocated elements
+    //
+    gsl_permutation_free (p);
+    gsl_vector_free (r);
+    gsl_vector_free (x);
+    gsl_vector_free (b);
+    gsl_matrix_free (A);
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
+}
+
+
 
 /*************************************************************************************************
  *
@@ -610,6 +1020,17 @@ EricPathLossSub (double **Obst_high,
  * 			Patrik Ritosa, May 2012
  *
  *************************************************************************************************/
+int 
+EricPathLossSub (double **Obst_high,
+                 double **Obst_dist,
+                 double **Offset,
+                 double **Raster, 
+                 double **Clutter, 
+                 double **PathLoss, 
+                 double **Meritve,
+                 double **AntLoss,
+                 char **RadioZone,
+                 struct StructEric *IniEric)
 {
 	// Ericsson model constants and variables
 	int BSxIndex = IniEric->BSxIndex;		    //	normalized position of BS -> UTMx/resolution 
@@ -679,7 +1100,7 @@ EricPathLossSub (double **Obst_high,
     //
     // DEBUG: parameter dump titles 
     //
-    //printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
+    printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
 #endif
 
 	for (ix = 0; ix < xN; ix++)
@@ -786,16 +1207,18 @@ EricPathLossSub (double **Obst_high,
 
 // Alfa correction factor
 				
-				if (Hdot > Fresnel/2){
+				if (Hdot > Fresnel/2)
+                {
 					Alfa = 1;
 				}
-				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2){
+				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2)
+                {
 					Alfa = 4 * Hdot/Fresnel - 1;
 				}
-				else if (Hdot < Fresnel/4){
+				else if (Hdot < Fresnel/4)
+                {
 					Alfa = 0;
 				}
-			
 			}
 
 //Spherical earth diffraction komponent JDFR
@@ -818,7 +1241,7 @@ EricPathLossSub (double **Obst_high,
 			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
 
 #ifdef _DEBUG_INFO_
-            /*
+            //
             // DEBUG: parameter dump for approximation using least squares
             //
             if (! isnan (Meritve[ix][iy]))
@@ -838,12 +1261,11 @@ EricPathLossSub (double **Obst_high,
                             Clutter[ix][iy],
                             PathLoss[ix][iy],
                             Meritve[ix][iy],
-                            AntLoss[ix][iy]);*/
+                            AntLoss[ix][iy]);
 #endif
 		} // end irow
 	} // end icol
-
-    printf ("--------\n");
+    printf ("E/// --------\n");
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);

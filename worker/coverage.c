@@ -5,25 +5,17 @@
 
 
 /**
- * Calculates the coverage prediction for one transmitter, using the 
- * Ericsson 9999 model.
+ * Calculates the coverage prediction for one transmitter, using the E/// model.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
- *                  configuration parameters needed for calculation;
- * eric_params      contains the four tunning parameters for the Ericsson 9999
- *                  model;
- * eric_params_len  the number of parameters within the received vector, four 
- *                  in this case (A0, A1, A2 and A3);
+ *                  parameters.-
  *
  */
 void 
-coverage (Parameters           *params,
-          Tx_parameters        *tx_params,
-          const double         *eric_params, 
-          const unsigned int   eric_params_len)
+coverage (Parameters    *params,
+          Tx_parameters *tx_params)
 {
     //
     // execute the path-loss calculation on CPU or GPU?
@@ -34,8 +26,7 @@ coverage (Parameters           *params,
         measure_time ("E/// on GPU");
 #endif
         eric_pathloss_on_gpu (params,
-                              tx_params,
-                              eric_params);
+                              tx_params);
     }
     else
     {
@@ -53,10 +44,10 @@ coverage (Parameters           *params,
                                      tx_params->nrows,
                                      params->map_ew_res,
                                      params->frequency, 
-                                     (double) eric_params[0],
-                                     (double) eric_params[1],
-                                     (double) eric_params[2], 
-                                     (double) eric_params[3],
+                                     (double) tx_params->eric_params[0],
+                                     (double) tx_params->eric_params[1],
+                                     (double) tx_params->eric_params[2], 
+                                     (double) tx_params->eric_params[3],
                                      1, 
                                      params->radius};
         EricPathLossSub (tx_params->m_obst_height,

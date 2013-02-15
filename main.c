@@ -165,15 +165,24 @@ int main (int argc, char *argv [])
     }
     else
     {
-        double ericsson_params [4] = {38.0, 32.0, -12.0, 0.1};
 
         if (params->ntx > 1)
             fprintf (stderr, 
                      "WARNING Only the first transmitter will be processed\n");
+        //
+        // set the tuning parameters for the prediction model
+        //
+        params->tx_params->eric_params[0] = 38.0;
+        params->tx_params->eric_params[1] = 32.0;
+        params->tx_params->eric_params[2] = -12.0;
+        params->tx_params->eric_params[3] = 0.1;
+
+        //
+        // calculate the coverage for this transmitter
+        //
         coverage (params,
-                  params->tx_params,
-                  ericsson_params,
-                  4);
+                  params->tx_params);
+
         //
         // calculation finished, do we have to write the raster output?
         //

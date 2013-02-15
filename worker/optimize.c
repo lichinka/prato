@@ -12,14 +12,16 @@
  * tx_params    a structure holding transmitter-specific configuration 
  *              parameters;
  * radio_zone   radio zone for which the objective function is calculated;
- * sol_vector   solution vector over which the objective function is calculated;
  *
  */
 static double
 obj_func_on_gpu (Parameters    *params,
                  Tx_parameters *tx_params,
                  const char    radio_zone)
-{ 
+{
+    int r, c;
+    double ret_value;
+
     //
     // check if the needed buffers are already on the device
     //
@@ -53,11 +55,42 @@ obj_func_on_gpu (Parameters    *params,
                       tx_params->v_partial_sum_dev,
                       ps_buff_size,
                       tx_params->v_partial_sum);
-        write_buffer_blocking (tx_params->ocl_obj,
-                               0,
-                               tx_params->m_field_meas_dev,
-                               fm_buff_size,
-                               tx_params->m_field_meas[0]);
+        write_buffer (tx_params->ocl_obj,
+                      0,
+                      tx_params->m_field_meas_dev,
+                      fm_buff_size,
+                      tx_params->m_field_meas[0]);
+        //
+        // count the number of valid field measurements
+        // to correctly calculate the mean square error
+        //
+        tx_params->field_meas_count = 0;
+        for (r = 0; r < tx_params->nrows; r ++)
+        {
+            for (c = 0; c < tx_params->ncols; c ++)
+            {
+                //
+                // use only valid path-loss values
+                //
+                double pl = tx_params->m_loss[r][c];
+                if (!isnan (pl))
+                {
+                    //
+                    // look for the target radio zone ...
+                    //
+                    char rz = tx_params->m_radio_zone[r][c];
+                    if ((rz & radio_zone) > 0)
+                    {
+                        //
+                        // ... and a field measurement there
+                        //
+                        double fm = tx_params->m_field_meas[r][c];
+                        if (!isnan (fm))
+                            tx_params->field_meas_count ++;
+                    }
+                }
+            }
+        }
     }
     //
     // activate the kernel 
@@ -106,7 +139,8 @@ obj_func_on_gpu (Parameters    *params,
                             &global_size,
                             &local_size);
     //
-    // no need to sync memory: everything is kept on the GPU
+    // bring the sum of each row from the GPU;
+    // and calculate the average on the CPU
     //
     size_t ps_buff_size = tx_params->nrows * 
                           sizeof (tx_params->v_partial_sum[0]);
@@ -115,22 +149,14 @@ obj_func_on_gpu (Parameters    *params,
                           tx_params->v_partial_sum_dev,
                           ps_buff_size,
                           tx_params->v_partial_sum);
-#ifdef _DEBUG_INFO_
-    //
-    // DEBUG memory
-    //
-    int r;
     for (r = 0; r < tx_params->nrows; r ++)
-    {
-        fprintf (stdout,
-                 "v_partial_sum\t%d\t%.5f\n", r,
-                                              tx_params->v_partial_sum[r]);
-    }
-    fprintf (stdout,
-             "v_partial_sum\t-----------------\n");
-#endif
+        ret_value += tx_params->v_partial_sum[r];
+    //
+    // the mean square error
+    //
+    ret_value /= tx_params->field_meas_count;
 
-    return 0;
+    return ret_value;
 }
 
 
@@ -150,21 +176,28 @@ static double
 obj_func (Parameters    *params,
           Tx_parameters *tx_params,
           const char     radio_zone,
-          //const double  *sol_vector)
-          double  *sol_vector)
+          const double  *sol_vector)
 {
     int r, c, count = 0;
     double ret_value = 0;
 
+    //
+    // copy the solution values to the internal structure,
+    // used for coverage calculation
+    //
+    tx_params->eric_params[0] = sol_vector[0];
+    tx_params->eric_params[1] = sol_vector[1];
+    tx_params->eric_params[2] = sol_vector[2];
+    tx_params->eric_params[3] = sol_vector[3];
+
 #ifdef _DEBUG_INFO_
     //
-    // a fixed solution for testing
-    // score is 101.0050757267
+    // a fixed solution for testing (score is 101.0050757267 for KPODVI1)
     //
-    sol_vector[0] = 36.0883185300743;
-    sol_vector[1] = -8.69953059242079;
-    sol_vector[2] = -0.760090245843437;
-    sol_vector[3] = 9.55413445652782;
+    tx_params->eric_params[0] = 80.36872968;
+    tx_params->eric_params[1] = -71.74091439;
+    tx_params->eric_params[2] = -23.82273819;
+    tx_params->eric_params[3] = 47.83436989;
 #endif
 
     if (params->use_gpu)
@@ -173,8 +206,7 @@ obj_func (Parameters    *params,
         measure_time ("E/// on GPU");
 #endif
         eric_pathloss_on_gpu (params,
-                              tx_params,
-                              sol_vector);
+                              tx_params);
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
         measure_time ("Apply antenna losses on GPU");
@@ -205,10 +237,10 @@ obj_func (Parameters    *params,
                                      tx_params->nrows,
                                      params->map_ew_res,
                                      params->frequency, 
-                                     (double) sol_vector[0],
-                                     (double) sol_vector[1],
-                                     (double) sol_vector[2],
-                                     (double) sol_vector[3],
+                                     (double) tx_params->eric_params[0],
+                                     (double) tx_params->eric_params[1],
+                                     (double) tx_params->eric_params[2],
+                                     (double) tx_params->eric_params[3],
                                      1, 
                                      params->radius};
         EricPathLossSub (tx_params->m_obst_height,
@@ -519,17 +551,47 @@ optimize (Parameters    *params,
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double e_default  [_SEARCH_VECTOR_DIMENSIONS_] = {38.0, 32.0, -12.0, 0.1};
-    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {-40.0, -40.0, -15.0, -15.0};
-    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = {40.0,  40.0,  15.0,  15.0};
+    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {-150.0, -150.0, -150.0, -150.0};
+    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = { 150.0,  150.0,  150.0,  150.0};
 
     //
     // calculate the coverage for the first time to initialize all needed structures
     //
     coverage (params,
-              tx_params,
-              e_default,
-              _SEARCH_VECTOR_DIMENSIONS_);
+              tx_params);
+    //
+    // if the first coverage calculation happened on the GPU,
+    // we need to refresh the memory buffers on the host
+    //
+    if (params->use_gpu)
+    {
+        size_t dbl_buff_size = tx_params->nrows * 
+                               tx_params->ncols * 
+                               sizeof (tx_params->m_loss[0][0]);
+        size_t ch_buff_size = tx_params->nrows * 
+                              tx_params->ncols * 
+                              sizeof (tx_params->m_radio_zone[0][0]);
+        read_buffer (tx_params->ocl_obj,
+                     0,
+                     tx_params->m_loss_dev,
+                     dbl_buff_size,
+                     tx_params->m_loss[0]);
+        read_buffer (tx_params->ocl_obj,
+                     0,
+                     tx_params->m_antenna_loss_dev,
+                     dbl_buff_size,
+                     tx_params->m_antenna_loss[0]);
+        read_buffer_blocking (tx_params->ocl_obj,
+                              0,
+                              tx_params->m_radio_zone_dev,
+                              ch_buff_size,
+                              tx_params->m_radio_zone[0]);
+    }
+    //
+    // calculate parameter approximation for E/// prediction model
+    //
+    parameter_fine_tuning (params,
+                           tx_params);
 
 #ifdef _DEBUG_INFO_
     //
@@ -554,7 +616,7 @@ optimize (Parameters    *params,
         tx_params,
         _SEARCH_VECTOR_DIMENSIONS_,
         20 * _SEARCH_VECTOR_DIMENSIONS_,
-        20,
+        100,
         0.9,
         0.9,
         1,

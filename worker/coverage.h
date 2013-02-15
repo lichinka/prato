@@ -96,14 +96,17 @@ struct Tx_parameters
     char    field_meas_map [_CHAR_BUFFER_SIZE_];
 
     // number of rows and columns of each of the 2D RADIUS area matrices
-    int nrows;
-    int ncols;
+    int     nrows;
+    int     ncols;
 
     // geographical limits of each of the 2D RADIUS area matrices
     double map_north;
     double map_east;
     double map_south;
     double map_west;
+
+    // the four tunning parameters for the E/// model (A0, A1, A2, A3)
+    double eric_params [4];
 
     // 2D RADIUS area matrix indices of the geographical limits
     int map_north_idx;
@@ -122,6 +125,10 @@ struct Tx_parameters
     // 2D RADIUS area matrix where the field measurements are kept
     // as received from the master process
     double **m_field_meas;
+
+    // the number of valid field measurements,
+    // used for calculating the mean square error
+    unsigned int field_meas_count;
 
     // 2D RADIUS area matrix where the path-loss predictions are saved
     double **m_loss;
@@ -384,25 +391,17 @@ worker (const int rank,
 
 
 /**
- * Calculates the coverage prediction for one transmitter, using the 
- * Ericsson 9999 model.
+ * Calculates the coverage prediction for one transmitter, using the E/// model.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
- *                  configuration parameters needed for calculation;
- * eric_params      contains the four tunning parameters for the Ericsson 9999
- *                  model;
- * eric_params_len  the number of parameters within the received vector, four 
- *                  in this case (A0, A1, A2 and A3);
+ *                  parameters.-
  *
  */
 void 
-coverage (Parameters           *params,
-          Tx_parameters        *tx_params,
-          const double         *eric_params, 
-          const unsigned int   eric_params_len);
+coverage (Parameters    *params,
+          Tx_parameters *tx_params);
 
 
 /**

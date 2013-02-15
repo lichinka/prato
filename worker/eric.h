@@ -38,8 +38,7 @@ struct StructEric {
  */
 void 
 eric_pathloss_on_gpu (Parameters    *params,
-                      Tx_parameters *tx_params,
-                      const double  *eric_params);
+                      Tx_parameters *tx_params);
 
 /**
  * Calculates the path loss using E/// 9999 model implementation on CPU.
@@ -56,6 +55,21 @@ EricPathLossSub (double **Obst_high,
                  double **AntLoss,
                  char **RadioZone,
                  struct StructEric *IniEric);
+
+/**
+ * Fine tunes the A0...A3 E/// parameters to best fit a set of measurements 
+ * within a given radio zone. The result is saved in the 
+ * `tx_params->eric_params` vector.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ */
+void
+parameter_fine_tuning (Parameters    *params,
+                       Tx_parameters *tx_params);
 
 #endif
 
