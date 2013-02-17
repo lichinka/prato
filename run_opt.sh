@@ -6,7 +6,7 @@
 #
 # Start MPI jobs
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage -gt ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage $1 ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 #mpirun --mca btl_tcp_if_include 192.168.1.0/24 -np 1 -host k100 r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 

@@ -378,6 +378,80 @@ static int common_params_handler (void *user_struct,
 
 
 /**
+ * Allocates a 2D matrix of the specified dimensions as a continous chunk 
+ * of memory. Despite this, the matrix can be referenced with two indices
+ * as `matrix[i][j]`.
+ * This function returns the target pointer to where the memory has been 
+ * allocated, i.e. `m_ptr`.
+ *
+ * nrows    the number of rows of the matrix;
+ * ncols    the number of columns in the matrix;
+ * m_ptr    target pointer, where the address of the allocated memory
+ *          is saved (output parameter).-
+ *
+ */
+static double **
+prato_alloc_double_matrix (const int    nrows,
+                           const int    ncols,
+                           double     **m_ptr)
+{
+    int r;
+
+    //
+    // only allocate new memory if the target pointer is NULL
+    //
+    if (m_ptr == NULL)
+     {
+        double *m_ptr_data = (double *) calloc (nrows * ncols, 
+                                                sizeof (double));
+        m_ptr = (double **) calloc (nrows,
+                                    sizeof (double *));
+        for (r = 0; r < nrows; r ++)
+            m_ptr[r] = &(m_ptr_data[r * ncols]);
+    }
+    return m_ptr;
+}
+
+
+
+/**
+ * Allocates a 2D matrix of the specified dimensions as a continous chunk 
+ * of memory. Despite this, the matrix can be referenced with two indices
+ * as `matrix[i][j]`.
+ * This function returns the target pointer to where the memory has been 
+ * allocated, i.e. `m_ptr`.
+ *
+ * nrows    the number of rows of the matrix;
+ * ncols    the number of columns in the matrix;
+ * m_ptr    target pointer, where the address of the allocated memory
+ *          is saved (output parameter).-
+ *
+ */
+static char **
+prato_alloc_char_matrix (const int    nrows,
+                         const int    ncols,
+                         char       **m_ptr)
+{
+    int r;
+
+    //
+    // only allocate new memory if the target pointer is NULL
+    //
+    if (m_ptr == NULL)
+    {
+        char *m_ptr_data = (char *) calloc (nrows * ncols, 
+                                            sizeof (char));
+        m_ptr = (char **) calloc (nrows,
+                                  sizeof (char *));
+        for (r = 0; r < nrows; r ++)
+            m_ptr[r] = &(m_ptr_data[r * ncols]);
+    }
+    return m_ptr;
+}
+
+
+
+/**
  *
  * Starts a worker process.
  *

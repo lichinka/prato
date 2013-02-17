@@ -1,4 +1,3 @@
-#include <performance_metric.h>
 #include "measurement.h"
 #include "worker/coverage.h"
 
@@ -306,15 +305,9 @@ init_coverage_for_tx (FILE          *ini_file,
         // if we haven't already
         //
         if (tx_params->m_field_meas == NULL)
-        {
-            int i;
-            double *m_field_meas_data = (double *) calloc (params->nrows * params->ncols,
-                                                     sizeof (double));
-            tx_params->m_field_meas = (double **) calloc (params->nrows, 
-                                                 sizeof (double *));
-            for (i = 0; i < params->nrows; i ++)
-                tx_params->m_field_meas[i] = &(m_field_meas_data[i * params->ncols]);
-        }
+            tx_params->m_field_meas = prato_alloc_double_matrix (params->nrows,
+                                                                 params->ncols,
+                                                                 tx_params->m_field_meas);
         //
         // load the measurements from a raster map
         //
@@ -527,14 +520,9 @@ init_coverage (FILE       *ini_file,
     // allocate memory for the resulting path-loss matrix
     //
     if (params->m_loss == NULL)
-    {
-        double *m_loss_data = (double *) calloc (params->nrows * params->ncols,
-                                                 sizeof (double));
-        params->m_loss = (double **) calloc (params->nrows, 
-                                             sizeof (double *));
-        for (i = 0; i < params->nrows; i ++)
-            params->m_loss[i] = &(m_loss_data[i * params->ncols]);
-    }
+        params->m_loss = prato_alloc_double_matrix (params->nrows,
+                                                    params->ncols,
+                                                    params->m_loss);
     //
     // allocate the reading buffers for DEM and clutter data
     //
@@ -547,21 +535,13 @@ init_coverage (FILE       *ini_file,
     if ((params->m_dem == NULL) && (params->m_clut == NULL))
     {
         // DEM
-        double *m_dem_data = (double *) calloc (params->nrows * params->ncols,
-                                                sizeof (double));
-        params->m_dem = (double **) calloc (params->nrows,
-                                            sizeof (double *));
-        for (i = 0; i < params->nrows; i ++)
-            params->m_dem[i] = &(m_dem_data[i * params->ncols]);
-
+        params->m_dem = prato_alloc_double_matrix (params->nrows,
+                                                   params->ncols,
+                                                   params->m_dem);
         // CLUTTER
-        double *m_clut_data = (double *) calloc (params->nrows * params->ncols,
-                                                 sizeof (double));
-        params->m_clut = (double **) calloc (params->nrows, 
-                                             sizeof (double *));
-        for (i = 0; i < params->nrows; i ++)
-            params->m_clut[i] = &(m_clut_data[i * params->ncols]);
-
+        params->m_clut = prato_alloc_double_matrix (params->nrows,
+                                                    params->ncols,
+                                                    params->m_clut);
         //
         // read files (DEM and clutter) into their respective arrays
         //
@@ -582,8 +562,8 @@ init_coverage (FILE       *ini_file,
                 FCELL f_in2 = ((FCELL *)inrast2)[col];
                 params->m_dem[row][col] = (double) f_in;
                 params->m_clut[row][col] = (double) f_in2;
-            }
-        }
+             }
+        } 
     }
     //
     // create an array containing the transmitters to be processed
@@ -653,14 +633,18 @@ void coverage_mpi (int argc,
     // sync point: pass common input data to all workers
     //
     MPI_Barrier (worker_comm);
+#ifdef _PERFORMANCE_METRICS_
     measure_time ("Common data distribution");
+#endif
     distribute_common_data (params,
                             worker_comm);
     //
     // sync point: common data distribution finished
     //
     MPI_Barrier (worker_comm);
+#ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
+#endif
 
     //
     // start processing loop
@@ -679,10 +663,13 @@ void coverage_mpi (int argc,
                   worker_comm,
                   &status);
         worker_rank = status.MPI_SOURCE;
+
+#ifdef _PERFORMANCE_METRICS_
         //
         // previous coverage calculation and result dump finished
         //
         measure_time_id (NULL, worker_rank);
+#endif
 
         switch (status.MPI_TAG)
         {   
@@ -701,24 +688,29 @@ void coverage_mpi (int argc,
                               worker_rank,
                               _WORKER_KEEP_WORKING_TAG_,
                               worker_comm);
+#ifdef _PERFORMANCE_METRICS_
+                    measure_time_id ("Transmitter data send", 
+                                     worker_rank);
+#endif
                     //
                     // starting transmitter-data send
                     //
-                    measure_time_id ("Transmitter data send", 
-                                     worker_rank);
                     send_tx_data (params,
                                   &(params->tx_params[-- tx_count]),
                                   worker_comm,
                                   worker_rank);
+#ifdef _PERFORMANCE_METRICS_
                     //
                     // transmitter-data send finished,
                     //
-                    measure_time_id (NULL, worker_rank);
+                    measure_time_id (NULL, 
+                                     worker_rank);
                     //
                     // start coverage calculation
                     // 
                     measure_time_id ("Calculation and result dump",
                                      worker_rank);
+#endif
                 }
                 else
                 {

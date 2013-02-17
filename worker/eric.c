@@ -60,370 +60,6 @@
 
 
 
-
-/**
- * Calculates the terrain profile for line-of-sight.
- *
- * Obst_high    output 2D matrix of heights;
- * Obst_dist    output 2D matrix of distances;
- * Offset       output 2D matrix of offsets.-
- *
- */
-static void calc_profile (double** Obst_high, 
-                          double** Obst_dist, 
-                          double** Raster, 
-                          double** Offset, 
-                          const double dx, 
-                          const double dy, 
-                          const double xBS, 
-                          const double yBS,
-                          const double ZoTransBS, 
-                          const int xN, 
-                          const int yN, 
-                          const double scale, 
-                          const double radius)
-{
-	
-	int X,Y;
-	double x_tmp, y_tmp;
-	double temp_dist, max_dist_old, max_dist_los, max_dist_nlos, max_dist, cand_dist, cand_el_dist;
-	double offset_dist;
-	
-	double max_high_old, max_high_los, max_high_nlos, max_high, cand_high, cand_el_high;
-	double cand_obstacle, cand_el_obstacle, max_obstacle;
-	double EL, EL_temp, EL_max;
-	double EL_nlos, EL_nlos_temp, EL_nlos_max;
-	
-	double interp_high, koef_x, koef_y; 
-	
-	int LOS_start = 1;
-	
-	
-	//Patrik x_tmp = xBS + dx;
-	//Patrik y_tmp = yBS + dy;
-	x_tmp = floor(xBS) + 0.5 + dx;
-	y_tmp = floor(yBS) + 0.5 + dy;
-	//Patrik x_tmp = floor(xBS) + dx;
-	//Patrik y_tmp = floor(yBS) + dy;
-		
-	//Patrik X = Y = 0;
-		
-	max_high = max_high_old = Raster [(int)xBS][(int)yBS];
-	max_dist = max_dist_old = 1;		// 1 bin
-	//Patrik cand_high = -999;
-	//Patrik cand_dist = 1;
-	EL_max = 0;
-	EL_nlos_max = 0;
-	while ((int)x_tmp >= 0 && (int)x_tmp < xN && (int)y_tmp >= 0 && (int)y_tmp < yN)
-	{
-		X = (int)x_tmp;
-		Y = (int)y_tmp;
-			
-		//Patrik temp_dist = sqrt(pow(floor(xBS) + 0.5 - x_tmp,2)+pow(floor(yBS) + 0.5 - y_tmp,2));
-		temp_dist = sqrt(pow(floor(xBS) - floor(x_tmp),2)+pow(floor(yBS) - floor(y_tmp),2));	//zaokorzena razdalja na bin - pravilno za racun
-		offset_dist = sqrt(pow(floor(xBS) + 0.5 - x_tmp,2)+pow(floor(yBS) + 0.5 - y_tmp,2));	//natancna razdalja potrebna za izracun offseta pri dolocanju bina
-	
-        /*
-         * Process the whole area, without the radius restriction
-         *
-		if (temp_dist*scale > radius*1000){
-			break;
-		}
-        */
-			
-// interpolacija DEM-a za natancnejso visino
-			if ((x_tmp - (floor(x_tmp) + 0.5)) <= 0){
-				if ((X-1) < 0){
-					koef_x = 0;	
-				}
-				else {
-					koef_x = (Raster[X][Y] - Raster[X-1][Y]);
-				}
-			}
-			else{
-				if ((X+1) >= xN){
-					koef_x = 0;	
-				}
-				else {
-					koef_x = (Raster[X+1][Y] - Raster[X][Y]);
-				}
-			}
-			
-			if ((y_tmp - (floor(y_tmp) + 0.5)) <= 0){
-				if ((Y-1) < 0){
-					koef_y = 0;
-				}
-				else {
-					koef_y = (Raster[X][Y] - Raster[X][Y-1]);
-				}
-			}
-			else{
-				if ((Y+1) >= yN){
-					koef_y = 0;
-				}
-				else{
-					koef_y = (Raster[X][Y+1] - Raster[X][Y]);
-				}
-			}
-		
-			
-			interp_high = Raster[X][Y] + koef_x * (x_tmp - (floor(x_tmp) + 0.5)) + koef_y * (y_tmp - (floor(y_tmp) + 0.5));
-// konec interpolacija DEM-a za natancnejso visino
-			
-			//Patrik EL = atan(temp_dist * scale / (ZoTransBS - Raster[X][Y]));
-			EL = atan(temp_dist * scale / (ZoTransBS - interp_high));
-			
-			if (EL < 0){
-				EL_temp = _PI_ + EL;
-			}
-			else{
-				EL_temp = EL;
-			}
-
-
-
-// LOS case			
-			if (EL_temp > EL_max){
-				if (LOS_start == 1){
-					max_high_los = max_high;
-					max_dist_los = max_dist;
-				}
-				else{
-					max_high_los = max_high_old;
-					max_dist_los = max_dist_old;
-				}	
-	
-				
-				if (fabs(offset_dist - temp_dist) < Offset[X][Y]){
-					Obst_high[X][Y] = max_high_los - (ZoTransBS - max_dist_los * scale / tan(EL));
-					Obst_dist[X][Y] = max_dist_los;			//do sedaj prevladuloca ovira
-					Offset[X][Y] = fabs(offset_dist - temp_dist);
-				}
-				EL_max = EL_temp;
-					
-				//Patrik if (Raster[X][Y] >= max_high){
-					//Patrik max_high = cand_high = Raster[X][Y];
-					max_high = cand_high = interp_high;
-					max_dist = cand_dist = temp_dist;			//nova ovira
-
-				//Patrik }
-				
-				
-				cand_el_high = max_high;			// ponastavi za naslednjo NLOS iteracijo
-				cand_el_dist = max_dist;
-				EL_nlos_max = 0; // prestudiraj!!
-			}
-// NLOS case
-			else{									// EL_temp <= EL_max
-				LOS_start = 0;
-				
-				
-				//Patrik EL_nlos = atan((temp_dist - cand_dist) * scale / (cand_high + 50 - Raster[X][Y]));
-				EL_nlos = atan((temp_dist - cand_dist) * scale / (cand_high + 50 - interp_high));
-				
-				if (EL_nlos < 0){
-					EL_nlos_temp = _PI_ + EL_nlos;
-				}
-				else{
-					EL_nlos_temp = EL_nlos;
-				}
-				
-				if (EL_nlos_temp > EL_nlos_max){
-					EL_nlos_max = EL_nlos_temp;
-				}
-				else{					//EL_nlos_temp <= EL_nlos_max
-					//Patrik cand_high = Raster[X][Y];
-					cand_high = interp_high;
-					cand_dist = temp_dist;
-					EL_nlos_max = 0; 			// reset kota, ker smo dosegli novo tocko LOS v NLOS obmocju
-				}
-				
-				cand_obstacle = cand_high - ZoTransBS + cand_dist * scale / tan(EL);		// kandidat za novo oviro NLOS
-				cand_el_obstacle = cand_el_high - ZoTransBS + cand_el_dist * scale / tan(EL);		// izbran kandidat za novo oviro NLOS
-				max_obstacle = max_high - ZoTransBS + max_dist * scale / tan(EL);					// prevladujoca ovira iz LOS
-				
-				if((cand_obstacle > max_obstacle) && (cand_obstacle > cand_el_obstacle)){
-					cand_el_high = cand_high;
-					cand_el_dist = cand_dist;		
-				}
-					
-				if (cand_el_obstacle >= max_obstacle){
-					max_high_nlos = cand_el_high;
-					max_dist_nlos = cand_el_dist;				
-				}
-				else{
-					max_high_nlos = max_high;
-					max_dist_nlos = max_dist;					
-				}	
-					
-
-				if (fabs(offset_dist - temp_dist) < Offset[X][Y]){
-					Obst_high[X][Y] = max_high_nlos - (ZoTransBS - max_dist_nlos * scale / tan(EL));
-					Obst_dist[X][Y] = max_dist_nlos;
-					Offset[X][Y] = fabs(offset_dist - temp_dist);
-				}
-					
-				if (max_high > max_high_nlos){
-					max_high_old = max_high;
-					max_dist_old = max_dist;
-				}
-				else{
-					max_high_old = max_high_nlos;
-					max_dist_old = max_dist_nlos;
-				}
-			}
-
-		x_tmp = x_tmp + dx;
-		y_tmp = y_tmp + dy;	
-	}
-}
-
-
-
-/**
- * Calculates line-of-sight vectors all around the transmitter.-
- *
- */
-static int DoProfile (double **Obst_high,
-                      double **Obst_dist,
-                      double **Offset,
-                      double ResDist, 
-                      double **Raster, 
-                      double xBS, 
-                      double yBS, 
-                      double ZoTransBS, 
-                      int xN, 
-                      int yN, 
-                      double scale, 
-                      double radius)
-{
-#ifdef _PERFORMANCE_METRICS_
-    measure_time ("Line-of-sight");
-#endif
-	double AZI;
-	int ix, iy;
-	double dx, dy;
-	
-    //
-    // LOS and obstacle height calculation is executed only once, 
-    // because its results are constant throughout the optimization
-    //
-
-    // Offset ini
-	for (ix = 0; ix < xN; ix++)
-    {
-		for (iy = 0; iy < yN; iy++)
-        {
-			Offset[ix][iy]=999;
-		}
-	}
-	
-	// Kvadrant I
-	for (ix = 0; ix < xN; ix++)
-	{
-		//Patrik AZI = atan((ix - xBS) / yBS);
-		AZI = atan((ix - floor(xBS)) / floor(yBS));
-		
-		if (cos(AZI) > sin(AZI))
-        {
-			//Patrik dx = sin(AZI) / cos(AZI);
-			//Patrik dy = -cos(AZI) / cos(AZI);
-			dx = (ix - floor(xBS)) / floor(yBS);			// tan(AZI)
-			dy = -1;
-		}
-		else
-        {
-			//Patrik dx = sin(AZI) / sin(AZI);
-			//Patrik dy = -cos(AZI) / sin(AZI);
-			dx = 1;
-			dy = -floor(yBS)/(ix - floor(xBS));				// ctan(AZI)
-		}
-		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
-	}
-
-	// Kvadrant III
-
-	for (ix = 0; ix < xN; ix++)
-	{
-		//Patrik AZI = atan((ix - xBS) / (yN - yBS));
-		AZI = atan((ix - floor(xBS)) / (yN - floor(yBS)));
-		
-		if (cos(AZI) > sin(AZI))
-        {
-			//Patrik dx = sin(AZI) / cos(AZI);
-			//Patrik dy = cos(AZI) / cos(AZI);
-			dx = (ix - floor(xBS)) / (yN - floor(yBS));			// tan(AZI)
-			dy = 1;
-		}
-		else
-        {
-			//Patrik dx = sin(AZI) / sin(AZI);
-			//Patrik dy = cos(AZI) / sin(AZI);
-			dx = 1;
-			dy = (yN - floor(yBS)) / (ix - floor(xBS));				// ctan(AZI)
-		}
-				
-		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
-	} 
-	
-	// Kvadrant II
-
-	for (iy = 0; iy < yN; iy++)
-	{
-		//Patrik AZI = atan((iy - yBS) / (xN - xBS));
-		AZI = atan((iy - floor(yBS)) / (xN - floor(xBS)));
-			
-		if (cos(AZI) > sin(AZI))
-        {
-			//Patrik dx = cos(AZI) / cos(AZI);
-			//Patrik dy = sin(AZI) / cos(AZI);
-			dx = 1;			
-			dy = (iy - floor(yBS)) / (xN - floor(xBS));		// tan(AZI)
-		}
-		else
-        {
-			//Patrik dx = cos(AZI) / sin(AZI);
-			//Patrik dy = sin(AZI) / sin(AZI);
-			dx = (xN - floor(xBS)) / (iy - floor(yBS));				// ctan(AZI)
-			dy = 1;
-		}
-		
-		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);	
-	}
-
-	// Kvadrant IV
-
-	for (iy = 0; iy < yN; iy++)
-	{
-		//Patrik AZI = atan((iy - yBS) / xBS);
-		AZI = atan((iy - floor(yBS)) / floor(xBS));
-		
-		if (cos(AZI) > sin(AZI))
-        {
-			//Patrik dx = -cos(AZI) / cos(AZI);
-			//Patrik dy = sin(AZI) / cos(AZI);
-			dx = -1;			
-			dy = (iy - floor(yBS)) / floor(xBS);		// tan(AZI)
-		}
-		else
-        {
-			//Patrik dx = -cos(AZI) / sin(AZI);
-			//Patrik dy = sin(AZI) / sin(AZI);
-			dx = -floor(xBS) / (iy - floor(yBS));				// ctan(AZI)
-			dy = 1;
-		}
-		
-		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);			
-	}
-
-#ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-#endif
-	return 0;
-}
-
-
-
 /**
  * Calculates the path loss using E/// 9999 model implementation on GPU.
  *
@@ -456,22 +92,6 @@ eric_pathloss_on_gpu (Parameters    *params,
                                 "r.coverage.cl",
                                 "eric_per_tx",
                                 "-I. -Werror");
-        //
-        // calculate the terrain profile, i.e. line-of-sight,
-        // only the first time
-        // 
-        DoProfile (tx_params->m_obst_height,
-                   tx_params->m_obst_dist,
-                   tx_params->m_obst_offset,
-                   1.0,
-                   tx_params->m_dem,
-                   tx_params->tx_east_coord_idx,
-                   tx_params->tx_north_coord_idx,
-                   tx_params->total_tx_height,
-                   tx_params->ncols,
-                   tx_params->nrows,
-                   params->map_ew_res,
-                   params->radius);
     }
     //
     // activate the compiled kernel
@@ -683,29 +303,9 @@ parameter_fine_tuning (Parameters    *params,
 	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
 
     //
-    // calculate the terrain profile if we haven't already
-    // 
-    if ((tx_params->m_obst_height == NULL) && (tx_params->m_obst_dist == NULL) && (tx_params->m_obst_offset == NULL))
-    {
-        DoProfile (tx_params->m_obst_height,
-                   tx_params->m_obst_dist,
-                   tx_params->m_obst_offset,
-                   1,
-                   tx_params->m_dem,
-                   BSxIndex,
-                   BSyIndex,
-                   ZoTransBS,
-                   xN,
-                   yN,
-                   scale,
-                   radi);
-    }
-
-    //
     // reset the counter of valid field measurements
     //
     tx_params->field_meas_count = 0;
-
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("E/// parameter fine tuning on CPU");
@@ -791,6 +391,7 @@ parameter_fine_tuning (Parameters    *params,
 
 			PathLossDiff = 0;
 			KDFR = 0;
+
 			if (Ddot > 0 && Ddotdot > 0) {
 				Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
 
@@ -946,15 +547,12 @@ parameter_fine_tuning (Parameters    *params,
     //
     double residual_norm = gsl_blas_dnrm2 (r);
 
-    if (residual_norm != 0)
-        fprintf (stderr,
-                 "*** WARNING: the linear system of equations does not have a unique solution (residual is %g)\n",
-                 residual_norm);
     //
     // save the solution in the parameters of the propagation model
     //
     fprintf (stdout,
-             "*** INFO: found optimal values for E///\n");
+             "*** INFO: found optimal values for E/// (residual is %g)\n", 
+             residual_norm);
     for (ix = 0; ix < Dim; ix ++)
     {
         tx_params->eric_params[ix] = gsl_vector_get (x, ix);
@@ -966,7 +564,7 @@ parameter_fine_tuning (Parameters    *params,
 
 #ifdef _DEBUG_INFO_
     //
-    // dump the matrices
+    // DEBUG: dump the matrices
     //
     printf ("A = \n");
     for (ix = 0; ix < Dim; ix ++)
@@ -1045,7 +643,6 @@ EricPathLossSub (double **Obst_high,
 	double A2  = IniEric->A2;			//	Model 9999 parameters
 	double A3  = IniEric->A3;			//	Model 9999 parameters
 	double freq  = IniEric->freq;			//	carrier frequency
-	double ResDist = IniEric->ResDist;		//	distance BS - MS sampling rate [normalized with scale
 	double Lambda = 300.0 / freq;			//	wave lenght
 	double radi = IniEric->radi;			// radius of calculation
 
@@ -1072,25 +669,6 @@ EricPathLossSub (double **Obst_high,
 	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
 									/*POPRAVJNEO (4.2.2010)*/	
 	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
-
-    //
-    // calculate the terrain profile if we haven't already
-    // 
-    if ((Obst_high == NULL) && (Obst_dist == NULL) && (Offset == NULL))
-    {
-        DoProfile (Obst_high,
-                   Obst_dist,
-                   Offset,
-                   ResDist,
-                   Raster,
-                   BSxIndex,
-                   BSyIndex,
-                   ZoTransBS,
-                   xN,
-                   yN,
-                   scale,
-                   radi);
-    }
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("E/// on CPU");
@@ -1156,7 +734,6 @@ EricPathLossSub (double **Obst_high,
 			else
 				tiltBS2MS = 0; 
 			
-			//DoProfile(&ZObs2LOS,&DistObs2BS,ResDist,Raster,BSxIndex,BSyIndex,ZoTransBS,ix,iy,tiltBS2MS);
 			ZObs2LOS = Obst_high[ix][iy];
 			DistObs2BS = Obst_dist[ix][iy];
 			// Calc path loss due to NLOS conditions
@@ -1265,7 +842,6 @@ EricPathLossSub (double **Obst_high,
 #endif
 		} // end irow
 	} // end icol
-    printf ("E/// --------\n");
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);

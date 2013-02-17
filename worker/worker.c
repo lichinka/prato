@@ -2,81 +2,6 @@
 
 
 
-
-/**
- * Allocates a 2D matrix of the specified dimensions as a continous
- * chunck of memory. Despite this, the matrix can be referenced with
- * two indices as `matrix[i][j]`.
- * This function returns the target pointer to where the memory has 
- * been allocated.
- *
- * nrows    the number of rows of the matrix;
- * ncols    the number of columns in the matrix;
- * m_ptr    target pointer, where the address of the allocated memory
- *          is saved (output parameter).-
- *
- */
-static double **
-allocate_double_matrix (const int    nrows,
-                        const int    ncols,
-                        double     **m_ptr)
-{
-    int r;
-
-    //
-    // only allocate new memory if the target pointer is NULL
-    //
-    if (m_ptr == NULL)
-     {
-        double *m_ptr_data = (double *) calloc (nrows * ncols, 
-                                                sizeof (double));
-        m_ptr = (double **) calloc (nrows,
-                                    sizeof (double *));
-        for (r = 0; r < nrows; r ++)
-            m_ptr[r] = &(m_ptr_data[r * ncols]);
-    }
-    return m_ptr;
-}
-
-
-
-/**
- * Allocates a 2D matrix of the specified dimensions as a continous
- * chunck of memory. Despite this, the matrix can be referenced with
- * two indices as `matrix[i][j]`.
- * This function returns the target pointer to where the memory has 
- * been allocated.
- *
- * nrows    the number of rows of the matrix;
- * ncols    the number of columns in the matrix;
- * m_ptr    target pointer, where the address of the allocated memory
- *          is saved (output parameter).-
- *
- */
-static char **
-allocate_char_matrix (const int    nrows,
-                      const int    ncols,
-                      char       **m_ptr)
-{
-    int r;
-
-    //
-    // only allocate new memory if the target pointer is NULL
-    //
-    if (m_ptr == NULL)
-    {
-        char *m_ptr_data = (char *) calloc (nrows * ncols, 
-                                            sizeof (char));
-        m_ptr = (char **) calloc (nrows,
-                                  sizeof (char *));
-        for (r = 0; r < nrows; r ++)
-            m_ptr[r] = &(m_ptr_data[r * ncols]);
-    }
-    return m_ptr;
-}
-
-
-
 /**
  * Receives data distributed by the master process, that is common
  * to all transmitters.
@@ -228,7 +153,7 @@ receive_tx_data (Parameters *params,
     //
     // digital elevation model
     //
-    tx_params->m_dem = allocate_double_matrix (tx_params->nrows,
+    tx_params->m_dem = prato_alloc_double_matrix (tx_params->nrows,
                                                tx_params->ncols,
                                                tx_params->m_dem);
     //
@@ -254,7 +179,7 @@ receive_tx_data (Parameters *params,
     //
     // clutter data
     //
-    tx_params->m_clut = allocate_double_matrix (tx_params->nrows,
+    tx_params->m_clut = prato_alloc_double_matrix (tx_params->nrows,
                                                 tx_params->ncols,
                                                 tx_params->m_clut);
     //
@@ -273,37 +198,37 @@ receive_tx_data (Parameters *params,
     //
     // radio zones 
     //
-    tx_params->m_radio_zone = allocate_char_matrix (tx_params->nrows,
-                                                    tx_params->ncols,
-                                                    tx_params->m_radio_zone);
+    tx_params->m_radio_zone = prato_alloc_char_matrix (tx_params->nrows,
+                                                       tx_params->ncols,
+                                                       tx_params->m_radio_zone);
     //
     // antenna-introduced losses
     //
-    tx_params->m_antenna_loss = allocate_double_matrix (tx_params->nrows,
-                                                        tx_params->ncols,
-                                                        tx_params->m_antenna_loss);
+    tx_params->m_antenna_loss = prato_alloc_double_matrix (tx_params->nrows,
+                                                           tx_params->ncols,
+                                                           tx_params->m_antenna_loss);
     //
     // path loss
     //
-    tx_params->m_loss = allocate_double_matrix (tx_params->nrows,
-                                                tx_params->ncols,
-                                                tx_params->m_loss);
+    tx_params->m_loss = prato_alloc_double_matrix (tx_params->nrows,
+                                                   tx_params->ncols,
+                                                   tx_params->m_loss);
     //
     // heights of obstacles - line-of-sight
     //
-    tx_params->m_obst_height = allocate_double_matrix (tx_params->nrows,
-                                                       tx_params->ncols,
-                                                       tx_params->m_obst_height);
+    tx_params->m_obst_height = prato_alloc_double_matrix (tx_params->nrows,
+                                                          tx_params->ncols,
+                                                          tx_params->m_obst_height);
     //
     // distances to obstacles - line-of-sight
     //
-    tx_params->m_obst_dist = allocate_double_matrix (tx_params->nrows,
-                                                     tx_params->ncols,
-                                                     tx_params->m_obst_dist);
+    tx_params->m_obst_dist = prato_alloc_double_matrix (tx_params->nrows,
+                                                        tx_params->ncols,
+                                                        tx_params->m_obst_dist);
     //
     // offset distances to obstacles - line-of-sight
     //
-    tx_params->m_obst_offset = allocate_double_matrix (tx_params->nrows,
+    tx_params->m_obst_offset = prato_alloc_double_matrix (tx_params->nrows,
                                                        tx_params->ncols,
                                                        tx_params->m_obst_offset);
     //
@@ -314,7 +239,7 @@ receive_tx_data (Parameters *params,
         //
         // field measurements
         //
-        tx_params->m_field_meas = allocate_double_matrix (tx_params->nrows,
+        tx_params->m_field_meas = prato_alloc_double_matrix (tx_params->nrows,
                                                           tx_params->ncols,
                                                           tx_params->m_field_meas);
         //
@@ -400,10 +325,8 @@ void worker (const int rank,
             // calculate coverage prediction or optimize parameters?
             // 
             if (params->use_opt)
-            {
                 optimize (params,
                           params->tx_params);
-            }
             else
             {
                 //

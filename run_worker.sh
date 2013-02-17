@@ -17,7 +17,7 @@ else
         v.to.rast input=temp type=point output=temp use=z --overwrite
     else
         if [ -z "${REDIR}" ]; then
-            ${CMD} > /tmp/worker.log
+            ${CMD} > /tmp/worker.log 2>&1
         else
             echo "Usage: $0 [-db] [-rast]"
             echo "Starts a worker process, writing its results to stdout."
