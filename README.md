@@ -45,6 +45,11 @@ Installing PRATO
 Requirements
 ------------
 - The OpenMPI library, version 1.6 or newer should be installed, including its headers. Earlier versions have a bug limiting the number of concurrent processes to 128.
+- You will also need the GNU Scientific Library (GSL). It is available at http://www.gnu.org/software/gsl/.
+- Some support libraries are also used to exploit the decoupled architecture of PRATO, instructions follow.
+
+Installing support libraries
+----------------------------
 - Choose a directory in your host computer, e.g. `prato`
 
 	```
@@ -70,13 +75,15 @@ Requirements
 	prato/ocl_common> cd ..
 	```
 
+Getting PRATO source code
+-------------------------
 - Download the lastest version of PRATO from https://github.com/lichinka/prato 
 
 	```
 	prato> git clone https://github.com/lichinka/prato src
 	```
 
-- Create symlinks of the dependency libraries into the `src` directory. This will ease the dynamic-library path handling at runtime:
+- Create symlinks of the support libraries into the `src` directory. This will ease the dynamic-library path handling at runtime:
 
 	```
 	prato> cd src
@@ -91,7 +98,6 @@ Compilation
 
 	```
 	prato
-	  |
 	  |--- performance
 	  |--- ocl_common
 	  |--- src
