@@ -482,16 +482,16 @@ parameter_fine_tuning (Parameters    *params,
                     A_data[3][2] += log10Zeff * (log10Zeff * log10DistBS2MSKm);
                     A_data[3][3] += (log10Zeff * log10DistBS2MSKm) * (log10Zeff * log10DistBS2MSKm);
 
-                    b_data[0] += tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                    b_data[0] += tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
                               - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                               - tx_params->m_field_meas[ix][iy];
-                    b_data[1] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                    b_data[1] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
                               - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                               - tx_params->m_field_meas[ix][iy]) * log10DistBS2MSKm;
-                    b_data[2] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                    b_data[2] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
                               - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                               - tx_params->m_field_meas[ix][iy]) * log10Zeff;
-                    b_data[3] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - KDFR 
+                    b_data[3] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos
                               - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                               - tx_params->m_field_meas[ix][iy]) * (log10Zeff * log10DistBS2MSKm);
                 }
@@ -678,7 +678,7 @@ EricPathLossSub (double **Obst_high,
     //
     // DEBUG: parameter dump titles 
     //
-    printf ("xi|yi|log(d)|HEBK|log(HEBK)|KDFR|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
+    printf ("xi|yi|log(d)|HEBK|log(HEBK)|NLOS|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
 #endif
 
 	for (ix = 0; ix < xN; ix++)
@@ -829,7 +829,7 @@ EricPathLossSub (double **Obst_high,
                             log10DistBS2MSKm,
                             fabs (Zeff),
                             log10Zeff,
-                            KDFR,
+                            nlos,
                             A0,
                             A1,
                             A2,

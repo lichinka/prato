@@ -194,6 +194,8 @@ obj_func (Parameters    *params,
     //
     // a fixed solution for testing (score is 101.0050757267 for KPODVI1)
     //
+    fprintf (stderr,
+             "*** WARNING: using fixed solution for E/// parameters\n");
     tx_params->eric_params[0] = 80.36872968;
     tx_params->eric_params[1] = -71.74091439;
     tx_params->eric_params[2] = -23.82273819;
