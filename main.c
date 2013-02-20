@@ -40,7 +40,7 @@ read_file_into_memory (const char *file_name,
 /**
  * Entry point of the GRASS module.-
  */
-int main (int argc, char *argv [])
+int main (int argc, char **argv)
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output;
@@ -225,23 +225,12 @@ int main (int argc, char *argv [])
     //
     // deallocate memory before exiting
     //
-    if (params->use_opt)
-    {
-        int i;
-        for (i = 0; i < params->ntx; i ++)
-        {
-            free (&(params->tx_params[i].m_field_meas[0][0]));
-            free (params->tx_params[i].m_field_meas);
-        }
-    }
-    free (params->tx_params);
+    int i;
+    for (i = 0; i < params->ntx; i ++)
+        free_tx_params (params,
+                        params->tx_params);
     free (params->ini_file_content);
-    free (&(params->m_loss[0][0]));
-    free (params->m_loss);
-    free (&(params->m_clut[0][0]));
-    free (params->m_clut);
-    free (&(params->m_dem[0][0]));
-    free (params->m_dem);
+    free (params->tx_params);
     free (params);
 
     exit (EXIT_SUCCESS);

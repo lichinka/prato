@@ -394,11 +394,10 @@ coverage (Parameters    *params,
                tx_params->tx_east_coord_idx,
                tx_params->tx_north_coord_idx,
                tx_params->total_tx_height,
-               tx_params->ncols,
                tx_params->nrows,
+               tx_params->ncols,
                params->map_ew_res,
                params->radius);
-
     //
     // execute the path-loss calculation on CPU or GPU?
     //
@@ -422,8 +421,8 @@ coverage (Parameters    *params,
                                      tx_params->tx_north_coord_idx,
                                      tx_params->antenna_height_AGL, 
                                      params->rx_height_AGL,
-                                     tx_params->ncols,
                                      tx_params->nrows,
+                                     tx_params->ncols,
                                      params->map_ew_res,
                                      params->frequency, 
                                      (double) tx_params->eric_params[0],
@@ -461,6 +460,7 @@ coverage (Parameters    *params,
 #endif
 
 }
+
 
 
 /**

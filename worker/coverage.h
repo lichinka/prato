@@ -306,6 +306,12 @@ struct Parameters
     char    clutter_map         [_CHAR_BUFFER_SIZE_];
     char    antenna_diagram_dir [_CHAR_BUFFER_SIZE_];
 
+    // category-based clutter losses are saved here;
+    // each category is used as an index within this array to retrieve 
+    // the correct loss; the initial values are read from the INI file
+    int     clutter_category_count;
+    double  clutter_loss        [_CHAR_BUFFER_SIZE_];
+
     // horizontal and vertical losses that define the main antenna beam
     int     main_zone_horiz;    
     int     main_zone_vert;
@@ -324,8 +330,7 @@ struct Parameters
     // a flag to indicate the GPU should be used 
     // on the worker side, if available
     char    use_gpu;
-
-} __attribute__((__packed__));
+ } __attribute__((__packed__));
 
 typedef struct Parameters Parameters;
 
@@ -351,9 +356,13 @@ static int common_params_handler (void *user_struct,
     #define MATCH(s,n) strcasecmp(section, s) == 0 && strcasecmp(name, n) == 0
 
     if (MATCH ("common", "DEMMapName"))
-        strncpy (pconfig->dem_map, value, _CHAR_BUFFER_SIZE_);
+        strncpy (pconfig->dem_map,
+                 value,
+                 _CHAR_BUFFER_SIZE_);
     else if (MATCH ("common", "clutterMapName"))
-        strncpy (pconfig->clutter_map, value, _CHAR_BUFFER_SIZE_);
+        strncpy (pconfig->clutter_map,
+                 value,
+                 _CHAR_BUFFER_SIZE_);
     else if (MATCH ("common", "receiverHeightAGL"))
         pconfig->rx_height_AGL = atof (value);
     else if (MATCH ("common", "frequency"))
@@ -361,7 +370,9 @@ static int common_params_handler (void *user_struct,
     else if (MATCH ("common", "radius"))
         pconfig->radius = atof (value);
     else if (MATCH ("common", "antennaDirectory"))
-        strncpy (pconfig->antenna_diagram_dir, value, _CHAR_BUFFER_SIZE_);
+        strncpy (pconfig->antenna_diagram_dir, 
+                 value, 
+                 _CHAR_BUFFER_SIZE_);
     else if (MATCH ("common", "firstRadioZoneHorizontal"))
         pconfig->main_zone_horiz = atoi (value);
     else if (MATCH ("common", "firstRadioZoneVertical"))
@@ -370,8 +381,40 @@ static int common_params_handler (void *user_struct,
         pconfig->sec_zone_horiz = atoi (value);
     else if (MATCH ("common", "secondRadioZoneVertical"))
         pconfig->sec_zone_vert = atoi (value);
+    else if (MATCH ("common", "clutterCategoryCount"))
+        pconfig->clutter_category_count = atoi (value) + 1;
+    else if (MATCH ("common", "clutterLoss1"))
+        pconfig->clutter_loss[1] = atof (value);
+    else if (MATCH ("common", "clutterLoss2"))
+        pconfig->clutter_loss[2] = atof (value);
+    else if (MATCH ("common", "clutterLoss3"))
+        pconfig->clutter_loss[3] = atof (value);
+    else if (MATCH ("common", "clutterLoss4"))
+        pconfig->clutter_loss[4] = atof (value);
+    else if (MATCH ("common", "clutterLoss5"))
+        pconfig->clutter_loss[5] = atof (value);
+    else if (MATCH ("common", "clutterLoss6"))
+        pconfig->clutter_loss[6] = atof (value);
+    else if (MATCH ("common", "clutterLoss7"))
+        pconfig->clutter_loss[7] = atof (value);
+    else if (MATCH ("common", "clutterLoss8"))
+        pconfig->clutter_loss[8] = atof (value);
+    else if (MATCH ("common", "clutterLoss9"))
+        pconfig->clutter_loss[9] = atof (value);
+    else if (MATCH ("common", "clutterLoss10"))
+        pconfig->clutter_loss[10] = atof (value);
+    else if (MATCH ("common", "clutterLoss11"))
+        pconfig->clutter_loss[11] = atof (value);
+    else if (MATCH ("common", "clutterLoss12"))
+        pconfig->clutter_loss[12] = atof (value);
+    else if (MATCH ("common", "clutterLoss13"))
+        pconfig->clutter_loss[13] = atof (value);
+    else if (MATCH ("common", "clutterLoss14"))
+        pconfig->clutter_loss[14] = atof (value);
+    else if (MATCH ("common", "clutterLoss15"))
+        pconfig->clutter_loss[15] = atof (value);
     else
-        return 0;  /* unknown section/name, error */
+        return 0;       /* unknown section/name, error */
     return 1;
 }
 
@@ -401,7 +444,7 @@ prato_alloc_double_matrix (const int    nrows,
     // only allocate new memory if the target pointer is NULL
     //
     if (m_ptr == NULL)
-     {
+    {
         double *m_ptr_data = (double *) calloc (nrows * ncols, 
                                                 sizeof (double));
         m_ptr = (double **) calloc (nrows,
@@ -449,19 +492,6 @@ prato_alloc_char_matrix (const int    nrows,
     return m_ptr;
 }
 
-
-
-/**
- *
- * Starts a worker process.
- *
- * rank The rank of this worker process;
- * comm the MPI communicator to use.-
- *
- */
-extern void 
-worker (const int rank,
-        MPI_Comm comm);
 
 
 /**

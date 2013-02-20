@@ -1,6 +1,8 @@
 #ifndef _MASTER_PROCESS_FOR_COVERAGE_CALCULATION_IN_GRASS_H_
 #define _MASTER_PROCESS_FOR_COVERAGE_CALCULATION_IN_GRASS_H_
 
+#include "measurement.h"
+#include "worker/worker.h"
 
 
 /**

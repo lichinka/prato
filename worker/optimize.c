@@ -181,21 +181,16 @@ obj_func (Parameters    *params,
     int r, c, count = 0;
     double ret_value = 0;
 
-    //
     // copy the solution values to the internal structure,
     // used for coverage calculation
     //
-    tx_params->eric_params[0] = sol_vector[0];
-    tx_params->eric_params[1] = sol_vector[1];
-    tx_params->eric_params[2] = sol_vector[2];
-    tx_params->eric_params[3] = sol_vector[3];
+    for (r = 0; r < params->clutter_category_count; r ++)
+        params->clutter_loss[r] = sol_vector[r];
 
 #ifdef _DEBUG_INFO_
     //
     // a fixed solution for testing (score is 101.0050757267 for KPODVI1)
     //
-    fprintf (stderr,
-             "*** WARNING: using fixed solution for E/// parameters\n");
     tx_params->eric_params[0] = 80.36872968;
     tx_params->eric_params[1] = -71.74091439;
     tx_params->eric_params[2] = -23.82273819;
@@ -549,13 +544,24 @@ void
 optimize (Parameters    *params,
           Tx_parameters *tx_params)
 {
+    int i;
+
     //
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double search_low [_SEARCH_VECTOR_DIMENSIONS_] = {-150.0, -150.0, -150.0, -150.0};
-    double search_up  [_SEARCH_VECTOR_DIMENSIONS_] = { 150.0,  150.0,  150.0,  150.0};
-
+    double *search_low = calloc (params->clutter_category_count,
+                                 sizeof (double));
+    double *search_up  = calloc (params->clutter_category_count,
+                                 sizeof (double));
+    //
+    // since we are looking for clutter losses, we define a range 0~255 dB
+    //
+    for (i = 0; params->clutter_category_count; i ++)
+    {
+        search_low[i] = 0;
+        search_up[i]  = 255;
+    }
     //
     // calculate the coverage for the first time to initialize all needed structures
     //
@@ -594,6 +600,16 @@ optimize (Parameters    *params,
     //
     parameter_fine_tuning (params,
                            tx_params);
+    //
+    // ... and its objective function value
+    //
+    double score = obj_func (params,
+                             tx_params,
+                             _RADIO_ZONE_MAIN_BEAM_ON_,
+                             tx_params->eric_params);
+    fprintf (stdout, 
+             "*** INFO: optimal values for E/// have score %g\n",
+             score);
 
 #ifdef _DEBUG_INFO_
     //
@@ -601,8 +617,8 @@ optimize (Parameters    *params,
     //
     de (params,
         tx_params,
-        _SEARCH_VECTOR_DIMENSIONS_,
-        _SEARCH_VECTOR_DIMENSIONS_,
+        params->clutter_category_count,
+        params->clutter_category_count,
         1,
         0.9,
         0.9,
@@ -616,9 +632,9 @@ optimize (Parameters    *params,
     //
     de (params,
         tx_params,
-        _SEARCH_VECTOR_DIMENSIONS_,
-        20 * _SEARCH_VECTOR_DIMENSIONS_,
-        5,
+        params->clutter_category_count,
+        20 * params->clutter_category_count,
+        1,
         0.9,
         0.9,
         1,
@@ -626,5 +642,10 @@ optimize (Parameters    *params,
         search_low,
         search_up);
 #endif
+    //
+    // free reserved buffer
+    //
+    free (search_up);
+    free (search_low);
 }
 

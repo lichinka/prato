@@ -1,5 +1,4 @@
-#include "measurement.h"
-#include "worker/coverage.h"
+#include "master/master.h"
 
 
 
@@ -97,152 +96,6 @@ send_tx_data (Parameters *params,
 
 
 /**
- * Dynamically spawns worker processes to calculate the area coverage using MPI.
- * It returns the number of spawned workers, and a reference to the communicator
- * used to talk to them in the 'worker_comm' parameter.
- *
- * params           a structure holding all parameters needed for calculation;
- * worker_comm      output parameter: the communicator used to talk to the 
- *                  spawned workers.-
- *
- */
-static int spawn_workers (Parameters *params,
-                          MPI_Comm *worker_comm)
-{
-    int i;
-    int rank, world_size, universe_size, flag;
-    int *universe_size_ptr;
-
-    MPI_Comm_size (MPI_COMM_WORLD, &world_size); 
-    MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-
-	printf ("*** DEBUG: World size %d\n", world_size);
-	printf ("*** DEBUG: Rank %d\n", world_size);
-
-    //
-    // only one master process should be started at once
-    //
-    if (world_size > 1)
-    {
-        fprintf (stderr, "ERROR You're supposed to start only one master process at a time");
-        exit (1);
-    }
-
-    //
-    // master takes care of starting the workers and 
-    // dividing the work among them
-    //
-    MPI_Comm_get_attr (MPI_COMM_WORLD, 
-                       MPI_UNIVERSE_SIZE,  
-                       &universe_size_ptr, 
-                       &flag);
-    universe_size = *universe_size_ptr;
-    if (universe_size == 1)
-    {
-        fprintf (stderr, "ERROR Allocate more slots so that the master may start some workers\n");
-        exit (1);
-    }
-
-	printf ("*** DEBUG: Universe size %d\n", universe_size);
-
-    //
-    // spawn the workers. Note that there is a run-time determination 
-    // of what type of worker to spawn, and presumably this calculation must 
-    // be done at run time and cannot be calculated before starting 
-    // the program. If everything is known when the application is  
-    // first started, it is generally better to start them all at once 
-    // in a single MPI_COMM_WORLD.  
-    //
-    int nworkers = universe_size - 1;
-
-    if (nworkers < params->ntx)
-    {
-        fprintf (stderr, 
-                 "*** WARNING There are not enough slots to process all transmitters in parallel\n");
-    }
-    else if (nworkers > params->ntx)
-    {
-        nworkers = params->ntx;
-    }
-    //
-    // prepare workers' commands and arguments
-    //
-    int buff_size = _CHAR_BUFFER_SIZE_;
-    //char    *worker_command = "run_worker.sh";
-    char    *worker_command = "hostname";
-    char    *worker_program  [nworkers];
-    char    *worker_arg      [nworkers];
-    char    *worker_args     [nworkers][2];
-    char   **worker_argv     [nworkers];
-    int      worker_maxproc  [nworkers];
-    MPI_Info worker_info     [nworkers];
-    int      worker_errcodes [nworkers];
-
-    for (i = 0; i < nworkers; i ++)
-    {
-        // worker's arguments 
-        worker_arg[i] = (char *) malloc (buff_size);
-		//
-		// test dynamic spawning with the hostname command
-		//
-        //snprintf (worker_arg[i], buff_size, "%d", i);
-        snprintf (worker_arg[i], buff_size, "-s");
-        worker_args[i][0] = worker_arg[i];
-        worker_args[i][1] = NULL;
-        worker_argv[i]    = &(worker_args[i][0]);
-
-        // worker's command
-        worker_program[i] = (char *) malloc (buff_size);
-        snprintf (worker_program[i], buff_size, worker_command);
-
-        worker_maxproc[i] = 1;
-
-		// 
-		// manually set host info to test the problem on ninestein
-		//
-        worker_info[i] = MPI_INFO_NULL;
-		//MPI_Info_create (&(worker_info[i]));
-		//MPI_Info_set (worker_info[i], "host", "k1");
-
-		printf ("*** DEBUG: worker_args[%d][0]\t%s\n", i, worker_args[i][0]);
-		printf ("*** DEBUG: worker_argv[%d]\t%s\n", i, worker_args[i][0]);
-		printf ("*** DEBUG: worker_program[%d]\t%s\n", i, worker_program[i]);
-    }
-    //
-    // spawn worker processes
-    //
-    printf ("Spawning %d workers to process %d transmitters ...\n", nworkers,
-                                                                    params->ntx);
-    MPI_Comm_spawn_multiple (nworkers,
-                             worker_program,
-                             &(worker_argv[0]),
-                             worker_maxproc,
-                             worker_info,
-                             _COVERAGE_MASTER_RANK_,
-                             MPI_COMM_SELF,
-                             worker_comm,
-                             worker_errcodes);
-    for (i = 0; i < nworkers; i ++)
-        if (worker_errcodes[i] != 0)
-            fprintf (stderr, 
-                     "*** WARNING Worker %d. returned with exit code %d\n", 
-                     i,
-                     worker_errcodes[i]);
-    //
-    // deallocate memory
-    //
-    for (i = 0; i < nworkers; i ++)
-    {
-        free (worker_arg[i]);
-        free (worker_program[i]);
-    }
-
-    return nworkers;
-} 
-
-
-
-/**
  * Initializes the coverage calculation by reading the configuration 
  * parameters in the INI file passed as argument.
  * This function uses the 'params' parameter to save its results.-
@@ -275,44 +128,52 @@ init_coverage_for_tx (FILE          *ini_file,
         G_fatal_error ("Can't parse INI memory buffer\n");
 
     //
-    // calculate the subregion (within the area) where this transmitter is 
-    // located, taking into account its location and the calculation radius
+    // by default, a transmitter subregion is the whole input region;
+    // this is recalculated on the workers when using the MPI implementation
+    // to lower the memory consumption
     //
-    double radius_in_meters       = params->radius * 1000;
-    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
-    tx_params->nrows              = 2 * radius_in_pixels;
-    tx_params->ncols              = 2 * radius_in_pixels;
-    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
-    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
-    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
-    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
-    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
-                                            params->map_ns_res);
-    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
-    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
-    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
-                                            params->map_ew_res);
-    tx_params->tx_north_coord_idx = radius_in_pixels;
-    tx_params->tx_east_coord_idx  = radius_in_pixels;
+    tx_params->nrows              = params->nrows;
+    tx_params->ncols              = params->ncols;
+    tx_params->map_north          = params->map_north;
+    tx_params->map_east           = params->map_east;
+    tx_params->map_south          = params->map_south;
+    tx_params->map_west           = params->map_west;
+    tx_params->map_north_idx      = params->nrows - 1;
+    tx_params->map_west_idx       = 0;
+    tx_params->map_east_idx       = params->ncols - 1;
+    tx_params->map_south_idx      = 0;
+    tx_params->tx_north_coord_idx = (tx_params->map_north - tx_params->tx_north_coord) /
+                                    params->map_ns_res;
+    tx_params->tx_east_coord_idx  = (tx_params->map_east - tx_params->tx_east_coord) /
+                                    params->map_ew_res;
+    //
+    // initialize the pointers within the transmitter structure
+    //
+    tx_params->m_dem            = params->m_dem;
+    tx_params->m_clut           = params->m_clut;
+    tx_params->m_field_meas     = NULL;
+    tx_params->field_meas_count = 0;
+    tx_params->m_loss           = params->m_loss;
+    tx_params->m_antenna_loss   = NULL;
+    tx_params->m_radio_zone     = NULL;
 
+    //
+    // initialize the rest of the data structures within this structure
+    // 
+    init_tx_params (params,
+                    tx_params,
+                    0);
     //
     // if in optimization mode, load the field measurements of this Tx
     //
     if (params->use_opt)
     {
         //
-        // allocate memory for the field-measurement buffer matrix,
-        // if we haven't already
-        //
-        if (tx_params->m_field_meas == NULL)
-            tx_params->m_field_meas = prato_alloc_double_matrix (params->nrows,
-                                                                 params->ncols,
-                                                                 tx_params->m_field_meas);
-        //
         // load the measurements from a raster map
         //
         load_field_measurements_from_map (tx_params->field_meas_map,
                                           tx_params->m_field_meas);
+        tx_params->m_field_meas = params->m_field_meas;
     }
     else
         fprintf (stdout, 
@@ -390,6 +251,13 @@ init_coverage (FILE       *ini_file,
     params->m_field_meas = NULL;
 
     //
+    // initialize the clutter categories to zero (0)
+    //
+    params->clutter_category_count = 0;
+    for (i = 0; i < _CHAR_BUFFER_SIZE_; i ++)
+        params->clutter_loss[i] = 0;
+
+    //
     // parse the INI file containing the common configuration values
     //
     rewind (ini_file);
@@ -399,30 +267,34 @@ init_coverage (FILE       *ini_file,
                             NULL);
     if (errno < 0)
         G_fatal_error ("Can't parse INI memory buffer\n");
-
+    
     //
-    // set all evaluation parameters up
+    // mapset names are kept here
     //
-    char *mapset, *mapset2;		    // mapset names
-    int row, col;
-    int infd, infd2;                // file descriptors
+    char *mapset  = (char *) calloc (_CHAR_BUFFER_SIZE_, sizeof (char));
+    char *mapset2 = (char *) calloc (_CHAR_BUFFER_SIZE_, sizeof (char));
+    int  row, col;
+    int  infd, infd2;                           // file descriptors
 
     //
     // returns NULL if the map was not found in any mapset
     //
-    mapset = G_find_cell2 (params->dem_map, "");
+    mapset = G_find_cell2 (params->dem_map, mapset);
     if (mapset == NULL)
         G_fatal_error("Raster map <%s> not found", params->dem_map);
    
-    mapset2 = G_find_cell2 (params->clutter_map, "");
+    mapset2 = G_find_cell2 (params->clutter_map, mapset2);
     if (mapset2 == NULL)
         G_fatal_error("Raster map <%s> not found", params->clutter_map);
-
-    // G_open_cell_old - returns file destriptor (>0) 
-    if ((infd = G_open_cell_old (params->dem_map, mapset)) < 0)
+    //
+    // returns a negative value if the map cannot be opened
+    //
+    infd = G_open_cell_old (params->dem_map, mapset);
+    if (infd < 0)
         G_fatal_error("Unable to open raster map <%s>", params->dem_map);
 
-    if ((infd2 = G_open_cell_old (params->clutter_map, mapset2)) < 0)
+    infd2 = G_open_cell_old (params->clutter_map, mapset2);
+    if (infd2 < 0)
         G_fatal_error("Unable to open raster map <%s>", params->clutter_map);
 
     //
@@ -437,15 +309,16 @@ init_coverage (FILE       *ini_file,
     errno = G_get_cellhd (params->dem_map,
                           mapset,
                           metadata);
-
     if (errno == 0)
     {
         //
         // check the size of a map cell in bytes, so that later casts won't fail
         //
         if (metadata->format == sizeof (params->null_value) - 1)
+        {
             G_set_f_null_value ((FCELL *) &(params->null_value), 1);
-	else
+        }
+	    else
         {
             fprintf (stdout, 
                      "*** WARNING: DEM map-cell format (%d) is not recognized.\n",
@@ -464,8 +337,8 @@ init_coverage (FILE       *ini_file,
         params->map_ns_res = metadata->ns_res;
     }
     else
-        G_fatal_error("Unable to open raster map <%s>", params->dem_map);
-       
+        G_fatal_error ("Unable to open raster map <%s>", 
+                       params->dem_map);
     //
     // clutter metadata
     //
@@ -478,8 +351,10 @@ init_coverage (FILE       *ini_file,
         // check the size of a map cell in bytes, so that later casts won't fail
         //
         if (metadata->format == sizeof (params->null_value) - 1)
+        {
             G_set_f_null_value ((FCELL *) &(params->null_value), 1);
-	else
+        }
+        else
         {
             fprintf (stdout, 
                      "*** WARNING: Clutter map-cell format (%d) is not recognized.\n",
@@ -487,7 +362,6 @@ init_coverage (FILE       *ini_file,
             fprintf (stdout, 
                      "\tMake sure it is of type FCELL to avoid undefined behaviour!\n");
         }
-
         if (!(params->map_east >= metadata->east &&
               params->map_west <= metadata->west &&
               params->map_north >= metadata->north &&
@@ -498,6 +372,7 @@ init_coverage (FILE       *ini_file,
     }
     else
         G_fatal_error ("Unable to open raster map <%s>", params->clutter_map);
+
     //
     // check that the current active window matches the loaded data
     //
@@ -549,11 +424,15 @@ init_coverage (FILE       *ini_file,
         {	
             // read DEM map data
             if (G_get_raster_row (infd, inrast, row, FCELL_TYPE) < 0)
-              G_fatal_error ("Unable to read raster map <%s> row %d", params->dem_map, row);
+                G_fatal_error ("Unable to read raster map <%s> row %d", 
+                               params->dem_map, 
+                               row);
 
             // read Clutter map data
             if (G_get_raster_row (infd2, inrast2, row, FCELL_TYPE) < 0)
-              G_fatal_error ("Unable to read raster map <%s> row %d", params->clutter_map, row);
+                G_fatal_error ("Unable to read raster map <%s> row %d",
+                               params->clutter_map, 
+                               row);
 
             // process the data
             for (col = 0; col < params->ncols; col ++) 
@@ -568,7 +447,7 @@ init_coverage (FILE       *ini_file,
     //
     // create an array containing the transmitters to be processed
     //
-    char *tx_sections [10240];
+    char *tx_sections [10 * _CHAR_BUFFER_SIZE_];
     params->ntx = split_sections (tx_sections_list,
                                   tx_sections);
     // 
@@ -588,6 +467,8 @@ init_coverage (FILE       *ini_file,
     //
     free (window);
     free (metadata);
+    free (mapset);
+    free (mapset2);
     //
     // free the read buffers for DEM and clutter data
     //

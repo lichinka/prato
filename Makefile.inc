@@ -9,8 +9,8 @@ PERFORMANCE_LIB_DIR = ../performance
 
 CC          = gcc
 #PRJCFLAGS   = -D_DEBUG_INFO_ -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
-#PRJCFLAGS   = -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
-PRJCFLAGS   = -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
+PRJCFLAGS   = -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
+#PRJCFLAGS   = -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJINCS     = -I$(PAPI_DIR)/include -I$(CUDA_DIR)/include -I$(GRASS_TOPDIR)/include $(shell mpicc --showme:compile) -I.
 PRJLIBS     = -L$(PAPI_DIR)/lib -lpapi -L$(CUDA_DIR)/lib/x86_64 $(shell mpicc --showme:link)
 RM          = rm

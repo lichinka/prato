@@ -1,4 +1,115 @@
+#include "worker/worker.h"
 #include "worker/optimize.h"
+
+
+
+/**
+ * Initializes the transmitter parameters structure.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ * dirty_pointers   a flag indicating whether to initialize all pointers 
+ *                  within the structure.-
+ *
+ */
+void 
+init_tx_params (Parameters    *params,
+                Tx_parameters *tx_params,
+                const char     dirty_pointers)
+{
+    if (dirty_pointers)
+    {
+        tx_params->eric_params[0]     = 38.0;
+        tx_params->eric_params[1]     = 32.0;
+        tx_params->eric_params[2]     = -12.0;
+        tx_params->eric_params[3]     = 0.1;
+        tx_params->diagram            = NULL;
+        tx_params->m_dem              = NULL;
+        tx_params->m_dem_dev          = NULL;
+        tx_params->m_clut             = NULL;
+        tx_params->m_clut_dev         = NULL;
+        tx_params->m_field_meas       = NULL;
+        tx_params->m_field_meas_dev   = NULL;
+        tx_params->m_loss             = NULL;
+        tx_params->m_loss_dev         = NULL;
+        tx_params->m_antenna_loss     = NULL;
+        tx_params->m_antenna_loss_dev = NULL;
+        tx_params->m_radio_zone       = NULL;
+        tx_params->m_radio_zone_dev   = NULL;
+        tx_params->m_obst_height      = NULL;
+        tx_params->m_obst_dist        = NULL;
+        tx_params->m_obst_offset      = NULL;
+        tx_params->ocl_obj            = NULL;
+    }
+    //
+    // allocate memory for the transmitter matrices;
+    // they contain strictly the data needed for calculation, i.e. 
+    // within the user-defined calculation radius (params->radius)
+    //
+
+    //
+    // digital elevation model
+    //
+    tx_params->m_dem = prato_alloc_double_matrix (tx_params->nrows,
+                                                  tx_params->ncols,
+                                                  tx_params->m_dem);
+    //
+    // clutter data
+    //
+    tx_params->m_clut = prato_alloc_double_matrix (tx_params->nrows,
+                                                   tx_params->ncols,
+                                                   tx_params->m_clut);
+    //
+    // radio zones 
+    //
+    tx_params->m_radio_zone = prato_alloc_char_matrix (tx_params->nrows,
+                                                       tx_params->ncols,
+                                                       tx_params->m_radio_zone);
+    //
+    // antenna-introduced losses
+    //
+    tx_params->m_antenna_loss = prato_alloc_double_matrix (tx_params->nrows,
+                                                           tx_params->ncols,
+                                                           tx_params->m_antenna_loss);
+    //
+    // path loss
+    //
+    tx_params->m_loss = prato_alloc_double_matrix (tx_params->nrows,
+                                                   tx_params->ncols,
+                                                   tx_params->m_loss);
+    //
+    // heights of obstacles - line-of-sight
+    //
+    tx_params->m_obst_height = prato_alloc_double_matrix (tx_params->nrows,
+                                                          tx_params->ncols,
+                                                          tx_params->m_obst_height);
+    //
+    // distances to obstacles - line-of-sight
+    //
+    tx_params->m_obst_dist = prato_alloc_double_matrix (tx_params->nrows,
+                                                        tx_params->ncols,
+                                                        tx_params->m_obst_dist);
+    //
+    // offset distances to obstacles - line-of-sight
+    //
+    tx_params->m_obst_offset = prato_alloc_double_matrix (tx_params->nrows,
+                                                          tx_params->ncols,
+                                                          tx_params->m_obst_offset);
+    //
+    // field-measurements matrix is only used in optimization mode
+    //
+    if (params->use_opt)
+    {
+        //
+        // field measurements
+        //
+        tx_params->m_field_meas = prato_alloc_double_matrix (tx_params->nrows,
+                                                             tx_params->ncols,
+                                                             tx_params->m_field_meas);
+    }
+}
 
 
 
@@ -77,9 +188,9 @@ static void
 receive_tx_data (Parameters *params,
                  MPI_Comm comm)
 {
-    char          uninitialized_pointers;
-    Tx_parameters *tx_params;
+    char           dirty_pointers;
     MPI_Status     status;
+    Tx_parameters *tx_params;
 
     //
     // allocate the `Tx_parameters` structure, if we haven't already,
@@ -88,15 +199,21 @@ receive_tx_data (Parameters *params,
     if (params->tx_params == NULL)
     {
         params->tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
-        uninitialized_pointers = 1;
+        dirty_pointers = 1;
     }
     else
-        uninitialized_pointers = 0;
+    {
+        dirty_pointers = 0;
+    }
+    //
+    // alias to avoid verbose writing
+    //
+    tx_params = params->tx_params;
 
     //
     // receive the transmitter-specific parameters
     //
-    MPI_Recv (params->tx_params,
+    MPI_Recv (tx_params,
               sizeof (Tx_parameters),
               MPI_BYTE,
               _COVERAGE_MASTER_RANK_,
@@ -104,58 +221,38 @@ receive_tx_data (Parameters *params,
               comm,
               &status);
     if (status.MPI_ERROR)
+    {
         fprintf (stderr, 
                  "*** ERROR: Transmitter parameters incorrectly received\n");
-    else
-    {
-        //
-        // an alias for less writing
-        //
-        tx_params = params->tx_params;
-
-        //
-        // after receiving the `Tx_parameters` structure, all contained
-        // pointer are invalid, because they contain addresses mapped 
-        // within the master process; make sure we clean this up
-        //
-        if (uninitialized_pointers)
-        {
-            tx_params->eric_params[0]     = 38.0;
-            tx_params->eric_params[1]     = 32.0;
-            tx_params->eric_params[2]     = -12.0;
-            tx_params->eric_params[3]     = 0.1;
-            tx_params->diagram            = NULL;
-            tx_params->m_dem              = NULL;
-            tx_params->m_dem_dev          = NULL;
-            tx_params->m_clut             = NULL;
-            tx_params->m_clut_dev         = NULL;
-            tx_params->m_field_meas       = NULL;
-            tx_params->m_field_meas_dev   = NULL;
-            tx_params->m_loss             = NULL;
-            tx_params->m_loss_dev         = NULL;
-            tx_params->m_antenna_loss     = NULL;
-            tx_params->m_antenna_loss_dev = NULL;
-            tx_params->m_radio_zone       = NULL;
-            tx_params->m_radio_zone_dev   = NULL;
-            tx_params->m_obst_height      = NULL;
-            tx_params->m_obst_dist        = NULL;
-            tx_params->m_obst_offset      = NULL;
-            tx_params->ocl_obj            = NULL;
-        }
+        exit (-1);
     }
+    //
+    // calculate the subregion (within the area) where this transmitter is 
+    // located, taking into account its location and the calculation radius
+    //
+    double radius_in_meters       = params->radius * 1000;
+    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
+    tx_params->nrows              = 2 * radius_in_pixels;
+    tx_params->ncols              = 2 * radius_in_pixels;
+    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
+    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
+    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
+    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
+    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
+                                            params->map_ns_res);
+    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
+    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
+    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
+                                            params->map_ew_res);
+    tx_params->tx_north_coord_idx = radius_in_pixels;
+    tx_params->tx_east_coord_idx  = radius_in_pixels;
 
     //
-    // allocate memory for the transmitter matrices;
-    // they contain strictly the data needed for calculation, i.e. 
-    // within the user-defined calculation radius (params->radius)
+    // initialize the transmitter structure
     //
-
-    //
-    // digital elevation model
-    //
-    tx_params->m_dem = prato_alloc_double_matrix (tx_params->nrows,
-                                               tx_params->ncols,
-                                               tx_params->m_dem);
+    init_tx_params (params,
+                    tx_params,
+                    dirty_pointers);
     //
     // receive DEM data from master
     //
@@ -167,8 +264,11 @@ receive_tx_data (Parameters *params,
               comm,
               &status);
     if (status.MPI_ERROR)
+    {
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of DEM data\n");
+        exit (-1);
+    }
     //
     // transmitter height above sea level
     //
@@ -176,12 +276,6 @@ receive_tx_data (Parameters *params,
                                                   [tx_params->tx_north_coord_idx];
     tx_params->total_tx_height += tx_params->antenna_height_AGL;
 
-    //
-    // clutter data
-    //
-    tx_params->m_clut = prato_alloc_double_matrix (tx_params->nrows,
-                                                tx_params->ncols,
-                                                tx_params->m_clut);
     //
     // receive clutter data from master
     //
@@ -193,55 +287,16 @@ receive_tx_data (Parameters *params,
               comm,
               &status);
     if (status.MPI_ERROR)
+    {
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of clutter data\n");
-    //
-    // radio zones 
-    //
-    tx_params->m_radio_zone = prato_alloc_char_matrix (tx_params->nrows,
-                                                       tx_params->ncols,
-                                                       tx_params->m_radio_zone);
-    //
-    // antenna-introduced losses
-    //
-    tx_params->m_antenna_loss = prato_alloc_double_matrix (tx_params->nrows,
-                                                           tx_params->ncols,
-                                                           tx_params->m_antenna_loss);
-    //
-    // path loss
-    //
-    tx_params->m_loss = prato_alloc_double_matrix (tx_params->nrows,
-                                                   tx_params->ncols,
-                                                   tx_params->m_loss);
-    //
-    // heights of obstacles - line-of-sight
-    //
-    tx_params->m_obst_height = prato_alloc_double_matrix (tx_params->nrows,
-                                                          tx_params->ncols,
-                                                          tx_params->m_obst_height);
-    //
-    // distances to obstacles - line-of-sight
-    //
-    tx_params->m_obst_dist = prato_alloc_double_matrix (tx_params->nrows,
-                                                        tx_params->ncols,
-                                                        tx_params->m_obst_dist);
-    //
-    // offset distances to obstacles - line-of-sight
-    //
-    tx_params->m_obst_offset = prato_alloc_double_matrix (tx_params->nrows,
-                                                       tx_params->ncols,
-                                                       tx_params->m_obst_offset);
+        exit (-1);
+    }
     //
     // field-measurements matrix is only used in optimization mode
     //
     if (params->use_opt)
     {
-        //
-        // field measurements
-        //
-        tx_params->m_field_meas = prato_alloc_double_matrix (tx_params->nrows,
-                                                          tx_params->ncols,
-                                                          tx_params->m_field_meas);
         //
         // receive field-measurement data from master
         //
@@ -253,9 +308,71 @@ receive_tx_data (Parameters *params,
                   comm,
                   &status);
         if (status.MPI_ERROR)
+        {
             fprintf (stderr, 
                      "*** ERROR: Incorrect receive of field measurements data\n");
+            exit (-1);
+        }
     }
+}
+
+
+
+/**
+ * Deallocates all internal structures contained in the 
+ * transmitter-parameters structure.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ */
+void 
+free_tx_params (Parameters    *params,
+                Tx_parameters *tx_params)
+{
+    if (params->use_opt)
+    {
+        free (params->tx_params->m_field_meas[0]);
+        free (params->tx_params->m_field_meas);
+        if (params->use_gpu)
+        {
+            free (params->tx_params->m_field_meas_dev);
+            free (params->tx_params->v_partial_sum_dev);
+            free (params->tx_params->v_partial_sum);
+        }
+    }
+    if (params->use_gpu)
+    {
+        free (params->tx_params->ocl_obj);
+        free (params->tx_params->m_dem_dev);
+        free (params->tx_params->m_clut_dev);
+        free (params->tx_params->m_loss_dev);
+        free (params->tx_params->m_radio_zone_dev);
+        free (params->tx_params->m_antenna_loss_dev);
+        free (params->tx_params->m_obst_height_dev);
+        free (params->tx_params->m_obst_dist_dev);
+    }
+    free (params->tx_params->m_antenna_loss[0]);
+    free (params->tx_params->m_antenna_loss);
+    free (params->tx_params->m_radio_zone[0]);
+    free (params->tx_params->m_radio_zone);
+    free (params->tx_params->m_obst_height[0]);
+    free (params->tx_params->m_obst_height);
+    free (params->tx_params->m_obst_dist[0]);
+    free (params->tx_params->m_obst_dist);
+    free (params->tx_params->m_obst_offset[0]);
+    free (params->tx_params->m_obst_offset);
+    free (params->tx_params->m_loss[0]);
+    free (params->tx_params->m_loss);
+    free (params->tx_params->m_dem[0]);
+    free (params->tx_params->m_dem);
+    free (params->tx_params->m_clut[0]);
+    free (params->tx_params->m_clut);
+    free (params->tx_params->diagram->horizontal);
+    free (params->tx_params->diagram->vertical);
+    free (params->tx_params->diagram);
 }
 
 
@@ -346,44 +463,8 @@ void worker (const int rank,
     //
     // deallocate memory before exiting
     //
-    if (params->use_opt)
-    {
-        free (&(params->tx_params->m_field_meas[0][0]));
-        free (params->tx_params->m_field_meas);
-        if (params->use_gpu)
-        {
-            free (params->tx_params->m_field_meas_dev);
-            free (params->tx_params->v_partial_sum_dev);
-            free (params->tx_params->v_partial_sum);
-        }
-    }
-    if (params->use_gpu)
-    {
-        free (params->tx_params->ocl_obj);
-        free (params->tx_params->m_dem_dev);
-        free (params->tx_params->m_clut_dev);
-        free (params->tx_params->m_loss_dev);
-        free (params->tx_params->m_radio_zone_dev);
-        free (params->tx_params->m_antenna_loss_dev);
-        free (params->tx_params->m_obst_height_dev);
-        free (params->tx_params->m_obst_dist_dev);
-    }
-    free (&(params->tx_params->m_antenna_loss[0][0]));
-    free (params->tx_params->m_antenna_loss);
-    free (&(params->tx_params->m_radio_zone[0][0]));
-    free (params->tx_params->m_radio_zone);
-    free (&(params->tx_params->m_obst_height[0][0]));
-    free (params->tx_params->m_obst_height);
-    free (&(params->tx_params->m_obst_dist[0][0]));
-    free (params->tx_params->m_obst_dist);
-    free (&(params->tx_params->m_obst_offset[0][0]));
-    free (params->tx_params->m_obst_offset);
-    free (&(params->tx_params->m_loss[0][0]));
-    free (params->tx_params->m_loss);
-    free (&(params->tx_params->m_dem[0][0]));
-    free (params->tx_params->m_dem);
-    free (&(params->tx_params->m_clut[0][0]));
-    free (params->tx_params->m_clut);
+    free_tx_params (params,
+                    params->tx_params);
     free (params->tx_params);
     free (params);
 }

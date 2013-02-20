@@ -136,10 +136,10 @@ int ini_parse_file(FILE* file,
 }
 
 /* See documentation in header file. */
-int ini_parse(const char* filename,
-              HANDLER,
-              void* user,
-              const char *tx_section)
+int ini_parse (const char* filename,
+               HANDLER,
+               void* user,
+               const char *tx_section)
 {
     FILE* file;
     int error;
@@ -147,7 +147,7 @@ int ini_parse(const char* filename,
     file = fopen(filename, "r");
     if (!file)
         return -1;
-    error = ini_parse_file(file, handler, user, tx_section);
+    error = ini_parse_file (file, handler, user, tx_section);
     fclose(file);
     return error;
 }
