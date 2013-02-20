@@ -226,26 +226,6 @@ receive_tx_data (Parameters *params,
                  "*** ERROR: Transmitter parameters incorrectly received\n");
         exit (-1);
     }
-    //
-    // calculate the subregion (within the area) where this transmitter is 
-    // located, taking into account its location and the calculation radius
-    //
-    double radius_in_meters       = params->radius * 1000;
-    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
-    tx_params->nrows              = 2 * radius_in_pixels;
-    tx_params->ncols              = 2 * radius_in_pixels;
-    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
-    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
-    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
-    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
-    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
-                                            params->map_ns_res);
-    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
-    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
-    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
-                                            params->map_ew_res);
-    tx_params->tx_north_coord_idx = radius_in_pixels;
-    tx_params->tx_east_coord_idx  = radius_in_pixels;
 
     //
     // initialize the transmitter structure
@@ -334,45 +314,89 @@ free_tx_params (Parameters    *params,
 {
     if (params->use_opt)
     {
-        free (params->tx_params->m_field_meas[0]);
-        free (params->tx_params->m_field_meas);
+        if (tx_params->m_field_meas != NULL)
+        {
+            free (tx_params->m_field_meas[0]);
+            free (tx_params->m_field_meas);
+            tx_params->m_field_meas = NULL;
+        }
         if (params->use_gpu)
         {
-            free (params->tx_params->m_field_meas_dev);
-            free (params->tx_params->v_partial_sum_dev);
-            free (params->tx_params->v_partial_sum);
+            free (tx_params->m_field_meas_dev);
+            if (tx_params->v_partial_sum != NULL)
+            {
+                free (tx_params->v_partial_sum_dev);
+                free (tx_params->v_partial_sum);
+                tx_params->v_partial_sum = NULL;
+            }
         }
     }
     if (params->use_gpu)
     {
-        free (params->tx_params->ocl_obj);
-        free (params->tx_params->m_dem_dev);
-        free (params->tx_params->m_clut_dev);
-        free (params->tx_params->m_loss_dev);
-        free (params->tx_params->m_radio_zone_dev);
-        free (params->tx_params->m_antenna_loss_dev);
-        free (params->tx_params->m_obst_height_dev);
-        free (params->tx_params->m_obst_dist_dev);
+        free (tx_params->ocl_obj);
+        free (tx_params->m_dem_dev);
+        free (tx_params->m_clut_dev);
+        free (tx_params->m_loss_dev);
+        free (tx_params->m_radio_zone_dev);
+        free (tx_params->m_antenna_loss_dev);
+        free (tx_params->m_obst_height_dev);
+        free (tx_params->m_obst_dist_dev);
     }
-    free (params->tx_params->m_antenna_loss[0]);
-    free (params->tx_params->m_antenna_loss);
-    free (params->tx_params->m_radio_zone[0]);
-    free (params->tx_params->m_radio_zone);
-    free (params->tx_params->m_obst_height[0]);
-    free (params->tx_params->m_obst_height);
-    free (params->tx_params->m_obst_dist[0]);
-    free (params->tx_params->m_obst_dist);
-    free (params->tx_params->m_obst_offset[0]);
-    free (params->tx_params->m_obst_offset);
-    free (params->tx_params->m_loss[0]);
-    free (params->tx_params->m_loss);
-    free (params->tx_params->m_dem[0]);
-    free (params->tx_params->m_dem);
-    free (params->tx_params->m_clut[0]);
-    free (params->tx_params->m_clut);
-    free (params->tx_params->diagram->horizontal);
-    free (params->tx_params->diagram->vertical);
-    free (params->tx_params->diagram);
+    if (tx_params->m_antenna_loss != NULL)
+    {
+        free (tx_params->m_antenna_loss[0]);
+        free (tx_params->m_antenna_loss);
+        tx_params->m_antenna_loss = NULL;
+    }
+    if (tx_params->m_radio_zone != NULL)
+    {
+        free (tx_params->m_radio_zone[0]);
+        free (tx_params->m_radio_zone);
+        tx_params->m_radio_zone = NULL;
+    }
+    if (tx_params->m_obst_height != NULL)
+    {
+        free (tx_params->m_obst_height[0]);
+        free (tx_params->m_obst_height);
+        tx_params->m_obst_height = NULL;
+    }
+    if (tx_params->m_obst_dist != NULL)
+    {
+        free (tx_params->m_obst_dist[0]);
+        free (tx_params->m_obst_dist);
+        tx_params->m_obst_dist = NULL;
+    }
+    if (tx_params->m_obst_offset != NULL)
+    {
+        free (tx_params->m_obst_offset[0]);
+        free (tx_params->m_obst_offset);
+        tx_params->m_obst_offset = NULL;
+    }
+    if (tx_params->m_loss != NULL)
+    {
+        free (tx_params->m_loss[0]);
+        free (tx_params->m_loss);
+        tx_params->m_loss = NULL;
+    }
+    if (tx_params->m_dem != NULL)
+    {
+        free (tx_params->m_dem[0]);
+        free (tx_params->m_dem);
+        tx_params->m_dem = NULL;
+    }
+    if (tx_params->m_clut != NULL)
+    {
+        free (tx_params->m_clut[0]);
+        free (tx_params->m_clut);
+        tx_params->m_clut = NULL;
+    }
+    if (tx_params->diagram != NULL)
+    {
+        free (tx_params->diagram->horizontal);
+        free (tx_params->diagram->vertical);
+        free (tx_params->diagram);
+        tx_params->diagram = NULL;
+    }
 }
 
 

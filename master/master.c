@@ -42,6 +42,27 @@ send_tx_data (Parameters *params,
               int worker_rank)
 {
     //
+    // calculate the subregion (within the area) where this transmitter is 
+    // located, taking into account its location and the calculation radius
+    //
+    double radius_in_meters       = params->radius * 1000;
+    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
+    tx_params->nrows              = 2 * radius_in_pixels;
+    tx_params->ncols              = 2 * radius_in_pixels;
+    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
+    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
+    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
+    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
+    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
+                                            params->map_ns_res);
+    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
+    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
+    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
+                                            params->map_ew_res);
+    tx_params->tx_north_coord_idx = radius_in_pixels;
+    tx_params->tx_east_coord_idx  = radius_in_pixels;
+
+    //
     // MPI data type for the radius-calculation area of this transmitter
     //
     MPI_Datatype Radius_area;
@@ -129,8 +150,9 @@ init_coverage_for_tx (FILE          *ini_file,
 
     //
     // by default, a transmitter subregion is the whole input region;
-    // this is recalculated on the workers when using the MPI implementation
-    // to lower the memory consumption
+    // when using the MPI implementation, this subregion is reduced
+    // (taking the calculation radius into account) to lower the memory
+    // consumption on the workers
     //
     tx_params->nrows              = params->nrows;
     tx_params->ncols              = params->ncols;
