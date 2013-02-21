@@ -382,7 +382,9 @@ static int common_params_handler (void *user_struct,
     else if (MATCH ("common", "secondRadioZoneVertical"))
         pconfig->sec_zone_vert = atoi (value);
     else if (MATCH ("common", "clutterCategoryCount"))
-        pconfig->clutter_category_count = atoi (value) + 1;
+        pconfig->clutter_category_count = atoi (value);
+    else if (MATCH ("common", "clutterLoss0"))
+        pconfig->clutter_loss[0] = atof (value);
     else if (MATCH ("common", "clutterLoss1"))
         pconfig->clutter_loss[1] = atof (value);
     else if (MATCH ("common", "clutterLoss2"))

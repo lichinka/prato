@@ -1,6 +1,7 @@
 #!/bin/bash
 
 REDIR=$1
+#CMD="valgrind --leak-check=yes ./worker/worker"
 CMD="./worker/worker"
 PSQL_SERVER=ninestein
 PSQL_USER=grassuser

@@ -41,20 +41,17 @@ eric_pathloss_on_gpu (Parameters    *params,
                       Tx_parameters *tx_params);
 
 /**
- * Calculates the path loss using E/// 9999 model implementation on CPU.
+ * Calculates path loss using the E/// 9999 prediction model on CPU.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
  *
  */
-int 
-EricPathLossSub (double **Obst_high,
-                 double **Obst_dist,
-                 double **Offset,
-                 double **Raster, 
-                 double **Clutter, 
-                 double **PathLoss, 
-                 double **Meritve,
-                 double **AntLoss,
-                 char **RadioZone,
-                 struct StructEric *IniEric);
+void 
+eric_pathloss_on_cpu (Parameters    *params,
+                      Tx_parameters *tx_params);
 
 /**
  * Fine tunes the A0...A3 E/// parameters to best fit a set of measurements 

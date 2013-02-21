@@ -181,6 +181,7 @@ obj_func (Parameters    *params,
     int r, c, count = 0;
     double ret_value = 0;
 
+    //
     // copy the solution values to the internal structure,
     // used for coverage calculation
     //
@@ -196,7 +197,9 @@ obj_func (Parameters    *params,
     tx_params->eric_params[2] = -23.82273819;
     tx_params->eric_params[3] = 47.83436989;
 #endif
-
+    //
+    // recalculate the isotrophic prediction using the received solution
+    //
     if (params->use_gpu)
     {
 #ifdef _PERFORMANCE_METRICS_
@@ -223,33 +226,8 @@ obj_func (Parameters    *params,
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif
-        //
-        // recalculate the isotrophic prediction using the received solution
-        //
-        struct StructEric IniEric = {tx_params->tx_east_coord_idx,
-                                     tx_params->tx_north_coord_idx,
-                                     tx_params->antenna_height_AGL, 
-                                     params->rx_height_AGL,
-                                     tx_params->ncols,
-                                     tx_params->nrows,
-                                     params->map_ew_res,
-                                     params->frequency, 
-                                     (double) tx_params->eric_params[0],
-                                     (double) tx_params->eric_params[1],
-                                     (double) tx_params->eric_params[2],
-                                     (double) tx_params->eric_params[3],
-                                     1, 
-                                     params->radius};
-        EricPathLossSub (tx_params->m_obst_height,
-                         tx_params->m_obst_dist,
-                         tx_params->m_obst_offset,
-                         tx_params->m_dem, 
-                         tx_params->m_clut, 
-                         tx_params->m_loss, 
-                         tx_params->m_field_meas,
-                         tx_params->m_antenna_loss,
-                         tx_params->m_radio_zone,
-                         &IniEric);
+        eric_pathloss_on_cpu (params,
+                              tx_params);
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
         measure_time ("Apply antenna losses and objective function on CPU");
@@ -550,14 +528,14 @@ optimize (Parameters    *params,
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double *search_low = calloc (params->clutter_category_count,
-                                 sizeof (double));
-    double *search_up  = calloc (params->clutter_category_count,
-                                 sizeof (double));
+    double *search_low = (double *) calloc (params->clutter_category_count,
+                                            sizeof (double));
+    double *search_up  = (double *) calloc (params->clutter_category_count,
+                                            sizeof (double));
     //
     // since we are looking for clutter losses, we define a range 0~255 dB
     //
-    for (i = 0; params->clutter_category_count; i ++)
+    for (i = 0; i < params->clutter_category_count; i ++)
     {
         search_low[i] = 0;
         search_up[i]  = 255;

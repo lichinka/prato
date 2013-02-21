@@ -61,164 +61,6 @@
 
 
 /**
- * Calculates the path loss using E/// 9999 model implementation on GPU.
- *
- * params           a structure holding configuration parameters which are 
- *                  common to all transmitters;
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters.-
- *
- */
-void 
-eric_pathloss_on_gpu (Parameters    *params,
-                      Tx_parameters *tx_params)
-{
-    //
-    // we use this pointer as a flag, indicating that we are about to
-    // run this function for the first time
-    //
-    if (tx_params->ocl_obj == NULL)
-    {
-        //
-        // initialize the OpenCL environment
-        //
-        init_gpu (tx_params);
-
-        //
-        // build the OpenCL source file (only the first time);
-        // in this case, all kernels reside in one source file
-        //
-        build_kernel_from_file (tx_params->ocl_obj,
-                                "r.coverage.cl",
-                                "eric_per_tx",
-                                "-I. -Werror");
-    }
-    //
-    // activate the compiled kernel
-    //
-    activate_kernel (tx_params->ocl_obj,
-                     "eric_per_tx");
-    //
-    // set scalar kernel parameters 
-    // 
-    set_kernel_double_arg (tx_params->ocl_obj,
-                           0,
-                           &params->map_ew_res);
-    set_kernel_double_arg (tx_params->ocl_obj,
-                           1,
-                           &tx_params->map_north);
-    set_kernel_double_arg (tx_params->ocl_obj,
-                           2,
-                           &tx_params->map_west);
-    set_kernel_double_arg (tx_params->ocl_obj,
-                           5,
-                           &params->rx_height_AGL);
-    set_kernel_double_arg (tx_params->ocl_obj,
-                           6,
-                           &params->frequency);
-    //
-    // set prediction model parameters
-    //
-    cl_double4 model_params;
-    model_params.s[0] = tx_params->eric_params[0];
-    model_params.s[1] = tx_params->eric_params[1];
-    model_params.s[2] = tx_params->eric_params[2];
-    model_params.s[3] = tx_params->eric_params[3];
-    set_kernel_value_arg (tx_params->ocl_obj,
-                          7,
-                          sizeof (cl_double4),
-                          &model_params);
-    //
-    // set memory pointer parameters
-    //
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        8,
-                        tx_params->m_obst_height_dev);
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        9,
-                        tx_params->m_obst_dist_dev);
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        10,
-                        tx_params->m_dem_dev);
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        11,
-                        tx_params->m_clut_dev);
-    set_kernel_mem_arg (tx_params->ocl_obj,
-                        12,
-                        tx_params->m_loss_dev);
-
-    // reserve local memory on the device
-    size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
-                       _WORK_ITEMS_PER_DIMENSION_ *
-                       sizeof (tx_params->m_loss[0][0]);
-    set_local_mem (tx_params->ocl_obj,
-                   13,
-                   lmem_size);
-    //
-    // calculation radius in meters
-    //
-    double radius_in_meters = params->radius * 1000;
-
-    //
-    // calculation tile offset within the target area, given in pixel coordinates
-    //
-    cl_int2 tile_offset;
-    tile_offset.s[0]  = (int) ((tx_params->tx_east_coord - tx_params->map_west) - radius_in_meters);
-    tile_offset.s[0] /= params->map_ew_res;
-    tile_offset.s[1]  = (int) ((tx_params->map_north - tx_params->tx_north_coord) - radius_in_meters);
-    tile_offset.s[1] /= params->map_ns_res;
-
-    //
-    // transmitter data
-    //
-    cl_double4 tx_data;
-    tx_data.s[0] = (double) tx_params->tx_east_coord;   // transmitter coordinate
-    tx_data.s[1] = (double) tx_params->tx_north_coord;  // transmitter coordinate
-    tx_data.s[2] = (double) tx_params->total_tx_height; // antenna height above sea level
-    tx_data.s[3] = (double) tx_params->antenna_height_AGL; // antenna height above ground
-
-    // set kernel parameters, specific for this transmitter
-    set_kernel_value_arg (tx_params->ocl_obj,
-                          3,
-                          sizeof (cl_double4),
-                          &tx_data);
-    set_kernel_value_arg (tx_params->ocl_obj,
-                          4,
-                          sizeof (cl_int2),
-                          &tile_offset);
-    //
-    // define a 2D execution range for the kernel ...
-    //
-    size_t global_sizes [2],
-           local_sizes  [2];
-    define_2D_range (params,
-                     global_sizes,
-                     local_sizes);
-    //
-    // ... and execute it
-    //
-    run_kernel_2D_blocking (tx_params->ocl_obj,
-                            0,
-                            NULL,
-                            global_sizes,
-                            local_sizes);
-    //
-    // no need to bring the path-loss matrix from the device to the host
-    //
-    /*
-    size_t buff_size = tx_params->nrows * 
-                       tx_params->ncols * 
-                       sizeof (tx_params->m_loss[0][0]);
-    read_buffer_blocking (tx_params->ocl_obj,
-                          0,
-                          tx_params->m_loss_dev,
-                          buff_size,
-                          tx_params->m_loss[0]);
-     */
-}
-
-
-/**
  * Calculates the path loss (in dB) on a specific coordinate, 
  * using E/// 9999 path-loss formula.
  *			
@@ -242,13 +84,13 @@ eric_pathloss_on_gpu (Parameters    *params,
  *
  */
 static void
-eric_pathloss_on_cpu (const Parameters    *params,
-                      const Tx_parameters *tx_params,
-                      const int           ix,
-                      const int           iy,
-                      double             *log10Zeff,
-                      double             *log10DistBS2MSKm,
-                      double             *nlos)
+eric_pathloss_on_point (const Parameters    *params,
+                        const Tx_parameters *tx_params,
+                        const int           ix,
+                        const int           iy,
+                        double             *log10Zeff,
+                        double             *log10DistBS2MSKm,
+                        double             *nlos)
 {
 	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
 	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
@@ -409,14 +251,272 @@ eric_pathloss_on_cpu (const Parameters    *params,
 
     // write data to pathloss
     tx_params->m_loss[ix][iy] = PathLossTmp + tx_params->m_clut[ix][iy];
+
+#ifdef _DEBUG_INFO_
+    //
+    // DEBUG: parameter dump titles 
+    //
+
+    //
+    // DEBUG: parameter dump for external approximation using least squares
+    //
+    if ((ix == 0) && (iy == 0))
+    {
+        // column titles: only at the beggining
+        printf ("xi|yi|log(d)|HEBK|log(HEBK)|NLOS|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
+    }
+    if (! isnan (tx_params->m_field_meas[ix][iy]))
+        if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
+            printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
+                    ix,
+                    iy,
+                    log10DistBS2MSKm,
+                    fabs (Zeff),
+                    log10Zeff,
+                    nlos,
+                    A0,
+                    A1,
+                    A2,
+                    A3,
+                    -PathLossAntHeightMS+PathLossFreq,
+                    tx_params->m_clut[ix][iy],
+                    tx_params->m_loss[ix][iy],
+                    tx_params->m_field_meas[ix][iy],
+                    tx_params->m_antenna_loss[ix][iy]);
+#endif
+}
+
+
+
+/**
+ * Calculates the path loss using E/// 9999 model implementation on GPU.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ */
+void 
+eric_pathloss_on_gpu (Parameters    *params,
+                      Tx_parameters *tx_params)
+{
+    //
+    // we use this pointer as a flag, indicating that we are about to
+    // run this function for the first time
+    //
+    if (tx_params->ocl_obj == NULL)
+    {
+        //
+        // initialize the OpenCL environment
+        //
+        init_gpu (tx_params);
+
+        //
+        // build the OpenCL source file (only the first time);
+        // in this case, all kernels reside in one source file
+        //
+        build_kernel_from_file (tx_params->ocl_obj,
+                                "r.coverage.cl",
+                                "eric_per_tx",
+                                "-I. -Werror");
+    }
+    //
+    // activate the compiled kernel
+    //
+    activate_kernel (tx_params->ocl_obj,
+                     "eric_per_tx");
+    //
+    // set scalar kernel parameters 
+    // 
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           0,
+                           &params->map_ew_res);
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           1,
+                           &tx_params->map_north);
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           2,
+                           &tx_params->map_west);
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           5,
+                           &params->rx_height_AGL);
+    set_kernel_double_arg (tx_params->ocl_obj,
+                           6,
+                           &params->frequency);
+    //
+    // set prediction model parameters
+    //
+    cl_double4 model_params;
+    model_params.s[0] = tx_params->eric_params[0];
+    model_params.s[1] = tx_params->eric_params[1];
+    model_params.s[2] = tx_params->eric_params[2];
+    model_params.s[3] = tx_params->eric_params[3];
+    set_kernel_value_arg (tx_params->ocl_obj,
+                          7,
+                          sizeof (cl_double4),
+                          &model_params);
+    //
+    // set memory pointer parameters
+    //
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        8,
+                        tx_params->m_obst_height_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        9,
+                        tx_params->m_obst_dist_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        10,
+                        tx_params->m_dem_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        11,
+                        tx_params->m_clut_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        12,
+                        tx_params->m_loss_dev);
+
+    // reserve local memory on the device
+    size_t lmem_size = _WORK_ITEMS_PER_DIMENSION_ *
+                       _WORK_ITEMS_PER_DIMENSION_ *
+                       sizeof (tx_params->m_loss[0][0]);
+    set_local_mem (tx_params->ocl_obj,
+                   13,
+                   lmem_size);
+    //
+    // calculation radius in meters
+    //
+    double radius_in_meters = params->radius * 1000;
+
+    //
+    // calculation tile offset within the target area, given in pixel coordinates
+    //
+    cl_int2 tile_offset;
+    tile_offset.s[0]  = (int) ((tx_params->tx_east_coord - tx_params->map_west) - radius_in_meters);
+    tile_offset.s[0] /= params->map_ew_res;
+    tile_offset.s[1]  = (int) ((tx_params->map_north - tx_params->tx_north_coord) - radius_in_meters);
+    tile_offset.s[1] /= params->map_ns_res;
+
+    //
+    // transmitter data
+    //
+    cl_double4 tx_data;
+    tx_data.s[0] = (double) tx_params->tx_east_coord;   // transmitter coordinate
+    tx_data.s[1] = (double) tx_params->tx_north_coord;  // transmitter coordinate
+    tx_data.s[2] = (double) tx_params->total_tx_height; // antenna height above sea level
+    tx_data.s[3] = (double) tx_params->antenna_height_AGL; // antenna height above ground
+
+    // set kernel parameters, specific for this transmitter
+    set_kernel_value_arg (tx_params->ocl_obj,
+                          3,
+                          sizeof (cl_double4),
+                          &tx_data);
+    set_kernel_value_arg (tx_params->ocl_obj,
+                          4,
+                          sizeof (cl_int2),
+                          &tile_offset);
+    //
+    // define a 2D execution range for the kernel ...
+    //
+    size_t global_sizes [2],
+           local_sizes  [2];
+    define_2D_range (params,
+                     global_sizes,
+                     local_sizes);
+    //
+    // ... and execute it
+    //
+    run_kernel_2D_blocking (tx_params->ocl_obj,
+                            0,
+                            NULL,
+                            global_sizes,
+                            local_sizes);
+    //
+    // no need to bring the path-loss matrix from the device to the host
+    //
+    /*
+    size_t buff_size = tx_params->nrows * 
+                       tx_params->ncols * 
+                       sizeof (tx_params->m_loss[0][0]);
+    read_buffer_blocking (tx_params->ocl_obj,
+                          0,
+                          tx_params->m_loss_dev,
+                          buff_size,
+                          tx_params->m_loss[0]);
+     */
+}
+
+
+
+/**
+ * Calculates path loss using the E/// 9999 prediction model on CPU.
+ *
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters.-
+ *
+ */
+void 
+eric_pathloss_on_cpu (Parameters    *params,
+                      Tx_parameters *tx_params)
+{
+	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
+	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int xN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
+	int yN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	double scale       = params->map_ew_res;            // terrain resolution (in mts)
+	double radi        = params->radius;			    // calculation radius around transmiter
+
+	int     ix, iy;	
+	int     DiffX, DiffY;
+    double  nlos;
+	double  log10Zeff;
+	double  log10DistBS2MSKm;
+    double  DistBS2MSKm;		                        // distance between MS and BS in km
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("E/// on CPU");
+#endif
+	for (ix = 0; ix < xN; ix++)
+	{
+		for (iy = 0; iy < yN; iy++)
+		{
+            //
+            // distance from the current point to the transmitter
+            //
+			DiffX = (BSxIndex-ix); 
+            DiffY = (BSyIndex-iy);
+			DistBS2MSKm = (sqrt (DiffX*DiffX + DiffY*DiffY) * scale) / 1000;
+
+			if (DistBS2MSKm < 0.01)
+				DistBS2MSKm = 0.01;
+                
+            //
+            // calculate path loss for points within the user-defined radius
+            //
+			if (DistBS2MSKm <= radi)
+            {
+                eric_pathloss_on_point (params,
+                                        tx_params,
+                                        ix,
+                                        iy,
+                                        &log10Zeff,
+                                        &log10DistBS2MSKm,
+                                        &nlos);
+            }
+        }
+    }
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
 }
 
 
 
 /**
  * Fine tunes the A0...A3 E/// parameters to best fit a set of measurements 
- * within a given radio zone. The result is saved in the 
- * `tx_params->eric_params` vector.
+ * within a given radio zone. The result is saved in the vector
+ * `tx_params->eric_params`.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
@@ -440,11 +540,11 @@ parameter_fine_tuning (Parameters    *params,
     double nlos;
 	double log10Zeff;
 	double log10DistBS2MSKm;
-	double PathLossFreq = 0;	    // path loss due to carrier frequency
+	double PathLossFreq = 0;	                        // path loss due to carrier frequency
 	int ix; int iy;	
 	int DiffX, DiffY;
 	double PathLossAntHeightMS;
-    double DistBS2MSKm;		        // distance between MS and BS in km
+    double DistBS2MSKm;		                            // distance between MS and BS in km
 
     //
     // define and initialize matrices for solving the linear system
@@ -485,10 +585,12 @@ parameter_fine_tuning (Parameters    *params,
 	{
 		for (iy = 0; iy < yN; iy++)
 		{
-			// Path Loss due to Hata model
-			DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
-			// ZoMS = tx_params->m_dem[ix][iy];
-			DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000;
+            //
+            // distance from the current point to the transmitter
+            //
+			DiffX = (BSxIndex-ix); 
+            DiffY = (BSyIndex-iy);
+			DistBS2MSKm = (sqrt (DiffX*DiffX + DiffY*DiffY) * scale) / 1000;
 
 			if (DistBS2MSKm < 0.01)
 				DistBS2MSKm = 0.01;
@@ -506,13 +608,13 @@ parameter_fine_tuning (Parameters    *params,
                 {
                     if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
                     {
-                        eric_pathloss_on_cpu (params,
-                                              tx_params,
-                                              ix,
-                                              iy,
-                                              &log10Zeff,
-                                              &log10DistBS2MSKm,
-                                              &nlos);
+                        eric_pathloss_on_point (params,
+                                                tx_params,
+                                                ix,
+                                                iy,
+                                                &log10Zeff,
+                                                &log10DistBS2MSKm,
+                                                &nlos);
                         //
                         // valid field measurement and prediction within the user-defined radio zone
                         //
@@ -655,256 +757,5 @@ parameter_fine_tuning (Parameters    *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
 #endif
-}
-
-
-
-/*************************************************************************************************
- *
- *		Function EricPathLossSub calculates PathLoss in dB using Ericsson 9999 path loss formula
- *			
- *			**PathLoss:	array of path loss in dB
- *			**Raster:       input DEM file
- *       	**Clutter:      input clutter file
- *			
- *			T.Javornik, Jan. 2010
- * 
- * 		Ericsson 9999 model update:
- * 			- Spherical earth diffraction komponent (JDFR)
- * 			- NLOS komponent (KDFR) 
- * 			- do_profile calculation speed optimisation
- * 
- * 			Patrik Ritosa, May 2012
- *
- *************************************************************************************************/
-int 
-EricPathLossSub (double **Obst_high,
-                 double **Obst_dist,
-                 double **Offset,
-                 double **Raster, 
-                 double **Clutter, 
-                 double **PathLoss, 
-                 double **Meritve,
-                 double **AntLoss,
-                 char **RadioZone,
-                 struct StructEric *IniEric)
-{
-	// Ericsson model constants and variables
-	int BSxIndex = IniEric->BSxIndex;		    //	normalized position of BS -> UTMx/resolution 
-	int BSyIndex = IniEric->BSyIndex;		    //	normalized position of BS -> UTMy/resolution
-	double AntHeightBS = IniEric->BSAntHeight;	//	Antenna height of BS [m]
-	double AntHeightMS = IniEric->MSAntHeight;	//	Antenna height of MS [m]
-	int xN = IniEric->xN;				//	dimension of the input(Raster) and output (PathLoss)
-	int yN = IniEric->yN;				//	dimension of the input(Raster) and output (PathLoss)
-	double scale = IniEric->scale;			//	Resolution Erricson model
-	double A0 = IniEric->A0;				//	Model 9999 parameters
-	double A1 = IniEric->A1;				//	Model 9999 parameters
-	double A2  = IniEric->A2;			//	Model 9999 parameters
-	double A3  = IniEric->A3;			//	Model 9999 parameters
-	double freq  = IniEric->freq;			//	carrier frequency
-	double Lambda = 300.0 / freq;			//	wave lenght
-	double radi = IniEric->radi;			// radius of calculation
-
-	double ZoBS;					// BS and MS height about the sea level
-	double ZObs2LOS = 0;
-	double DistObs2BS = 0;
-	double ZoTransBS,ZoTransMS;
-	double log10Zeff;
-	double log10DistBS2MSKm;
-	double tiltBS2MS;				// (ZoBS-ZoMS)/distBS2MSNorm	
-	double PathLossFreq = 0;			// path loss due to carrier frequency
-	double PathLossTmp = 0;				// tmp path loss
-	int ix; int iy;	
-	int DiffX, DiffY;
-    double Zeff;			// Difference in X and Y direction
-	double PathLossAntHeightMS;
-	double DistBS2MSNorm, DistBS2MSKm;		// distance between MS and BS in Km sqrt(x2+y2+z2) * scale / 1000
-							// normalized distance between MS and BS in xy plan sqrt(x2+y2)
-	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff, KDFR, Alfa, Fresnel, JDFR;
-	
-	ZoBS = Raster[(int)BSxIndex][(int)BSyIndex];	// BS height above the sea level calculated from raster DEM file
-	ZoTransBS = ZoBS + AntHeightBS;			// BS transmitter height above the sea level
-
-	PathLossFreq = 44.49*log10(freq) - 4.78*pow(log10(freq),2);	// Loss due to carrier frequency
-									/*POPRAVJNEO (4.2.2010)*/	
-	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
-
-#ifdef _PERFORMANCE_METRICS_
-    measure_time ("E/// on CPU");
-#endif
-
-#ifdef _DEBUG_INFO_
-    //
-    // DEBUG: parameter dump titles 
-    //
-    printf ("xi|yi|log(d)|HEBK|log(HEBK)|NLOS|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
-#endif
-
-	for (ix = 0; ix < xN; ix++)
-	{
-		for (iy = 0; iy < yN; iy++)
-		{
-			// Path Loss due to Hata model
-			DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
-			// ZoMS = Raster[ix][iy];
-			ZoTransMS = Raster[ix][iy]+AntHeightMS;  // ZoMS
-			Zeff = ZoTransBS - ZoTransMS;		// ??
-			DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
-			DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
-//			if(ZoBS <= Raster[ix][iy]) 
-//			{
-//				Zeff = AntHeightBS;  // ZoMS
-//			}
-			if (DistBS2MSKm < 0.01)
-			{
-				DistBS2MSKm = 0.01;
-			}
-
-			if ((DistBS2MSKm) > radi)
-		   	{    
-			    continue;
-		    }
-
-            //height correction due to earth sphere
-			Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3);
-		
-			if ((- AntHeightBS < Zeff) && (Zeff < AntHeightBS))
-            {
-				Zeff = AntHeightBS;		// Preventing Log10(Zeff) to go toward -inf
-			}
-			
-			log10Zeff=log10(fabs(Zeff));
-
-			//log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
-			log10DistBS2MSKm=log10(DistBS2MSKm);			
-
-			PathLossTmp = A0 + A1*log10DistBS2MSKm; 
-			PathLossTmp = PathLossTmp + A2*log10Zeff ;
-            PathLossTmp = PathLossTmp + A3*log10DistBS2MSKm*log10Zeff;
-			PathLossTmp = PathLossTmp - PathLossAntHeightMS + PathLossFreq;
-
-			// Calc position of the height and position of the highest obstacle
-
-		
-			tiltBS2MS = ZoTransBS - ZoTransMS; 	//STARO: tiltBS2MS = Zeff; Zeff je vmes lahko spremenjena /* Sprememba (4.2.2010)*/
-
-			if (DistBS2MSNorm > 0) 
-				tiltBS2MS = -tiltBS2MS/DistBS2MSNorm; 
-			else
-				tiltBS2MS = 0; 
-			
-			ZObs2LOS = Obst_high[ix][iy];
-			DistObs2BS = Obst_dist[ix][iy];
-			// Calc path loss due to NLOS conditions
-/*Patrik/scale*/	ElevAngCos = cos(atan(tiltBS2MS/scale));
-
-			Ddot = DistObs2BS; 
-			if (ElevAngCos != 0) 
-			{	
-				Ddot = DistObs2BS/ElevAngCos;
-			}
-			Ddotdot = DistBS2MSNorm - Ddot;
-			if (ElevAngCos != 0) {
-				Ddotdot = (DistBS2MSNorm)/ElevAngCos - Ddot;
-			}
-
-//Obstacle height korrection due to earth sphere
-			if (Ddot <= Ddotdot){
-				ZObs2LOS = ZObs2LOS + (Ddot*scale/1000*Ddot*scale/1000)/(2 * 4/3 * 6370)*1000;
-			}
-			else{
-				ZObs2LOS = ZObs2LOS + (Ddotdot*scale/1000*Ddotdot*scale/1000)/(2 * 4/3 * 6370)*1000;
-			}
-
-//Hight correction due to BS2MS line angle
-			Hdot = ZObs2LOS*ElevAngCos;
-
-			PathLossDiff = 0;
-			KDFR = 0;
-			if (Ddot > 0 && Ddotdot > 0) {
-				Fresnel=sqrt((Lambda*Ddot*Ddotdot*scale)/(Ddot+Ddotdot)); // First Fresnel elipsoid radius
-
-				PathLossDiff = Hdot/Fresnel;
-
-// NLOS komponent calculation KDFR
-
-				if (PathLossDiff < -0.49 ) {
-					KDFR = 0; 
-				}
-				else if(-0.49 <= PathLossDiff && PathLossDiff < 0.5) {
-					KDFR = 6 + 12.2 * PathLossDiff;
-				}
-				else if(0.5 <= PathLossDiff && PathLossDiff < 2) {
-					KDFR = 11.61 * PathLossDiff - 2 * PathLossDiff *PathLossDiff + 6.8;
-				}
-				else if(2 <= PathLossDiff) {
-					KDFR = 16 + 20 * log10(PathLossDiff);
-				}
-
-// Alfa correction factor
-				
-				if (Hdot > Fresnel/2)
-                {
-					Alfa = 1;
-				}
-				else if (Fresnel/4 <= Hdot && Hdot <= Fresnel/2)
-                {
-					Alfa = 4 * Hdot/Fresnel - 1;
-				}
-				else if (Hdot < Fresnel/4)
-                {
-					Alfa = 0;
-				}
-			}
-
-//Spherical earth diffraction komponent JDFR
-			if (Hdot > 0)
-            {
-				JDFR = 20 + 0.112 * pow(freq/(16/9),1/3) * (DistBS2MSKm - sqrt(12.73 * 4/3) * ( sqrt(ZoTransBS) + sqrt(ZoTransMS) )  );
-				if (JDFR < 0)
-					JDFR=0;
-			}
-			else
-            {
-				JDFR = 0;
-			}
-
-            double nlos = sqrt(pow(Alfa*KDFR,2) + pow(JDFR,2));
-
-			PathLossTmp += nlos;
-
-			// write data to pathloss
-			PathLoss[ix][iy] = PathLossTmp + Clutter[ix][iy];
-
-#ifdef _DEBUG_INFO_
-            //
-            // DEBUG: parameter dump for approximation using least squares
-            //
-            if (! isnan (Meritve[ix][iy]))
-                if ((RadioZone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
-                    printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
-                            ix,
-                            iy,
-                            log10DistBS2MSKm,
-                            fabs (Zeff),
-                            log10Zeff,
-                            nlos,
-                            A0,
-                            A1,
-                            A2,
-                            A3,
-                            -PathLossAntHeightMS+PathLossFreq,
-                            Clutter[ix][iy],
-                            PathLoss[ix][iy],
-                            Meritve[ix][iy],
-                            AntLoss[ix][iy]);
-#endif
-		} // end irow
-	} // end icol
-
-#ifdef _PERFORMANCE_METRICS_
-    measure_time (NULL);
-#endif
-	return 0;
 }
 

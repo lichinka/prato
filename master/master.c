@@ -195,7 +195,6 @@ init_coverage_for_tx (FILE          *ini_file,
         //
         load_field_measurements_from_map (tx_params->field_meas_map,
                                           tx_params->m_field_meas);
-        tx_params->m_field_meas = params->m_field_meas;
     }
     else
         fprintf (stdout, 

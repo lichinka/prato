@@ -414,33 +414,8 @@ coverage (Parameters    *params,
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif
-        //
-        // initialize the structure variables for Ericsson 9999 model
-        //
-        struct StructEric IniEric = {tx_params->tx_east_coord_idx,
-                                     tx_params->tx_north_coord_idx,
-                                     tx_params->antenna_height_AGL, 
-                                     params->rx_height_AGL,
-                                     tx_params->nrows,
-                                     tx_params->ncols,
-                                     params->map_ew_res,
-                                     params->frequency, 
-                                     (double) tx_params->eric_params[0],
-                                     (double) tx_params->eric_params[1],
-                                     (double) tx_params->eric_params[2], 
-                                     (double) tx_params->eric_params[3],
-                                     1, 
-                                     params->radius};
-        EricPathLossSub (tx_params->m_obst_height,
-                         tx_params->m_obst_dist,
-                         tx_params->m_obst_offset,
-                         tx_params->m_dem, 
-                         tx_params->m_clut, 
-                         tx_params->m_loss, 
-                         tx_params->m_field_meas,
-                         tx_params->m_antenna_loss,
-                         tx_params->m_radio_zone,
-                         &IniEric);
+        eric_pathloss_on_cpu (params,
+                              tx_params);
     }
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
