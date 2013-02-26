@@ -6,12 +6,15 @@
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
  *
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
  *
  */
 void
-init_gpu (Tx_parameters *tx_params);
+init_gpu (Parameters *params,
+          Tx_parameters *tx_params);
 
 
 /**

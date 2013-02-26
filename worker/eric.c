@@ -323,8 +323,8 @@ eric_pathloss_on_gpu (Parameters    *params,
         //
         // initialize the OpenCL environment
         //
-        init_gpu (tx_params);
-
+        init_gpu (params,
+                  tx_params);
         //
         // build the OpenCL source file (only the first time);
         // in this case, all kernels reside in one source file
@@ -339,6 +339,14 @@ eric_pathloss_on_gpu (Parameters    *params,
     //
     activate_kernel (tx_params->ocl_obj,
                      "eric_per_tx");
+    //
+    // send the clutter losses to the device
+    //
+    write_buffer_blocking (tx_params->ocl_obj,
+                           0,
+                           tx_params->v_clutter_loss_dev,
+                           params->clutter_category_count * sizeof (params->clutter_loss[0]),
+                           params->clutter_loss);
     //
     // set scalar kernel parameters 
     // 
@@ -386,6 +394,9 @@ eric_pathloss_on_gpu (Parameters    *params,
                         tx_params->m_clut_dev);
     set_kernel_mem_arg (tx_params->ocl_obj,
                         12,
+                        tx_params->v_clutter_loss_dev);
+    set_kernel_mem_arg (tx_params->ocl_obj,
+                        13,
                         tx_params->m_loss_dev);
 
     // reserve local memory on the device
@@ -393,7 +404,7 @@ eric_pathloss_on_gpu (Parameters    *params,
                        _WORK_ITEMS_PER_DIMENSION_ *
                        sizeof (tx_params->m_loss[0][0]);
     set_local_mem (tx_params->ocl_obj,
-                   13,
+                   14,
                    lmem_size);
     //
     // calculation radius in meters
@@ -655,16 +666,18 @@ parameter_fine_tuning (Parameters    *params,
                         A_data[3][2] += log10Zeff * (log10Zeff * log10DistBS2MSKm);
                         A_data[3][3] += (log10Zeff * log10DistBS2MSKm) * (log10Zeff * log10DistBS2MSKm);
 
-                        b_data[0] += tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
+                        int clutter_category = (int) tx_params->m_clut[ix][iy];
+
+                        b_data[0] += tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
                                   - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                                   - tx_params->m_field_meas[ix][iy];
-                        b_data[1] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
+                        b_data[1] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
                                   - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                                   - tx_params->m_field_meas[ix][iy]) * log10DistBS2MSKm;
-                        b_data[2] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos 
+                        b_data[2] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
                                   - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                                   - tx_params->m_field_meas[ix][iy]) * log10Zeff;
-                        b_data[3] += (tx_params->tx_power - tx_params->m_clut[ix][iy] - nlos
+                        b_data[3] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos
                                   - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
                                   - tx_params->m_field_meas[ix][iy]) * (log10Zeff * log10DistBS2MSKm);
                     }

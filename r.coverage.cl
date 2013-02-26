@@ -394,7 +394,8 @@ __kernel void eric_per_tx (const real pixel_res,
                            __global real *obst_height_in,
                            __global real *obst_dist_in,
                            __global real *dem_in,
-                           __global real *clut_in,
+                           __global real *clut_cat_in,
+                           __global real *clut_loss_in,
                            __global real *pl_out,
                            __local  real *pblock)
 {
@@ -426,7 +427,8 @@ __kernel void eric_per_tx (const real pixel_res,
     //
     // cache the partial path-loss value
     //
-    pblock[local_idx] = (real) (clut_in[element_idx]);
+    int clutter_category = (int) clut_cat_in[element_idx];
+    pblock[local_idx]    = (real) clut_loss_in[clutter_category];
 
     // wait for other work items to cache their values
     barrier (CLK_LOCAL_MEM_FENCE);

@@ -181,6 +181,8 @@ struct Tx_parameters
     double      *v_partial_sum;
     cl_mem      *v_partial_sum_dev;
 
+    // GPU vector where the clutter categories <-> loss mapping is kept
+    cl_mem      *v_clutter_loss_dev;
 } __attribute__((__packed__));
 
 typedef struct Tx_parameters Tx_parameters;

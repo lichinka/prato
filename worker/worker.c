@@ -341,6 +341,7 @@ free_tx_params (Parameters    *params,
         free (tx_params->m_antenna_loss_dev);
         free (tx_params->m_obst_height_dev);
         free (tx_params->m_obst_dist_dev);
+        free (tx_params->v_clutter_loss_dev);
     }
     if (tx_params->m_antenna_loss != NULL)
     {

@@ -5,12 +5,15 @@
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
  *
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
  *
  */
 void
-init_gpu (Tx_parameters *tx_params)
+init_gpu (Parameters *params,
+          Tx_parameters *tx_params)
 {
     //
     // initialize the OpenCL environment if we haven't already;
@@ -28,6 +31,7 @@ init_gpu (Tx_parameters *tx_params)
         tx_params->m_loss_dev        = (cl_mem *) malloc (sizeof (cl_mem));
         tx_params->m_obst_height_dev = (cl_mem *) malloc (sizeof (cl_mem));
         tx_params->m_obst_dist_dev   = (cl_mem *) malloc (sizeof (cl_mem));
+        tx_params->v_clutter_loss_dev= (cl_mem *) malloc (sizeof (cl_mem));
 
         // initialize the OpenCL platform
         init_opencl (tx_params->ocl_obj, 1);
@@ -52,6 +56,10 @@ init_gpu (Tx_parameters *tx_params)
         *(tx_params->m_obst_dist_dev)   = create_buffer (tx_params->ocl_obj,
                                                          CL_MEM_READ_ONLY, 
                                                          nelem * sizeof (tx_params->m_obst_dist[0][0]));
+        *(tx_params->v_clutter_loss_dev)= create_buffer (tx_params->ocl_obj,
+                                                         CL_MEM_READ_ONLY,
+                                                         params->clutter_category_count * sizeof (params->clutter_loss));
+
         //
         // send input data to the device
         // 
