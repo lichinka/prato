@@ -4,23 +4,29 @@
 
 
 /**
- * Initializes the transmitter parameters structure.
+ * Initializes the transmitter parameters structure and returns a pointer
+ * to the parameter `tx_params`.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
  *                  parameters;
- * dirty_pointers   a flag indicating whether to initialize all pointers 
- *                  within the structure.-
+ * rcv_tx_params    a structure holding transmitter-specific configuration 
+ *                  parameters as received from the master process.-
  *
  */
-void 
+Tx_parameters * 
 init_tx_params (Parameters    *params,
                 Tx_parameters *tx_params,
-                const char     dirty_pointers)
+                Tx_parameters *rcv_tx_params)
 {
-    if (dirty_pointers)
+    if (tx_params == NULL)
     {
+        //
+        // allocate the local structure and initialize it
+        //
+        tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
+
         tx_params->eric_params[0]     = 38.0;
         tx_params->eric_params[1]     = 32.0;
         tx_params->eric_params[2]     = -12.0;
@@ -44,7 +50,56 @@ init_tx_params (Parameters    *params,
         tx_params->ocl_obj            = NULL;
     }
     //
-    // allocate memory for the transmitter matrices;
+    // copy the received values to the local structure, keeping
+    // all the pointers untouched
+    //
+    tx_params->beam_direction       = rcv_tx_params->beam_direction;
+    tx_params->electrical_tilt      = rcv_tx_params->electrical_tilt;
+    tx_params->mechanical_tilt      = rcv_tx_params->mechanical_tilt;
+    tx_params->antenna_height_AGL   = rcv_tx_params->antenna_height_AGL;
+    tx_params->total_tx_height      = rcv_tx_params->total_tx_height;
+    tx_params->tx_east_coord        = rcv_tx_params->tx_east_coord;
+    tx_params->tx_north_coord       = rcv_tx_params->tx_north_coord;
+    tx_params->tx_east_coord_idx    = rcv_tx_params->tx_east_coord_idx;
+    tx_params->tx_north_coord_idx   = rcv_tx_params->tx_north_coord_idx;
+    tx_params->tx_power             = rcv_tx_params->tx_power;
+    tx_params->nrows                = rcv_tx_params->nrows;
+    tx_params->ncols                = rcv_tx_params->ncols;
+    tx_params->map_north            = rcv_tx_params->map_north;
+    tx_params->map_east             = rcv_tx_params->map_east;
+    tx_params->map_south            = rcv_tx_params->map_south;
+    tx_params->map_west             = rcv_tx_params->map_west;
+    tx_params->map_north_idx        = rcv_tx_params->map_north_idx;
+    tx_params->map_east_idx         = rcv_tx_params->map_east_idx;
+    tx_params->map_south_idx        = rcv_tx_params->map_south_idx;
+    tx_params->map_west_idx         = rcv_tx_params->map_west_idx;
+
+    //
+    // also copy the received character arrays
+    //
+    strncpy (tx_params->tx_name, 
+             rcv_tx_params->tx_name,
+             _CHAR_BUFFER_SIZE_);
+    strncpy (tx_params->antenna_diagram_file,
+             rcv_tx_params->antenna_diagram_file,
+             _CHAR_BUFFER_SIZE_);
+    strncpy (tx_params->field_meas_map,
+             rcv_tx_params->field_meas_map,
+             _CHAR_BUFFER_SIZE_);
+
+    //
+    // clear the previously used antenna diagram data
+    //
+    if (tx_params->diagram != NULL)
+    {
+        free (tx_params->diagram->horizontal);
+        free (tx_params->diagram->vertical);
+        free (tx_params->diagram);
+        tx_params->diagram = NULL;
+    }
+
+    //
+    // allocate memory for the transmitter matrices only if needed;
     // they contain strictly the data needed for calculation, i.e. 
     // within the user-defined calculation radius (params->radius)
     //
@@ -109,6 +164,7 @@ init_tx_params (Parameters    *params,
                                                              tx_params->ncols,
                                                              tx_params->m_field_meas);
     }
+    return tx_params;
 }
 
 
@@ -188,32 +244,18 @@ static void
 receive_tx_data (Parameters *params,
                  MPI_Comm comm)
 {
-    char           dirty_pointers;
     MPI_Status     status;
-    Tx_parameters *tx_params;
+    Tx_parameters *rcv_tx_params;
 
     //
-    // allocate the `Tx_parameters` structure, if we haven't already,
-    // and mark all its pointers as uninitialized
+    // the received structure will be saved here
     //
-    if (params->tx_params == NULL)
-    {
-        params->tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
-        dirty_pointers = 1;
-    }
-    else
-    {
-        dirty_pointers = 0;
-    }
-    //
-    // alias to avoid verbose writing
-    //
-    tx_params = params->tx_params;
+    rcv_tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
 
     //
     // receive the transmitter-specific parameters
     //
-    MPI_Recv (tx_params,
+    MPI_Recv (rcv_tx_params,
               sizeof (Tx_parameters),
               MPI_BYTE,
               _COVERAGE_MASTER_RANK_,
@@ -228,16 +270,17 @@ receive_tx_data (Parameters *params,
     }
 
     //
-    // initialize the transmitter structure
+    // initialize or clear the transmitter structure
+    // before receiving the rest of the data
     //
-    init_tx_params (params,
-                    tx_params,
-                    dirty_pointers);
+    params->tx_params = init_tx_params (params,
+                                        params->tx_params,
+                                        rcv_tx_params);
     //
     // receive DEM data from master
     //
-    MPI_Recv (tx_params->m_dem[0],
-              tx_params->nrows * tx_params->ncols,
+    MPI_Recv (params->tx_params->m_dem[0],
+              params->tx_params->nrows * params->tx_params->ncols,
               MPI_DOUBLE,
               _COVERAGE_MASTER_RANK_,
               MPI_ANY_TAG,
@@ -252,15 +295,15 @@ receive_tx_data (Parameters *params,
     //
     // transmitter height above sea level
     //
-    tx_params->total_tx_height  = tx_params->m_dem[tx_params->tx_east_coord_idx]
-                                                  [tx_params->tx_north_coord_idx];
-    tx_params->total_tx_height += tx_params->antenna_height_AGL;
+    params->tx_params->total_tx_height  = params->tx_params->m_dem[params->tx_params->tx_east_coord_idx]
+                                                  [params->tx_params->tx_north_coord_idx];
+    params->tx_params->total_tx_height += params->tx_params->antenna_height_AGL;
 
     //
     // receive clutter data from master
     //
-    MPI_Recv (tx_params->m_clut[0],
-              tx_params->nrows * tx_params->ncols,
+    MPI_Recv (params->tx_params->m_clut[0],
+              params->tx_params->nrows * params->tx_params->ncols,
               MPI_DOUBLE,
               _COVERAGE_MASTER_RANK_,
               MPI_ANY_TAG,
@@ -280,8 +323,8 @@ receive_tx_data (Parameters *params,
         //
         // receive field-measurement data from master
         //
-        MPI_Recv (tx_params->m_field_meas[0],
-                  tx_params->nrows * tx_params->ncols,
+        MPI_Recv (params->tx_params->m_field_meas[0],
+                  params->tx_params->nrows * params->tx_params->ncols,
                   MPI_DOUBLE,
                   _COVERAGE_MASTER_RANK_,
                   MPI_ANY_TAG,
@@ -294,6 +337,7 @@ receive_tx_data (Parameters *params,
             exit (-1);
         }
     }
+    free (rcv_tx_params);
 }
 
 
@@ -427,7 +471,7 @@ void worker (const int rank,
     // sync point: common data distribution finished 
     //
     MPI_Barrier (comm);
-
+    
     //
     // start coverage-processing loop
     //

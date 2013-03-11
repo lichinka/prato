@@ -1,2 +1,2 @@
-localhost	slots=1
-k1         slots=3
+localhost	slots=3
+#k1         slots=3

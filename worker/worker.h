@@ -6,20 +6,21 @@
 
 
 /**
- * Initializes the transmitter parameters structure.
+ * Initializes the transmitter parameters structure and returns a pointer
+ * to the parameter `tx_params`.
  *
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
  *                  parameters;
- * dirty_pointers   a flag indicating whether to initialize all pointers 
- *                  within the structure.-
+ * rcv_tx_params    a structure holding transmitter-specific configuration 
+ *                  parameters as received from the master process.-
  *
  */
-void 
+Tx_parameters *
 init_tx_params (Parameters    *params,
                 Tx_parameters *tx_params,
-                const char     dirty_pointers);
+                Tx_parameters *rcv_tx_params);
 
 /**
  * Deallocates all internal structures contained in the 

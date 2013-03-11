@@ -184,7 +184,7 @@ init_coverage_for_tx (FILE          *ini_file,
     // 
     init_tx_params (params,
                     tx_params,
-                    0);
+                    tx_params);
     //
     // if in optimization mode, load the field measurements of this Tx
     //
