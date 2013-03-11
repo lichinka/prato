@@ -6,8 +6,8 @@
 #
 # Start MPI jobs
 #
-mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage $1 ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
-#mpirun --mca btl_tcp_if_include 192.168.1.0/24 -np 1 -host k100 r.coverage -p ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+#mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage $1 ini_file=./parameters_gsm.ini tx_ini_sections=KPODVI1 : -np 1 --hostfile hostfile.local ./run_worker.sh
+mpirun --mca btl_tcp_if_include 192.168.1.0/24 --mca btl tcp,sm,self -np 1 -host localhost r.coverage $1 ini_file=./parameters_umts.ini tx_ini_sections=SBANOVA : -np 1 --hostfile hostfile.local ./run_worker.sh
 
 
 ############
@@ -41,7 +41,4 @@ mpirun --mca btl tcp,sm,self -np 1 -host localhost r.coverage $1 ini_file=./para
 #r.mapcalc diff=temp-temp1
 #r.info diff
 #r.colors map=diff color=elevation
-
-
-
 
