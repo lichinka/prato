@@ -261,7 +261,7 @@ eric_pathloss_on_point (const Parameters    *params,
     }
     else
     {
-	clutter_loss = 0;
+        clutter_loss = 0;
         fprintf (stderr,
                  "*** WARNING: clutter category (%d) does not exist. Assuming 0 (zero).\n",
                  clutter_category);
