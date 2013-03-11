@@ -1,3 +1,4 @@
 - Check that there is data available within the defined calculation radius around each transmitter.
   The current version does not check this, and generates a SEGFAULT.
+- Check that the Clutter maps covers at least the same area as the DEM, otherwise SEGFAULT occurs.
 
