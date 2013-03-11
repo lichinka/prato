@@ -253,15 +253,17 @@ eric_pathloss_on_point (const Parameters    *params,
     double clutter_loss;
     int    clutter_category = (int) tx_params->m_clut[ix][iy];
 
-    if (clutter_category < params->clutter_category_count)
+    if ((clutter_category > -1) &&
+        (clutter_category < params->clutter_category_count))
     {
         clutter_loss = params->clutter_loss[clutter_category];
         tx_params->m_loss[ix][iy] = PathLossTmp + clutter_loss;
     }
     else
     {
+	clutter_loss = 0;
         fprintf (stderr,
-                 "*** WARNING: clutter category (%d) does not exist.\n",
+                 "*** WARNING: clutter category (%d) does not exist. Assuming 0 (zero).\n",
                  clutter_category);
     }
 
