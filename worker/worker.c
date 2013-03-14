@@ -45,10 +45,12 @@ init_tx_params (Parameters    *params,
         tx_params->m_radio_zone       = NULL;
         tx_params->m_radio_zone_dev   = NULL;
         tx_params->m_obst_height      = NULL;
+        tx_params->m_obst_height_dev  = NULL;
         tx_params->m_obst_dist        = NULL;
+        tx_params->m_obst_dist_dev    = NULL;
         tx_params->m_obst_offset      = NULL;
         tx_params->ocl_obj            = NULL;
-    }
+    } 
     //
     // copy the received values to the local structure, keeping
     // all the pointers untouched
@@ -88,7 +90,7 @@ init_tx_params (Parameters    *params,
              _CHAR_BUFFER_SIZE_);
 
     //
-    // clear the previously used antenna diagram data
+    // clear the previously used antenna data
     //
     if (tx_params->diagram != NULL)
     {
@@ -97,6 +99,11 @@ init_tx_params (Parameters    *params,
         free (tx_params->diagram);
         tx_params->diagram = NULL;
     }
+    //
+    // clear the previously used GPU buffers
+    //
+    if (params->use_gpu)
+        release_gpu (tx_params);
 
     //
     // allocate memory for the transmitter matrices only if needed;
@@ -364,28 +371,10 @@ free_tx_params (Parameters    *params,
             free (tx_params->m_field_meas);
             tx_params->m_field_meas = NULL;
         }
-        if (params->use_gpu)
-        {
-            free (tx_params->m_field_meas_dev);
-            if (tx_params->v_partial_sum != NULL)
-            {
-                free (tx_params->v_partial_sum_dev);
-                free (tx_params->v_partial_sum);
-                tx_params->v_partial_sum = NULL;
-            }
-        }
     }
     if (params->use_gpu)
     {
-        free (tx_params->ocl_obj);
-        free (tx_params->m_dem_dev);
-        free (tx_params->m_clut_dev);
-        free (tx_params->m_loss_dev);
-        free (tx_params->m_radio_zone_dev);
-        free (tx_params->m_antenna_loss_dev);
-        free (tx_params->m_obst_height_dev);
-        free (tx_params->m_obst_dist_dev);
-        free (tx_params->v_clutter_loss_dev);
+        close_gpu (tx_params);
     }
     if (tx_params->m_antenna_loss != NULL)
     {
@@ -471,7 +460,7 @@ void worker (const int rank,
     // sync point: common data distribution finished 
     //
     MPI_Barrier (comm);
-    
+ 
     //
     // start coverage-processing loop
     //

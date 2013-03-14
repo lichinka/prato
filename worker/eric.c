@@ -317,25 +317,10 @@ eric_pathloss_on_gpu (Parameters    *params,
                       Tx_parameters *tx_params)
 {
     //
-    // we use this pointer as a flag, indicating that we are about to
-    // run this function for the first time
+    // initialize the OpenCL environment
     //
-    if (tx_params->ocl_obj == NULL)
-    {
-        //
-        // initialize the OpenCL environment
-        //
-        init_gpu (params,
-                  tx_params);
-        //
-        // build the OpenCL source file (only the first time);
-        // in this case, all kernels reside in one source file
-        //
-        build_kernel_from_file (tx_params->ocl_obj,
-                                "r.coverage.cl",
-                                "eric_per_tx",
-                                "-I. -Werror");
-    }
+    init_gpu (params,
+              tx_params);
     //
     // activate the compiled kernel
     //

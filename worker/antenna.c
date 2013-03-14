@@ -378,7 +378,8 @@ static void
 antenna_influence_gpu (Parameters    *params,
                        Tx_parameters *tx_params)
 {
-    cl_mem horiz_diag_in_dev, vert_diag_in_dev;
+    cl_mem horiz_diag_in_dev, 
+           vert_diag_in_dev;
 
     // activate the kernel
     activate_kernel (tx_params->ocl_obj,

@@ -1,6 +1,7 @@
 #ifndef _PRATO_WORKER_H_
 #define _PRATO_WORKER_H_
 
+#include "worker/gpu.h"
 #include "worker/coverage.h"
 
 

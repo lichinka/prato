@@ -3,6 +3,26 @@
 
 
 /**
+ * Deactivates the OpenCL environment, releasing all associated memory.
+ *
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
+ *
+ */
+void
+close_gpu (Tx_parameters *tx_params);
+
+/**
+ * Deactivates the OpenCL environment, releasing all associated memory.
+ *
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
+ *
+ */
+void
+release_gpu (Tx_parameters *tx_params);
+
+/**
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
  *
@@ -15,7 +35,6 @@
 void
 init_gpu (Parameters *params,
           Tx_parameters *tx_params);
-
 
 /**
  * Defines a 2D execution range for a kernel, consisting of square tiles,

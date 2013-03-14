@@ -3,15 +3,17 @@
 REDIR=$1
 #CMD="valgrind --leak-check=yes ./worker/worker"
 CMD="./worker/worker"
-PSQL_SERVER=ninestein
-PSQL_USER=grassuser
+#PSQL_SERVER=ninestein
+PSQL_SERVER=localhost
+#PSQL_USER=grassuser
+PSQL_USER=garufa
 PSQL_DB=grass
 
 if [ "${REDIR}" = "-db" ]; then
     #
     # redirect worker's output to the database server
     #
-    ${CMD} | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
+    ${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
 else 
     if [ "${REDIR}" = "-rast" ]; then
         ${CMD} | grep '^[0-9]' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 

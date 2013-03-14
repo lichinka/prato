@@ -3,8 +3,10 @@
 TX=$1
 INI=$2
 RAST=$3
-PSQL_SERVER=ninestein
-PSQL_USER=grassuser
+#PSQL_SERVER=ninestein
+PSQL_SERVER=localhost
+#PSQL_USER=grassuser
+PSQL_USER=garufa
 PSQL_DB=grass
 
 if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
@@ -21,7 +23,7 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     echo "*** INFO: Importing path-loss predictions from the database ..."
     echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
     echo "*** INFO: Converting vector to raster map ..."
-    v.to.rast input=temp type=point output=temp use=z --overwrite
+    v.to.rast input=temp type=point output=${RAST} use=z --overwrite
     r.colors -n map=${RAST} color=elevation
 else
     echo -e "Usage:\t$0 [comma-separated transmitter's section names] [INI file] [raster name]"

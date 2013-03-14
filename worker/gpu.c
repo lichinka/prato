@@ -1,6 +1,113 @@
 #include "worker/gpu.h"
 
 
+
+
+/**
+ * Deactivates the OpenCL environment, releasing all associated memory.
+ *
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
+ *
+ */
+void
+release_gpu (Tx_parameters *tx_params)
+{ 
+    //
+    // check the OpenCL environment has been initialized
+    //
+    if (tx_params->ocl_obj != NULL)
+    {
+        //
+        // release the memory objects on the device
+        //
+        if (tx_params->m_dem_dev != NULL)
+        {
+            free (tx_params->m_dem_dev);
+            tx_params->m_dem_dev = NULL;
+        }
+        
+        if (tx_params->m_clut_dev != NULL)
+        {
+            free (tx_params->m_clut_dev);
+            tx_params->m_clut_dev = NULL;
+        }
+        
+        if (tx_params->m_field_meas_dev != NULL)
+        {
+            free (tx_params->m_field_meas_dev);
+            tx_params->m_field_meas_dev = NULL;
+        }
+        
+        if (tx_params->m_loss_dev != NULL)
+        {
+            free (tx_params->m_loss_dev);
+            tx_params->m_loss_dev = NULL;
+        }
+        
+        if (tx_params->m_antenna_loss_dev != NULL)
+        {
+            free (tx_params->m_antenna_loss_dev);
+            tx_params->m_antenna_loss_dev = NULL;
+        }
+        
+        if (tx_params->m_radio_zone_dev != NULL)
+        {
+            free (tx_params->m_radio_zone_dev);
+            tx_params->m_radio_zone_dev = NULL;
+        }
+        
+        if (tx_params->m_obst_height_dev != NULL)
+        {
+            free (tx_params->m_obst_height_dev);
+            tx_params->m_obst_height_dev = NULL;
+        }
+        
+        if (tx_params->m_obst_dist_dev != NULL)
+        {
+            free (tx_params->m_obst_dist_dev);
+            tx_params->m_obst_dist_dev = NULL;
+        }
+
+        if (tx_params->v_partial_sum_dev != NULL)
+        {
+            free (tx_params->v_partial_sum_dev);
+            tx_params->v_partial_sum_dev = NULL;
+        }
+        
+        if (tx_params->v_clutter_loss_dev != NULL)
+        {
+            free (tx_params->v_clutter_loss_dev);
+            tx_params->v_clutter_loss_dev = NULL;
+        }
+    }
+}
+
+
+
+/**
+ * Deactivates the OpenCL environment, releasing all associated memory.
+ *
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
+ *
+ */
+void
+close_gpu (Tx_parameters *tx_params)
+{
+    //
+    // check the OpenCL environment has been initialized
+    //
+    if (tx_params->ocl_obj != NULL)
+    {
+        release_gpu (tx_params);
+        deactivate_opencl (tx_params->ocl_obj);
+        free (tx_params->ocl_obj);
+    }
+}
+
+
+
 /**
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
@@ -20,75 +127,87 @@ init_gpu (Parameters *params,
     //
     if (tx_params->ocl_obj == NULL)
     {
-        //
-        // create the memory objects on the device, that will be shared 
-        // among different function calls; this should minize data 
-        // transfers to/from the GPU
-        //
-        tx_params->ocl_obj           = (OCL_object *) malloc (sizeof (OCL_object));
-        tx_params->m_dem_dev         = (cl_mem *) malloc (sizeof (cl_mem));
-        tx_params->m_clut_dev        = (cl_mem *) malloc (sizeof (cl_mem));
-        tx_params->m_loss_dev        = (cl_mem *) malloc (sizeof (cl_mem));
-        tx_params->m_obst_height_dev = (cl_mem *) malloc (sizeof (cl_mem));
-        tx_params->m_obst_dist_dev   = (cl_mem *) malloc (sizeof (cl_mem));
-        tx_params->v_clutter_loss_dev= (cl_mem *) malloc (sizeof (cl_mem));
-
-        // initialize the OpenCL platform
+        tx_params->ocl_obj = (OCL_object *) malloc (sizeof (OCL_object));
         init_opencl (tx_params->ocl_obj, 1);
 
         //
-        // create OpenCL buffers
+        // build the OpenCL source file (only the first time);
+        // in this case, all kernels reside in one source file
         //
-        int nelem = tx_params->nrows * tx_params->ncols;
-
-        *(tx_params->m_dem_dev)         = create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_ONLY, 
-                                                         nelem * sizeof (tx_params->m_dem[0][0]));
-        *(tx_params->m_clut_dev)        = create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_ONLY, 
-                                                         nelem * sizeof (tx_params->m_clut[0][0]));
-        *(tx_params->m_loss_dev)        = create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_WRITE, 
-                                                         nelem * sizeof (tx_params->m_loss[0][0]));
-        *(tx_params->m_obst_height_dev) = create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_ONLY, 
-                                                         nelem * sizeof (tx_params->m_obst_height[0][0]));
-        *(tx_params->m_obst_dist_dev)   = create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_ONLY, 
-                                                         nelem * sizeof (tx_params->m_obst_dist[0][0]));
-        *(tx_params->v_clutter_loss_dev)= create_buffer (tx_params->ocl_obj,
-                                                         CL_MEM_READ_ONLY,
-                                                         params->clutter_category_count * sizeof (params->clutter_loss));
-
-        //
-        // send input data to the device
-        // 
-        write_buffer (tx_params->ocl_obj,
-                      0,
-                      tx_params->m_obst_height_dev,
-                      nelem * sizeof (tx_params->m_obst_height[0][0]),
-                      tx_params->m_obst_height[0]);
-        write_buffer (tx_params->ocl_obj,
-                      0,
-                      tx_params->m_obst_dist_dev,
-                      nelem * sizeof (tx_params->m_obst_dist[0][0]),
-                      tx_params->m_obst_dist[0]);
-        write_buffer (tx_params->ocl_obj,
-                      0,
-                      tx_params->m_dem_dev,
-                      nelem * sizeof (tx_params->m_dem[0][0]),
-                      tx_params->m_dem[0]);
-        write_buffer (tx_params->ocl_obj,
-                      0,
-                      tx_params->m_clut_dev,
-                      nelem * sizeof (tx_params->m_clut[0][0]),
-                      tx_params->m_clut[0]);
-        write_buffer_blocking (tx_params->ocl_obj,
-                               0,
-                               tx_params->m_loss_dev,
-                               nelem * sizeof (tx_params->m_loss[0][0]),
-                               tx_params->m_loss[0]);
+        build_kernel_from_file (tx_params->ocl_obj,
+                                "r.coverage.cl",
+                                "eric_per_tx",
+                                "-I. -Werror");
     }
+    //
+    // create the memory objects on the device, that will be shared 
+    // among different function calls; this should minize data 
+    // transfers to/from the GPU
+    //
+    if (tx_params->m_dem_dev == NULL)
+        tx_params->m_dem_dev = (cl_mem *) malloc (sizeof (cl_mem));
+    if (tx_params->m_clut_dev == NULL)
+        tx_params->m_clut_dev = (cl_mem *) malloc (sizeof (cl_mem));
+    if (tx_params->m_loss_dev == NULL)
+        tx_params->m_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
+    if (tx_params->m_obst_height_dev == NULL)
+        tx_params->m_obst_height_dev = (cl_mem *) malloc (sizeof (cl_mem));
+    if (tx_params->m_obst_dist_dev == NULL)
+        tx_params->m_obst_dist_dev = (cl_mem *) malloc (sizeof (cl_mem));
+    if (tx_params->v_clutter_loss_dev == NULL)
+        tx_params->v_clutter_loss_dev = (cl_mem *) malloc (sizeof (cl_mem));
+
+    //
+    // create OpenCL buffers
+    //
+    int nelem = tx_params->nrows * tx_params->ncols;
+
+    *(tx_params->m_dem_dev)         = create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_ONLY, 
+                                                     nelem * sizeof (tx_params->m_dem[0][0]));
+    *(tx_params->m_clut_dev)        = create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_ONLY, 
+                                                     nelem * sizeof (tx_params->m_clut[0][0]));
+    *(tx_params->m_loss_dev)        = create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_WRITE, 
+                                                     nelem * sizeof (tx_params->m_loss[0][0]));
+    *(tx_params->m_obst_height_dev) = create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_ONLY, 
+                                                     nelem * sizeof (tx_params->m_obst_height[0][0]));
+    *(tx_params->m_obst_dist_dev)   = create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_ONLY, 
+                                                     nelem * sizeof (tx_params->m_obst_dist[0][0]));
+    *(tx_params->v_clutter_loss_dev)= create_buffer (tx_params->ocl_obj,
+                                                     CL_MEM_READ_ONLY,
+                                                     params->clutter_category_count * sizeof (params->clutter_loss));
+    //
+    // send input data to the device
+    // 
+    write_buffer (tx_params->ocl_obj,
+                  0,
+                  tx_params->m_obst_height_dev,
+                  nelem * sizeof (tx_params->m_obst_height[0][0]),
+                  tx_params->m_obst_height[0]);
+    write_buffer (tx_params->ocl_obj,
+                  0,
+                  tx_params->m_obst_dist_dev,
+                  nelem * sizeof (tx_params->m_obst_dist[0][0]),
+                  tx_params->m_obst_dist[0]);
+    write_buffer (tx_params->ocl_obj,
+                  0,
+                  tx_params->m_dem_dev,
+                  nelem * sizeof (tx_params->m_dem[0][0]),
+                  tx_params->m_dem[0]);
+    write_buffer (tx_params->ocl_obj,
+                  0,
+                  tx_params->m_clut_dev,
+                  nelem * sizeof (tx_params->m_clut[0][0]),
+                  tx_params->m_clut[0]);
+    write_buffer_blocking (tx_params->ocl_obj,
+                           0,
+                           tx_params->m_loss_dev,
+                           nelem * sizeof (tx_params->m_loss[0][0]),
+                           tx_params->m_loss[0]);
 }
 
 
