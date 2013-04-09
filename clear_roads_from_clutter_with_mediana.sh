@@ -16,7 +16,6 @@ ${INPUT}[1,-1],\
 ${INPUT}[0,-1],\
 ${INPUT}[-1,-1]),\
 ${INPUT})"
-    echo "done"
 else
     echo "Replaces the road clutter with the mode category (i.e. most frequent) of the neighboring pixels."
     echo "Usage:"
