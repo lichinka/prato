@@ -317,11 +317,6 @@ eric_pathloss_on_gpu (Parameters    *params,
                       Tx_parameters *tx_params)
 {
     //
-    // initialize the OpenCL environment
-    //
-    init_gpu (params,
-              tx_params);
-    //
     // activate the compiled kernel
     //
     activate_kernel (tx_params->ocl_obj,

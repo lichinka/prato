@@ -230,7 +230,7 @@ obj_func (Parameters    *params,
                               tx_params);
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
-        measure_time ("Apply antenna losses and objective function on CPU");
+        measure_time ("Apply antenna losses and calculate objective function on CPU");
 #endif
         //
         // objective function calculation, for 
@@ -263,16 +263,19 @@ obj_func (Parameters    *params,
                         double fm = tx_params->m_field_meas[r][c];
                         if (!isnan (fm))
                         {
-                            count ++;
+                            //
+                            // squared error
+                            //
                             ret_value += (tx_params->tx_power - pl - fm) *
                                          (tx_params->tx_power - pl - fm);
+                            count ++;
                         }
                     }
                 }
             }
         }
         //
-        // mean square error
+        // mean squared error
         //
         ret_value /= count;
     }

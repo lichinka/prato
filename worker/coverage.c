@@ -403,6 +403,11 @@ coverage (Parameters    *params,
     //
     if (params->use_gpu)
     {
+        //
+        // initialize the OpenCL environment
+        //
+        init_gpu (params,
+                  tx_params);
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on GPU");
 #endif

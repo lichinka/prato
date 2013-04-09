@@ -49,6 +49,9 @@ init_tx_params (Parameters    *params,
         tx_params->m_obst_dist        = NULL;
         tx_params->m_obst_dist_dev    = NULL;
         tx_params->m_obst_offset      = NULL;
+        tx_params->v_partial_sum      = NULL;
+        tx_params->v_partial_sum_dev  = NULL;
+        tx_params->v_clutter_loss_dev = NULL;
         tx_params->ocl_obj            = NULL;
     } 
     //
@@ -372,10 +375,6 @@ free_tx_params (Parameters    *params,
             tx_params->m_field_meas = NULL;
         }
     }
-    if (params->use_gpu)
-    {
-        close_gpu (tx_params);
-    }
     if (tx_params->m_antenna_loss != NULL)
     {
         free (tx_params->m_antenna_loss[0]);
@@ -431,6 +430,8 @@ free_tx_params (Parameters    *params,
         free (tx_params->diagram);
         tx_params->diagram = NULL;
     }
+    if (params->use_gpu)
+        close_gpu (tx_params);
 }
 
 
@@ -442,8 +443,9 @@ free_tx_params (Parameters    *params,
  * comm the MPI communicator to use.-
  *
  */
-void worker (const int rank,
-             MPI_Comm comm)
+void 
+worker (const int rank,
+        MPI_Comm comm)
 {
     int has_finished;
     MPI_Status status;
@@ -460,7 +462,7 @@ void worker (const int rank,
     // sync point: common data distribution finished 
     //
     MPI_Barrier (comm);
- 
+
     //
     // start coverage-processing loop
     //
