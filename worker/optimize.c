@@ -188,15 +188,6 @@ obj_func (Parameters    *params,
     for (r = 0; r < params->clutter_category_count; r ++)
         params->clutter_loss[r] = sol_vector[r];
 
-#ifdef _DEBUG_INFO_
-    //
-    // a fixed solution for testing (score is 101.0050757267 for KPODVI1)
-    //
-    tx_params->eric_params[0] = 80.36872968;
-    tx_params->eric_params[1] = -71.74091439;
-    tx_params->eric_params[2] = -23.82273819;
-    tx_params->eric_params[3] = 47.83436989;
-#endif
     //
     // recalculate the isotrophic prediction using the received solution
     //
@@ -328,6 +319,8 @@ de (Parameters     *params,
     //
     if (reset_seed)
         srand (time (0));
+    else
+        srand (0);
 
     // Printing out information about optimization process for the user	
 
@@ -512,18 +505,24 @@ de (Parameters     *params,
 
 
 /**
- * Optimizes the parameters of the prediction model to fit field measurements
- * within different radio zones.
+ * Initialize the optimization environment and structures for both 
+ * worker and master-based optimization processes.
  *
  * params       a structure holding configuration parameters which are 
  *              common to all transmitters;
  * tx_params    a structure holding transmitter-specific configuration 
  *              parameters;
+ * search_low   pointer to vector containing the minimum values each 
+ *              solution component may take;
+ * search_up    pointer to vector containing the maximum values each 
+ *              solution component may take;
  *
  */
-void 
-optimize (Parameters    *params,
-          Tx_parameters *tx_params)
+static void 
+init_optimize (Parameters    *params,
+               Tx_parameters *tx_params,
+               double       **search_low,
+               double       **search_up)
 {
     int i;
 
@@ -531,17 +530,17 @@ optimize (Parameters    *params,
     // define lower and upper bounds for each search-vector component,
     // i.e. solutions should be within these limits
     //
-    double *search_low = (double *) calloc (params->clutter_category_count,
-                                            sizeof (double));
-    double *search_up  = (double *) calloc (params->clutter_category_count,
-                                            sizeof (double));
+    *search_low = (double *) calloc (params->clutter_category_count,
+                                     sizeof (double));
+    *search_up  = (double *) calloc (params->clutter_category_count,
+                                     sizeof (double));
     //
     // since we are looking for clutter losses, we define a range 0~255 dB
     //
     for (i = 0; i < params->clutter_category_count; i ++)
     {
-        search_low[i] = 0;
-        search_up[i]  = 255;
+        (*search_low)[i] = 0;
+        (*search_up)[i]  = 255;
     }
     //
     // calculate the coverage for the first time to initialize all needed structures
@@ -576,6 +575,37 @@ optimize (Parameters    *params,
                               ch_buff_size,
                               tx_params->m_radio_zone[0]);
     }
+}
+
+
+
+/**
+ * Optimizes the parameters of the prediction model to fit field measurements
+ * within different radio zones using a deterministic (analytical) approach.
+ * It also optimizes the clutter-category losses using the differential 
+ * evolution (DE) metaheuristic algorithm.
+ * Optimization happens locally, i.e. within the current worker process.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration 
+ *              parameters;
+ *
+ */
+void 
+optimize_on_worker (Parameters    *params,
+                    Tx_parameters *tx_params)
+{
+    //
+    // vectors defining the range of each solution component
+    //
+    double *search_low = NULL;
+    double *search_up  = NULL;
+
+    init_optimize (params,
+                   tx_params,
+                   &search_low,
+                   &search_up);
     //
     // calculate parameter approximation for E/// prediction model
     //
@@ -587,9 +617,10 @@ optimize (Parameters    *params,
     double score = obj_func (params,
                              tx_params,
                              _RADIO_ZONE_MAIN_BEAM_ON_,
-                             tx_params->eric_params);
+                             params->clutter_loss);
     fprintf (stdout, 
-             "*** INFO: optimal values for E/// have score %g\n",
+             "*** INFO: optimal values for E/// (%s) have score %g\n",
+             tx_params->tx_name,
              score);
 
 #ifdef _DEBUG_INFO_
@@ -603,7 +634,7 @@ optimize (Parameters    *params,
         1,
         0.9,
         0.9,
-        1,
+        0,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
         search_up);
@@ -615,10 +646,10 @@ optimize (Parameters    *params,
         tx_params,
         params->clutter_category_count,
         20 * params->clutter_category_count,
-        200,
-        0.9,
-        0.9,
         1,
+        0.9,
+        0.9,
+        0,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
         search_up);
@@ -626,6 +657,108 @@ optimize (Parameters    *params,
     //
     // free reserved buffer
     //
+    free (search_up);
+    free (search_low);
+}
+
+
+
+/**
+ * Optimizes the parameters of the prediction model to fit field measurements
+ * within different radio zones using a deterministic (analytical) approach.
+ * It also calculates the objective-function value using the solutions 
+ * received from the master process, where the optimization of the 
+ * clutter-category losses (using differential evolution (DE)) runs.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration 
+ *              parameters;
+ * comm         the communicator used to receive messages from the master;
+ *
+ */
+void 
+optimize_from_master (Parameters    *params,
+                      Tx_parameters *tx_params,
+                      MPI_Comm      *comm)
+{
+    int has_finished = 0;
+    MPI_Status status;
+
+    //
+    // vectors defining the range of each solution component
+    //
+    double *search_low = NULL;
+    double *search_up  = NULL;
+
+    //
+    // initialize the optimization environment for this worker
+    //
+    init_optimize (params,
+                   tx_params,
+                   &search_low,
+                   &search_up);
+    //
+    // calculate parameter approximation for E/// prediction model
+    //
+    parameter_fine_tuning (params,
+                           tx_params);
+    //
+    // ... and its objective function value, using the default
+    // clutter-category losses
+    //
+    double score = obj_func (params,
+                             tx_params,
+                             _RADIO_ZONE_MAIN_BEAM_ON_,
+                             params->clutter_loss);
+    fprintf (stdout, 
+             "*** INFO: optimal values for E/// (%s) have score %g\n",
+             tx_params->tx_name,
+             score);
+    //
+    // a vector to keep the received solution
+    //
+    double *sol_vector = (double *) calloc (params->clutter_category_count,
+                                            sizeof (params->clutter_loss[0]));
+    //
+    // get ready to evaluate the received solutions
+    //
+    while (!has_finished)
+    {
+        //
+        // receive the solution vector
+        //
+        MPI_Bcast (sol_vector,
+                   params->clutter_category_count,
+                   MPI_DOUBLE,
+                   _COVERAGE_MASTER_RANK_,
+                   *comm);
+        //
+        // maybe this worker should stop working?
+        //
+        if (status.MPI_TAG != _WORKER_SHUTDOWN_TAG_)
+        {
+            //
+            // calculate the objective-function value for this solution
+            //
+            score = obj_func (params,
+                              tx_params,
+                              _RADIO_ZONE_MAIN_BEAM_ON_,
+                              sol_vector);
+            MPI_Send (&score,
+                      1,
+                      MPI_DOUBLE,
+                      _COVERAGE_MASTER_RANK_,
+                      1,
+                      *comm);
+        }
+        else
+            has_finished = 1;
+    }
+    //
+    // free reserved vectors
+    //
+    free (sol_vector);
     free (search_up);
     free (search_low);
 }

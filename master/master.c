@@ -245,6 +245,207 @@ split_sections (char *tx_section_list,
 
 
 /**
+ * Calculates the coverage prediction of several transmitters over MPI.
+ *
+ * params       a structure holding all parameters needed for calculation;
+ * nworkers     the number of available workers within the group;
+ * worker_comm  the MPI communicator, to which the workers are connected;
+ *
+ */
+static void 
+coverage_mpi (Parameters *params,
+              const int   nworkers,
+              MPI_Comm   *worker_comm)
+{
+    MPI_Status status;
+    char buff [_CHAR_BUFFER_SIZE_];
+
+    //
+    // start optimization-processing loop
+    //
+    int worker_rank;
+    int tx_count = params->ntx;
+    int running_workers = nworkers;
+
+    while (running_workers > 0)
+    {   
+        MPI_Recv (&buff, 
+                  0,
+                  MPI_BYTE,
+                  MPI_ANY_SOURCE,
+                  MPI_ANY_TAG,
+                  *worker_comm,
+                  &status);
+        worker_rank = status.MPI_SOURCE;
+
+#ifdef _PERFORMANCE_METRICS_
+        //
+        // previous calculation and result dump finished
+        //
+        measure_time_id (NULL, worker_rank);
+#endif
+
+        switch (status.MPI_TAG)
+        {   
+            case (_WORKER_IS_IDLE_TAG_):
+                //
+                // send calculation data, if we still have transmitters
+                //
+                if (tx_count > 0)
+                {
+                    //
+                    // tell the worker to keep working
+                    //
+                    MPI_Send (NULL,
+                              0,
+                              MPI_BYTE,
+                              worker_rank,
+                              _WORKER_KEEP_WORKING_TAG_,
+                              *worker_comm);
+#ifdef _PERFORMANCE_METRICS_
+                    measure_time_id ("Transmitter data send", 
+                                     worker_rank);
+#endif
+                    //
+                    // starting transmitter-data send
+                    //
+                    send_tx_data (params,
+                                  &(params->tx_params[-- tx_count]),
+                                  *worker_comm,
+                                  worker_rank);
+#ifdef _PERFORMANCE_METRICS_
+                    //
+                    // transmitter-data send finished,
+                    //
+                    measure_time_id (NULL, 
+                                     worker_rank);
+                    //
+                    // start coverage calculation
+                    // 
+                    measure_time_id ("Calculation and result dump",
+                                     worker_rank);
+#endif
+                }
+                else
+                {
+                    //
+                    // send the shutdown order to this worker
+                    //
+                    MPI_Send (NULL,
+                              0,
+                              MPI_BYTE,
+                              worker_rank,
+                              _WORKER_SHUTDOWN_TAG_,
+                              *worker_comm);
+                    //
+                    // coverage calculation and result dump finished
+                    //
+                    measure_time_id (NULL, worker_rank);
+                    running_workers --;
+                }
+                break;
+
+            default:
+                fprintf (stderr, 
+                         "WARNING Unknown message from %d. worker\n", 
+                         worker_rank);
+        }   
+    }
+}
+
+
+
+/**
+ * Optimizes the clutter-category losses using differential evolution on
+ * the master process and evaluating the objective function on the workers.
+ *
+ * params       a structure holding all parameters needed for calculation;
+ * nworkers     the number of available workers within the group;
+ * worker_comm  the MPI communicator, to which the workers are connected;
+ *
+ */
+static void 
+optimize_mpi (Parameters *params,
+              const int   nworkers,
+              MPI_Comm   *worker_comm)
+{
+    MPI_Status status;
+    char buff [_CHAR_BUFFER_SIZE_];
+
+    //
+    // start coverage-processing loop
+    //
+    int worker_rank;
+    int tx_count = params->ntx;
+    int running_workers = nworkers;
+
+    while (running_workers > 0)
+    {   
+        MPI_Recv (&buff, 
+                  0,
+                  MPI_BYTE,
+                  MPI_ANY_SOURCE,
+                  MPI_ANY_TAG,
+                  *worker_comm,
+                  &status);
+        worker_rank = status.MPI_SOURCE;
+        switch (status.MPI_TAG)
+        {   
+            case (_WORKER_IS_IDLE_TAG_):
+                //
+                // send transmitter data, before starting the optimization loop
+                //
+                if (tx_count > 0)
+                {
+                    //
+                    // tell the worker to keep working
+                    //
+                    MPI_Send (NULL,
+                              0,
+                              MPI_BYTE,
+                              worker_rank,
+                              _WORKER_KEEP_WORKING_TAG_,
+                              *worker_comm);
+#ifdef _PERFORMANCE_METRICS_
+                    measure_time_id ("Transmitter data send", 
+                                     worker_rank);
+#endif
+                    //
+                    // starting transmitter-data send
+                    //
+                    send_tx_data (params,
+                                  &(params->tx_params[-- tx_count]),
+                                  *worker_comm,
+                                  worker_rank);
+                    //
+                    // reduce the number of transmitter-data still to be sent
+                    //
+                    running_workers --;
+#ifdef _PERFORMANCE_METRICS_
+                    //
+                    // transmitter-data send finished,
+                    //
+                    measure_time_id (NULL, 
+                                     worker_rank);
+#endif
+                }
+                break;
+
+            default:
+                fprintf (stderr, 
+                         "WARNING Unknown message from %d. worker\n", 
+                         worker_rank);
+        }   
+    }
+    printf ("*** INFO: All transmitter data sent. Starting optimization ...\n");
+    optimize_on_master (params,
+                        params->tx_params,
+                        worker_comm);
+}
+
+
+
+/**
  * Initializes the coverage calculation by reading the configuration 
  * parameters in the [Common] section of the INI file passed as argument.
  * This function returns a pointer to the newly created parameters structure.
@@ -505,20 +706,19 @@ init_coverage (FILE       *ini_file,
 
 
 /**
- * Starts coverage calculation over MPI.
+ * Initializes the MPI environment for master and workers.
  *
  * argc             Number of command line parameters;
  * argv             array containing command line parameters;
  * params           a structure holding all parameters needed for calculation.-
  *
  */
-void coverage_mpi (int argc, 
-                   char *argv [],
-                   Parameters *params)
+void 
+init_mpi (int argc, 
+          char *argv [],
+          Parameters *params)
 {
     int nworkers = -1;
-    char buff [_CHAR_BUFFER_SIZE_];
-    MPI_Status status;
 
     MPI_Comm worker_comm;
     MPI_Init  (&argc, &argv);
@@ -530,6 +730,18 @@ void coverage_mpi (int argc,
     // one is the master process
     //
     nworkers -= 1;
+
+    //
+    // in optimization mode, we may only process as many transmitters
+    // as there are worker processes
+    //
+    if ((params->use_opt) && (params->ntx > nworkers))
+    {
+        fprintf (stderr, 
+                 "*** WARNING Only the first %d transmitters will take part in the optimization\n",
+                 nworkers);
+        params->ntx = nworkers;
+    }
 
     //
     // sync point: pass common input data to all workers
@@ -549,97 +761,19 @@ void coverage_mpi (int argc,
 #endif
 
     //
-    // start processing loop
+    // do we have to start coverage or optimization calculation?
     //
-    int worker_rank;
-    int tx_count = params->ntx;
-    int running_workers = nworkers;
-
-    while (running_workers > 0)
-    {   
-        MPI_Recv (&buff, 
-                  0,
-                  MPI_BYTE,
-                  MPI_ANY_SOURCE,
-                  MPI_ANY_TAG,
-                  worker_comm,
-                  &status);
-        worker_rank = status.MPI_SOURCE;
-
-#ifdef _PERFORMANCE_METRICS_
-        //
-        // previous coverage calculation and result dump finished
-        //
-        measure_time_id (NULL, worker_rank);
-#endif
-
-        switch (status.MPI_TAG)
-        {   
-            case (_WORKER_IS_IDLE_TAG_):
-                //
-                // send calculation data, if we still have transmitters
-                //
-                if (tx_count > 0)
-                {
-                    //
-                    // tell the worker to keep working
-                    //
-                    MPI_Send (NULL,
-                              0,
-                              MPI_BYTE,
-                              worker_rank,
-                              _WORKER_KEEP_WORKING_TAG_,
-                              worker_comm);
-#ifdef _PERFORMANCE_METRICS_
-                    measure_time_id ("Transmitter data send", 
-                                     worker_rank);
-#endif
-                    //
-                    // starting transmitter-data send
-                    //
-                    send_tx_data (params,
-                                  &(params->tx_params[-- tx_count]),
-                                  worker_comm,
-                                  worker_rank);
-#ifdef _PERFORMANCE_METRICS_
-                    //
-                    // transmitter-data send finished,
-                    //
-                    measure_time_id (NULL, 
-                                     worker_rank);
-                    //
-                    // start coverage calculation
-                    // 
-                    measure_time_id ("Calculation and result dump",
-                                     worker_rank);
-#endif
-                }
-                else
-                {
-                    //
-                    // send the shutdown order to this worker
-                    //
-                    MPI_Send (NULL,
-                              0,
-                              MPI_BYTE,
-                              worker_rank,
-                              _WORKER_SHUTDOWN_TAG_,
-                              worker_comm);
-                    //
-                    // coverage calculation and result dump finished
-                    //
-                    measure_time_id (NULL, worker_rank);
-                    running_workers --;
-                }
-                break;
-
-            default:
-                fprintf (stderr, 
-                         "WARNING Unknown message from %d. worker\n", 
-                         worker_rank);
-        }   
-    }
-
+    if (params->use_master_opt)
+        optimize_mpi (params,
+                      nworkers,
+                      &worker_comm);
+    else 
+        coverage_mpi (params,
+                      nworkers,
+                      &worker_comm);
+    //
+    // close the MPI environment
+    //
     MPI_Finalize ( );
 }
 

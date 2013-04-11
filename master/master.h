@@ -3,6 +3,7 @@
 
 #include "measurement.h"
 #include "worker/worker.h"
+#include "master/optimize.h"
 
 
 /**
@@ -24,7 +25,7 @@ init_coverage (FILE       *ini_file,
 
 
 /**
- * Starts coverage calculation over MPI.
+ * Initializes the MPI environment for master and workers.
  *
  * argc             Number of command line parameters;
  * argv             array containing command line parameters;
@@ -32,8 +33,8 @@ init_coverage (FILE       *ini_file,
  *
  */
 void
-coverage_mpi (int argc, 
-              char *argv [],
-              Parameters *params);
+init_mpi (int argc, 
+          char *argv [],
+          Parameters *params);
 
 #endif

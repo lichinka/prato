@@ -499,11 +499,16 @@ worker (const int rank,
             receive_tx_data (params, comm);
 
             //
-            // calculate coverage prediction or optimize parameters?
+            // calculate coverage prediction or optimize the 
+            // clutter-category losses?
             // 
-            if (params->use_opt)
-                optimize (params,
-                          params->tx_params);
+            if (params->use_master_opt)
+                optimize_from_master (params,
+                                      params->tx_params,
+                                      &comm);
+            else if (params->use_opt)
+                optimize_on_worker (params,
+                                    params->tx_params);
             else
             {
                 //

@@ -329,6 +329,12 @@ struct Parameters
     // a flag to indicate the framework starts in optimization mode
     char    use_opt;
 
+    // a flag to indicate the optimization algorithm runs globally, i.e.
+    // using the workers just to calculate the objective function value
+    // in every iteration of the optimization algorithm running on the 
+    // master process
+    char    use_master_opt;
+
     // a flag to indicate the GPU should be used 
     // on the worker side, if available
     char    use_gpu;

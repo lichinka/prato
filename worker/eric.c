@@ -280,7 +280,7 @@ eric_pathloss_on_point (const Parameters    *params,
         // column titles: only at the beggining
         printf ("xi|yi|log(d)|HEBK|log(HEBK)|NLOS|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
     }
-    if (! isnan (tx_params->m_field_meas[ix][iy]))
+    if ((params->use_opt) && (! isnan (tx_params->m_field_meas[ix][iy])))
         if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
             printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
                     ix,

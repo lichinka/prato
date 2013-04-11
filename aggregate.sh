@@ -20,6 +20,9 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     SQL="$( echo "${SQL}" | sed -e 's/UNION$//g' )"
     SQL="${SQL}) AS agg GROUP BY agg.east, agg.north ) AS sub "
     SQL="${SQL} WHERE rscp < 0"
+    echo ${SQL}
+    exit -1
+
     echo "*** INFO: Importing path-loss predictions from the database ..."
     echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | v.in.ascii -t output=temp format=point -z z=3 --overwrite
     echo "*** INFO: Converting vector to raster map ..."

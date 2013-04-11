@@ -44,7 +44,7 @@ int main (int argc, char **argv)
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output;
-    struct Flag    *use_mpi, *use_gpu, *use_opt;
+    struct Flag    *use_mpi, *use_gpu, *use_opt, *use_master_opt;
 
     //
     // initialize the GIS environment
@@ -80,16 +80,20 @@ int main (int argc, char **argv)
     output->label = "Output raster name. Without it, output is given in standard output.";
 
     use_mpi = G_define_flag ( );
-    use_mpi->key = 'p';
-    use_mpi->description = "Whether to use the MPI implementation";
+    use_mpi->key = 'm';
+    use_mpi->description = "Use the MPI implementation";
 
     use_gpu = G_define_flag ( );
     use_gpu->key = 'g';
-    use_gpu->description = "Whether to use the GPU implementation. Implies -p.";
+    use_gpu->description = "Use the GPU implementation. Implies -m.";
 
     use_opt = G_define_flag ( );
     use_opt->key = 't';
-    use_opt->description = "Whether to start the framework in optimization mode. Implies -p.";
+    use_opt->description = "Optimize the clutter-category losses locally, i.e. per worker. Implies -m.";
+
+    use_master_opt = G_define_flag ( );
+    use_master_opt->key = 'p';
+    use_master_opt->description = "Optimize the clutter-category losses globally, i.e. workers calculate only the objective function. Implies -t.";
 
     //
     // ... and parse them
@@ -106,10 +110,11 @@ int main (int argc, char **argv)
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
 
     //
-    // flags for GPU implementations and optimization mode
+    // flags for optimization modes and GPU implementation
     //
-    params->use_gpu = use_gpu->answer;
-    params->use_opt = use_opt->answer;
+    params->use_gpu        = use_gpu->answer;
+    params->use_opt        = use_opt->answer;
+    params->use_master_opt = use_master_opt->answer;
 
     if (params->use_gpu)
     {
@@ -117,6 +122,9 @@ int main (int argc, char **argv)
         fprintf (stdout, 
                  "*** INFO: GPU hardware will be used on the workers, if available\n");
     }
+    if (params->use_master_opt)
+        params->use_opt = 1;
+
     if (params->use_opt)
     {
         use_mpi->answer = 1;
@@ -139,7 +147,7 @@ int main (int argc, char **argv)
                                       params->ini_file_content_size,
                                       "r");
     //
-    // initialize the coverage calculation
+    // initialize the coverage calculation ...
     //
     init_coverage (ini_file_stream,
                    tx_ini_sections->answer,
@@ -159,16 +167,15 @@ int main (int argc, char **argv)
     //
     if (use_mpi->answer)
     {
-        coverage_mpi (argc,
-                      argv,
-                      params);
+        init_mpi (argc,
+                  argv,
+                  params);
     }
     else
     {
-
         if (params->ntx > 1)
             fprintf (stderr, 
-                     "WARNING Only the first transmitter will be processed\n");
+                     "*** WARNING Only the first transmitter will be processed\n");
         //
         // set the tuning parameters for the prediction model
         //
