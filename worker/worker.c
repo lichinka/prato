@@ -503,9 +503,12 @@ worker (const int rank,
             // clutter-category losses?
             // 
             if (params->use_master_opt)
+            {
                 optimize_from_master (params,
                                       params->tx_params,
                                       &comm);
+                has_finished = 1;
+            }
             else if (params->use_opt)
                 optimize_on_worker (params,
                                     params->tx_params);

@@ -5,7 +5,10 @@
 
 
 /**
- * Objective function evaluation, executed on the GPU, if available.
+ * Returns the squared error between the prediction and the field 
+ * measurements of this transmitter, i.e. the objective function 
+ * evaluation, used by the optimization algorithm.
+ * Most of this function is executed on the GPU, if available.
  *
  * params       a structure holding configuration parameters which are 
  *              common to all transmitters;
@@ -151,10 +154,6 @@ obj_func_on_gpu (Parameters    *params,
                           tx_params->v_partial_sum);
     for (r = 0; r < tx_params->nrows; r ++)
         ret_value += tx_params->v_partial_sum[r];
-    //
-    // the mean square error
-    //
-    ret_value /= tx_params->field_meas_count;
 
     return ret_value;
 }
@@ -162,7 +161,9 @@ obj_func_on_gpu (Parameters    *params,
 
 
 /**
- * Objective function evaluation, used by the optimization algorithm.
+ * Returns the squared error between the prediction and the field 
+ * measurements of this transmitter, i.e. the objective function 
+ * evaluation, used by the optimization algorithm.
  *
  * params       a structure holding configuration parameters which are 
  *              common to all transmitters;
@@ -178,7 +179,7 @@ obj_func (Parameters    *params,
           const char     radio_zone,
           const double  *sol_vector)
 {
-    int r, c, count = 0;
+    int r, c;
     double ret_value = 0;
 
     //
@@ -227,6 +228,7 @@ obj_func (Parameters    *params,
         // objective function calculation, for 
         // each point in the path loss matrix ...
         //
+        tx_params->field_meas_count = 0;
         for (r = 0; r < tx_params->nrows; r ++)
         {
             for (c = 0; c < tx_params->ncols; c ++)
@@ -259,16 +261,12 @@ obj_func (Parameters    *params,
                             //
                             ret_value += (tx_params->tx_power - pl - fm) *
                                          (tx_params->tx_power - pl - fm);
-                            count ++;
+                            tx_params->field_meas_count ++;
                         }
                     }
                 }
             }
         }
-        //
-        // mean squared error
-        //
-        ret_value /= count;
     }
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
@@ -352,10 +350,18 @@ de (Parameters     *params,
         for (j=0; j < D; j++)
             popul[i][j] = X_low[j] + (X_up[j] - X_low[j])*URAND;
 
+        //
+        // objective function => squared error
+        //
         popul[i][D] = obj_func (params,
                                 tx_params,
                                 radio_zone,
                                 popul[i]);
+        //
+        // mean-squared error
+        //
+        popul[i][D] /= tx_params->field_meas_count;
+
         numofFE++;
 
         next[i] = (double *)malloc((D+1)*sizeof(double));
@@ -411,31 +417,39 @@ de (Parameters     *params,
                 U[j] = X_low[j];
             if (U[j] > X_up[j])
                 U[j] = X_up[j];
-         }
+        }
 
-         U[D] = obj_func (params,
-                          tx_params,
-                          radio_zone,
-                          U);
-         numofFE++;
+        //
+        // objective function => squared error
+        //
+        U[D] = obj_func (params,
+                         tx_params,
+                         radio_zone,
+                         U);
+        //
+        // mean-squared error
+        //
+        U[D] /= tx_params->field_meas_count;
 
-         printf ("Generation %d/%d\tscore %20.10f\n", k, Gmax, U[D]);
+        numofFE++;
 
-         /* Comparing the trial vector 'U' and the old individual
-            'next[i]' and selecting better one to continue in the
-            next population.	*/
+        printf ("Generation %d/%d\tscore %20.10f\n", k, Gmax, U[D]);
 
-         if (U[D] <= popul[i][D])
-         {
-            iptr = U;
-            U = next[i];
-            next[i] = iptr;
-         }
-         else
-         {
-            for (j=0; j <= D; j++)
-                next[i][j] = popul[i][j];
-         }
+        /* Comparing the trial vector 'U' and the old individual
+           'next[i]' and selecting better one to continue in the
+           next population.	*/
+
+        if (U[D] <= popul[i][D])
+        {
+           iptr = U;
+           U = next[i];
+           next[i] = iptr;
+        }
+        else
+        {
+           for (j=0; j <= D; j++)
+               next[i][j] = popul[i][j];
+        }
 
       }	/* End of the going through whole population	*/
 
@@ -612,12 +626,13 @@ optimize_on_worker (Parameters    *params,
     parameter_fine_tuning (params,
                            tx_params);
     //
-    // ... and its objective function value
+    // ... and its mean-squared error value
     //
     double score = obj_func (params,
                              tx_params,
                              _RADIO_ZONE_MAIN_BEAM_ON_,
                              params->clutter_loss);
+    score /= tx_params->field_meas_count;
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
              tx_params->tx_name,
@@ -646,10 +661,10 @@ optimize_on_worker (Parameters    *params,
         tx_params,
         params->clutter_category_count,
         20 * params->clutter_category_count,
+        200,
+        0.9,
+        0.9,
         1,
-        0.9,
-        0.9,
-        0,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
         search_up);
@@ -683,7 +698,13 @@ optimize_from_master (Parameters    *params,
                       MPI_Comm      *comm)
 {
     int has_finished = 0;
-    MPI_Status status;
+
+    //
+    // vector used to send the squared error and the number of
+    // field measurements within the prediciton area (used to
+    // calculate the mean square error on the master side)
+    //
+    double score [2];
 
     //
     // vectors defining the range of each solution component
@@ -704,17 +725,18 @@ optimize_from_master (Parameters    *params,
     parameter_fine_tuning (params,
                            tx_params);
     //
-    // ... and its objective function value, using the default
+    // ... and its squared error value, using the default 
     // clutter-category losses
     //
-    double score = obj_func (params,
-                             tx_params,
-                             _RADIO_ZONE_MAIN_BEAM_ON_,
-                             params->clutter_loss);
+    score[0] = obj_func (params,
+                         tx_params,
+                         _RADIO_ZONE_MAIN_BEAM_ON_,
+                         params->clutter_loss);
+    score[1] = (double) tx_params->field_meas_count;
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
              tx_params->tx_name,
-             score);
+             score[0] / score[1]);
     //
     // a vector to keep the received solution
     //
@@ -736,24 +758,35 @@ optimize_from_master (Parameters    *params,
         //
         // maybe this worker should stop working?
         //
-        if (status.MPI_TAG != _WORKER_SHUTDOWN_TAG_)
+        if (sol_vector[0] == _PI_)
+        {
+            int i;
+            for (i = 0; i < params->clutter_category_count; i ++)
+                if (sol_vector[i] == _PI_)
+                    has_finished = 1;
+                else
+                    has_finished = 0;
+        }
+        else
         {
             //
-            // calculate the objective-function value for this solution
+            // calculate the squared error value for this solution ...
             //
-            score = obj_func (params,
-                              tx_params,
-                              _RADIO_ZONE_MAIN_BEAM_ON_,
-                              sol_vector);
-            MPI_Send (&score,
-                      1,
+            score[0] = obj_func (params,
+                                 tx_params,
+                                 _RADIO_ZONE_MAIN_BEAM_ON_,
+                                 sol_vector);
+            score[1] = (double) tx_params->field_meas_count;
+            //
+            // ... and send it back to the master process
+            //
+            MPI_Send (score,
+                      2,
                       MPI_DOUBLE,
                       _COVERAGE_MASTER_RANK_,
                       1,
                       *comm);
         }
-        else
-            has_finished = 1;
     }
     //
     // free reserved vectors
