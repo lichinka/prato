@@ -20,7 +20,7 @@ else
         v.to.rast input=temp type=point output=temp use=z --overwrite
     else
         if [ -z "${REDIR}" ]; then
-            ln --force -s /tmp/worker.log /tmp/worker.$$.log
+            ln --force -s /tmp/worker.$$.log /tmp/worker.log
             ${CMD} > /tmp/worker.$$.log 2>&1
         else
             echo "Usage: $0 [-db] [-rast]"
