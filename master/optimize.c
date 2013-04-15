@@ -364,12 +364,12 @@ optimize_on_master (Parameters    *params,
     double *search_up  = (double *) calloc (params->clutter_category_count,
                                             sizeof (double));
     //
-    // since we are looking for clutter losses, we define a range 0~255 dB
+    // since we are looking for clutter losses, we define a range 0~40 dB
     //
     for (i = 0; i < params->clutter_category_count; i ++)
     {
         search_low[i] = 0;
-        search_up[i]  = 255;
+        search_up[i]  = 40;
     }
 #ifdef _DEBUG_INFO_
     //

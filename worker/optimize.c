@@ -549,13 +549,14 @@ init_optimize (Parameters    *params,
     *search_up  = (double *) calloc (params->clutter_category_count,
                                      sizeof (double));
     //
-    // since we are looking for clutter losses, we define a range 0~255 dB
+    // since we are looking for clutter losses, we define a range 0~40 dB
     //
     for (i = 0; i < params->clutter_category_count; i ++)
-    {
+    { 
         (*search_low)[i] = 0;
-        (*search_up)[i]  = 255;
+        (*search_up)[i]  = 40;
     }
+    
     //
     // calculate the coverage for the first time to initialize all needed structures
     //
@@ -737,6 +738,7 @@ optimize_from_master (Parameters    *params,
              "*** INFO: optimal values for E/// (%s) have score %g\n",
              tx_params->tx_name,
              score[0] / score[1]);
+    fflush (stdout);
     //
     // a vector to keep the received solution
     //
