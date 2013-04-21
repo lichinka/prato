@@ -750,7 +750,7 @@ __kernel void antenna_influence_kern (const real pixel_res,
     // we should mark the pixels which are too close for calculation 
     // (less than 200 mts), and those within distances for which the 
     // propagation model is defined
-    if (dist_Tx_Rx_in_km < 0.2)
+    if (dist_Tx_Rx_in_km < 0.01)
         radio_zone_out[element_idx] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
     else 
         radio_zone_out[element_idx] |= _RADIO_ZONE_MODEL_DISTANCE_ON_;
