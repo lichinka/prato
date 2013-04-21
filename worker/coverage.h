@@ -274,8 +274,11 @@ struct Parameters
     // parameters of the transmitters being processed
     Tx_parameters *tx_params;
 
-    // NULL value used in maps
-    float null_value;
+    // NULL value used in DEM and measurement maps
+    float fcell_null_value;
+
+    // NULL value used in clutter maps
+    int cell_null_value;
 
     // 2D matrix containing the digital-elevation-model raster
     double **m_dem;
@@ -307,6 +310,9 @@ struct Parameters
     char    dem_map             [_CHAR_BUFFER_SIZE_];
     char    clutter_map         [_CHAR_BUFFER_SIZE_];
     char    antenna_diagram_dir [_CHAR_BUFFER_SIZE_];
+    
+    // the four tunning parameters for the E/// model (A0, A1, A2, A3)
+    double eric_params [4];
 
     // category-based clutter losses are saved here;
     // each category is used as an index within this array to retrieve 

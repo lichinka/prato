@@ -329,7 +329,7 @@ antenna_influence_cpu (Parameters    *params,
             // 
             if ((dist_Tx_Rx < 0.2) || (dist_Tx_Rx > params->radius))
             {
-                loss_out                       = params->null_value;
+                loss_out                       = params->fcell_null_value;
                 tx_params->m_radio_zone[r][c] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
             }
             else 

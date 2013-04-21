@@ -534,18 +534,15 @@ init_coverage (FILE       *ini_file,
     if (errno == 0)
     {
         //
-        // check the size of a map cell in bytes, so that later casts won't fail
+        // NULL value in DEM maps
         //
-        if (metadata->format == sizeof (params->null_value) - 1)
+        G_set_f_null_value ((FCELL *) &(params->fcell_null_value), 1);
+        if (metadata->format != sizeof (params->fcell_null_value) - 1)
         {
-            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
-        }
-	    else
-        {
-            fprintf (stdout, 
+            fprintf (stderr, 
                      "*** WARNING: DEM map-cell format (%d) is not recognized.\n",
                      metadata->format);
-            fprintf (stdout, 
+            fprintf (stderr, 
                      "\tMake sure it is of type FCELL to avoid undefined behaviour!\n");
         }
         //
@@ -570,19 +567,16 @@ init_coverage (FILE       *ini_file,
     if (errno == 0)
     {
         //
-        // check the size of a map cell in bytes, so that later casts won't fail
+        // NULL value in clutter maps 
         //
-        if (metadata->format == sizeof (params->null_value) - 1)
+        G_set_c_null_value ((CELL *) &(params->cell_null_value), 1);
+        if (metadata->format != sizeof (params->cell_null_value) - 1)
         {
-            G_set_f_null_value ((FCELL *) &(params->null_value), 1);
-        }
-        else
-        {
-            fprintf (stdout, 
+            fprintf (stderr, 
                      "*** WARNING: Clutter map-cell format (%d) is not recognized.\n",
                      metadata->format);
-            fprintf (stdout, 
-                     "\tMake sure it is of type FCELL to avoid undefined behaviour!\n");
+            fprintf (stderr, 
+                     "\tMake sure it is of type CELL to avoid undefined behaviour!\n");
         }
         if (!(params->map_east >= metadata->east &&
               params->map_west <= metadata->west &&

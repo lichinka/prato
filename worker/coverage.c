@@ -496,7 +496,7 @@ output_to_stdout (const Parameters *params,
 
             float pl = (float) params->tx_params->m_loss[r][c];
 
-            if ((!isnan (pl)) && (pl != params->null_value))
+            if ((!isnan (pl)) && (pl != params->fcell_null_value))
                 fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
                                                      north_coord,
                                                      pl);

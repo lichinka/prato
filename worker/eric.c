@@ -249,12 +249,13 @@ eric_pathloss_on_point (const Parameters    *params,
 
     PathLossTmp += *nlos;
 
+    //
     // get the clutter loss, based on the category of this point
+    //
     double clutter_loss;
     int    clutter_category = (int) tx_params->m_clut[ix][iy];
 
-    if ((clutter_category > -1) &&
-        (clutter_category < params->clutter_category_count))
+    if (clutter_category != params->cell_null_value)
     {
         clutter_loss = params->clutter_loss[clutter_category];
         tx_params->m_loss[ix][iy] = PathLossTmp + clutter_loss;
@@ -263,15 +264,13 @@ eric_pathloss_on_point (const Parameters    *params,
     {
         clutter_loss = 0;
         fprintf (stderr,
-                 "*** WARNING: clutter category (%d) does not exist. Assuming 0 (zero).\n",
-                 clutter_category);
+                 "*** WARNING: clutter category (%d) at (%10.0f, %10.0f) does not exist. Assuming 0 (zero).\n",
+                 clutter_category,
+                 tx_params->map_west + (ix * params->map_ew_res),
+                 tx_params->map_south + (iy * params->map_ns_res));
     }
 
 #ifdef _DEBUG_INFO_
-    //
-    // DEBUG: parameter dump titles 
-    //
-
     //
     // DEBUG: parameter dump for external approximation using least squares
     //
@@ -478,7 +477,7 @@ eric_pathloss_on_cpu (Parameters    *params,
     double  nlos;
 	double  log10Zeff;
 	double  log10DistBS2MSKm;
-    double  DistBS2MSKm;		                        // distance between MS and BS in km
+    double  DistBS2MSKm;	// distance between MS and BS in km
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("E/// on CPU");

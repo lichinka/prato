@@ -27,10 +27,10 @@ init_tx_params (Parameters    *params,
         //
         tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
 
-        tx_params->eric_params[0]     = 38.0;
-        tx_params->eric_params[1]     = 32.0;
-        tx_params->eric_params[2]     = -12.0;
-        tx_params->eric_params[3]     = 0.1;
+        tx_params->eric_params[0]     = params->eric_params[0];
+        tx_params->eric_params[1]     = params->eric_params[1];
+        tx_params->eric_params[2]     = params->eric_params[2];
+        tx_params->eric_params[3]     = params->eric_params[3];
         tx_params->diagram            = NULL;
         tx_params->m_dem              = NULL;
         tx_params->m_dem_dev          = NULL;

@@ -43,7 +43,8 @@ read_file_into_memory (const char *file_name,
 int main (int argc, char **argv)
 {
     struct GModule *module;
-    struct Option  *ini_file, *tx_ini_sections, *output;
+    struct Option  *ini_file, *tx_ini_sections, *output,
+                   *eric_a0, *eric_a1, *eric_a2, *eric_a3;
     struct Flag    *use_mpi, *use_gpu, *use_opt, *use_master_opt;
 
     //
@@ -79,6 +80,34 @@ int main (int argc, char **argv)
     output->required = NO;
     output->label = "Output raster name. Without it, output is given in standard output.";
 
+    eric_a0 = G_define_option ( );
+    eric_a0->key = "A0";
+    eric_a0->type = TYPE_DOUBLE;
+    eric_a0->required = NO;
+    eric_a0->answer = "38.0";
+    eric_a0->label = "Value of the A0 parameter for the E/// 9999 model";
+
+    eric_a1 = G_define_option ( );
+    eric_a1->key = "A1";
+    eric_a1->type = TYPE_DOUBLE;
+    eric_a1->required = NO;
+    eric_a1->answer = "32.0";
+    eric_a1->label = "Value of the A1 parameter for the E/// 9999 model";
+
+    eric_a2 = G_define_option ( );
+    eric_a2->key = "A2";
+    eric_a2->type = TYPE_DOUBLE;
+    eric_a2->required = NO;
+    eric_a2->answer = "-12.0";
+    eric_a2->label = "Value of the A2 parameter for the E/// 9999 model";
+
+    eric_a3 = G_define_option ( );
+    eric_a3->key = "A3";
+    eric_a3->type = TYPE_DOUBLE;
+    eric_a3->required = NO;
+    eric_a3->answer = "0.1";
+    eric_a3->label = "Value of the A3 parameter for the E/// 9999 model";
+
     use_mpi = G_define_flag ( );
     use_mpi->key = 'm';
     use_mpi->description = "Use the MPI implementation";
@@ -108,6 +137,14 @@ int main (int argc, char **argv)
     // allocate the parameters structure
     //
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
+
+    //
+    // parameter values for prediction model
+    //
+    sscanf (eric_a0->answer, "%lf", &(params->eric_params[0]));
+    sscanf (eric_a1->answer, "%lf", &(params->eric_params[1]));
+    sscanf (eric_a2->answer, "%lf", &(params->eric_params[2]));
+    sscanf (eric_a3->answer, "%lf", &(params->eric_params[3]));
 
     //
     // flags for optimization modes and GPU implementation
@@ -179,10 +216,10 @@ int main (int argc, char **argv)
         //
         // set the tuning parameters for the prediction model
         //
-        params->tx_params->eric_params[0] = 38.0;
-        params->tx_params->eric_params[1] = 32.0;
-        params->tx_params->eric_params[2] = -12.0;
-        params->tx_params->eric_params[3] = 0.1;
+        sscanf (eric_a0->answer, "%lf", &(params->tx_params->eric_params[0]));
+        sscanf (eric_a1->answer, "%lf", &(params->tx_params->eric_params[1]));
+        sscanf (eric_a2->answer, "%lf", &(params->tx_params->eric_params[2]));
+        sscanf (eric_a3->answer, "%lf", &(params->tx_params->eric_params[3]));
 
         //
         // calculate the coverage for this transmitter
