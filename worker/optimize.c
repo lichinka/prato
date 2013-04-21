@@ -4,6 +4,50 @@
 
 
 
+
+/**
+ * Override the clutter losses in order to avoid recalculation of the 
+ * isotrophic prediction of the antenna during optimization.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration 
+ *              parameters;
+ *
+ */
+static void
+override_clutter_losses (Parameters    *params,
+                         Tx_parameters *tx_params)
+{
+    int r, c;
+
+    //
+    // substract the already applied clutter loss 
+    // in order to have the clean isotrophic prediction 
+    //
+    for (r = 0; r < tx_params->nrows; r ++)
+    {
+        for (c = 0; c < tx_params->ncols; c ++)
+        {
+            //
+            // use only valid path-loss values
+            //
+            if (!isnan (tx_params->m_loss[r][c]))
+            {
+                //
+                // get the clutter loss, based on the category of this point
+                //
+                int clutter_category = (int) tx_params->m_clut[r][c];
+
+                if (clutter_category != params->cell_null_value)
+                    tx_params->m_loss[r][c] -= params->clutter_loss[clutter_category];
+            }
+        }
+    }
+}
+
+
+
 /**
  * Returns the squared error between the prediction and the field 
  * measurements of this transmitter, i.e. the objective function 
@@ -171,13 +215,18 @@ obj_func_on_gpu (Parameters    *params,
  *              parameters;
  * radio_zone   radio zone for which the objective function is calculated;
  * sol_vector   solution vector over which the objective function is calculated;
+ * recalculate  whether to recalculate the isotrophic prediction, e.g. for 
+ *              clutter optimization there is no need to recalculate the 
+ *              prediction in every iteration. This is useful to speed-up 
+ *              the process on the CPU;
  *
- */
+ */ 
 static double
 obj_func (Parameters    *params,
           Tx_parameters *tx_params,
           const char     radio_zone,
-          const double  *sol_vector)
+          const double  *sol_vector,
+          const char     recalculate)
 {
     int r, c;
     double ret_value = 0;
@@ -215,11 +264,14 @@ obj_func (Parameters    *params,
     }
     else
     {
+        if (recalculate)
+        {
 #ifdef _PERFORMANCE_METRICS_
-        measure_time ("E/// on CPU");
+            measure_time ("E/// on CPU");
 #endif
-        eric_pathloss_on_cpu (params,
-                              tx_params);
+            eric_pathloss_on_cpu (params,
+                                  tx_params);
+        }
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
         measure_time ("Apply antenna losses and calculate objective function on CPU");
@@ -239,6 +291,20 @@ obj_func (Parameters    *params,
                 double pl = tx_params->m_loss[r][c];
                 if (!isnan (pl))
                 {
+                    //
+                    // apply the clutter losses only if the isotrophic 
+                    // prediction has not been recalculated
+                    //
+                    if (!recalculate)
+                    {
+                        //
+                        // get the clutter loss, based on the category of this point
+                        //
+                        int clutter_category = (int) tx_params->m_clut[r][c];
+
+                        if (clutter_category != params->cell_null_value)
+                            pl += params->clutter_loss[clutter_category];
+                    }
                     //
                     // apply the antenna loss
                     //
@@ -356,7 +422,8 @@ de (Parameters     *params,
         popul[i][D] = obj_func (params,
                                 tx_params,
                                 radio_zone,
-                                popul[i]);
+                                popul[i],
+                                1);
         //
         // mean-squared error
         //
@@ -425,7 +492,8 @@ de (Parameters     *params,
         U[D] = obj_func (params,
                          tx_params,
                          radio_zone,
-                         U);
+                         U,
+                         1);
         //
         // mean-squared error
         //
@@ -632,7 +700,8 @@ optimize_on_worker (Parameters    *params,
     double score = obj_func (params,
                              tx_params,
                              _RADIO_ZONE_MAIN_BEAM_ON_,
-                             params->clutter_loss);
+                             params->clutter_loss,
+                             1);
     score /= tx_params->field_meas_count;
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
@@ -732,7 +801,8 @@ optimize_from_master (Parameters    *params,
     score[0] = obj_func (params,
                          tx_params,
                          _RADIO_ZONE_MAIN_BEAM_ON_,
-                         params->clutter_loss);
+                         params->clutter_loss,
+                         1);
     score[1] = (double) tx_params->field_meas_count;
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
@@ -747,6 +817,8 @@ optimize_from_master (Parameters    *params,
     //
     // get ready to evaluate the received solutions
     //
+    override_clutter_losses (params,
+                             tx_params);
     while (!has_finished)
     {
         //
@@ -777,7 +849,8 @@ optimize_from_master (Parameters    *params,
             score[0] = obj_func (params,
                                  tx_params,
                                  _RADIO_ZONE_MAIN_BEAM_ON_,
-                                 sol_vector);
+                                 sol_vector,
+                                 0);
             score[1] = (double) tx_params->field_meas_count;
             //
             // ... and send it back to the master process
