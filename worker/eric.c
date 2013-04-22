@@ -74,8 +74,8 @@
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
  *                  parameters;
- * ix               X-coordinate index within the area;
- * iy               Y-coordinate index within the area;
+ * ix               northern-coordinate index within the area;
+ * iy               eastern-coordinate index within the area;
  * log10Zeff        logarithm of the effective antenna height 
  *                  (output parameter);
  * log10DistBS2MSKm logarithm of the distance between MS and BS in km
@@ -92,8 +92,8 @@ eric_pathloss_on_point (const Parameters    *params,
                         double             *log10DistBS2MSKm,
                         double             *nlos)
 {
-	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
-	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int BSxIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int BSyIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
 	double AntHeightBS = tx_params->antenna_height_AGL;	// antenna height of BS [m]
 	double AntHeightMS = params->rx_height_AGL;	        // antenna height of MS [m]
 	double scale       = params->map_ew_res;            // terrain resolution (in mts)
@@ -255,19 +255,20 @@ eric_pathloss_on_point (const Parameters    *params,
     double clutter_loss;
     int    clutter_category = (int) tx_params->m_clut[ix][iy];
 
-    if (clutter_category != params->cell_null_value)
-    {
-        clutter_loss = params->clutter_loss[clutter_category];
-        tx_params->m_loss[ix][iy] = PathLossTmp + clutter_loss;
-    }
-    else
+    //if (clutter_category != params->cell_null_value)
+    if (isnan (tx_params->m_clut[ix][iy]))
     {
         clutter_loss = 0;
         fprintf (stderr,
-                 "*** WARNING: clutter category (%d) at (%10.0f, %10.0f) does not exist. Assuming 0 (zero).\n",
+                 "*** WARNING: clutter category (%d) at (%.f, %.f) does not exist. Assuming 0 (zero).\n",
                  clutter_category,
-                 tx_params->map_west + (ix * params->map_ew_res),
-                 tx_params->map_south + (iy * params->map_ns_res));
+                 tx_params->map_west  + (iy * params->map_ns_res),
+                 tx_params->map_north - (ix * params->map_ew_res));
+    }
+    else
+    {
+        clutter_loss = params->clutter_loss[clutter_category];
+        tx_params->m_loss[ix][iy] = PathLossTmp + clutter_loss;
     }
 
 #ifdef _DEBUG_INFO_
@@ -279,15 +280,16 @@ eric_pathloss_on_point (const Parameters    *params,
         // column titles: only at the beggining
         printf ("xi|yi|log(d)|HEBK|log(HEBK)|NLOS|A0|A1|A2|A3|-k0+k1|clut|path_loss|field_meas|antenna\n");
     }
-    if ((params->use_opt) && (! isnan (tx_params->m_field_meas[ix][iy])))
+    //if ((params->use_opt) && (! isnan (tx_params->m_field_meas[ix][iy])))
+    if (! isnan (tx_params->m_clut[ix][iy]))
         if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
-            printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n", 
+            printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n",
                     ix,
                     iy,
-                    log10DistBS2MSKm,
+                    *log10DistBS2MSKm,
                     fabs (Zeff),
-                    log10Zeff,
-                    nlos,
+                    *log10Zeff,
+                    *nlos,
                     A0,
                     A1,
                     A2,
@@ -295,7 +297,7 @@ eric_pathloss_on_point (const Parameters    *params,
                     -PathLossAntHeightMS+PathLossFreq,
                     tx_params->m_clut[ix][iy],
                     tx_params->m_loss[ix][iy],
-                    tx_params->m_field_meas[ix][iy],
+                    //tx_params->m_field_meas[ix][iy],
                     tx_params->m_antenna_loss[ix][iy]);
 #endif
 }
@@ -465,10 +467,10 @@ void
 eric_pathloss_on_cpu (Parameters    *params,
                       Tx_parameters *tx_params)
 {
-	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
-	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
-	int xN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
-	int yN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	int BSxIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int BSyIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
+	int xN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	int yN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
 	double scale       = params->map_ew_res;            // terrain resolution (in mts)
 	double radi        = params->radius;			    // calculation radius around transmiter
 
@@ -533,11 +535,11 @@ void
 parameter_fine_tuning (Parameters    *params,
                        Tx_parameters *tx_params)
 {
-	int BSxIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
-	int BSyIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int BSxIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
+	int BSyIndex       = tx_params->tx_east_coord_idx;	// position of BS in pixels
 	double AntHeightMS = params->rx_height_AGL;	        // antenna height of MS [m]
-	int xN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
-	int yN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	int xN             = tx_params->nrows;				// dimension of the input(Raster) and output (PathLoss)
+	int yN             = tx_params->ncols;				// dimension of the input(Raster) and output (PathLoss)
 	double scale       = params->map_ew_res;            // terrain resolution (in mts)
 	double freq        = params->frequency;             // carrier frequency
 	double radi        = params->radius;			    // calculation radius around transmiter

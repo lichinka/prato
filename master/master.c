@@ -695,6 +695,22 @@ init_coverage (FILE       *ini_file,
     // 
     G_close_cell (infd);
     G_close_cell (infd2);
+
+#ifdef _DEBUG_INFO_
+    int r, c;
+    for (r = 0; r < params->tx_params->nrows; r ++)
+    {
+        for (c = 0; c < params->tx_params->ncols; c ++)
+        {
+            fprintf (stdout,
+                     "%.f|%.f|%.f\n",
+                     params->map_west + 12.5 + (c * params->map_ew_res),
+                     params->map_north - 12.5 - (r * params->map_ns_res),
+                     params->tx_params->m_clut[r][c]);
+        }
+    }
+    exit (-1);
+#endif
 }
 
 
