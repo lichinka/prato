@@ -21,7 +21,7 @@ else
     else
         if [ -z "${REDIR}" ]; then
             rm -f /tmp/worker.log
-            ln -s /tmp/worker.$$.log /tmp/worker.log
+            #ln -s /tmp/worker.$$.log /tmp/worker.log
             ${CMD} > /tmp/worker.$$.log 2>&1
         else
             echo "Usage: $0 [-db] [-rast]"

@@ -1,13 +1,15 @@
 #
 # Common definitions used in all Makefiles
 #
-GRASS_TOPDIR        = /usr/local/src/grass-6.4.2/dist.x86_64-unknown-linux-gnu
-CUDA_DIR            = $(HOME)/AMD_SDK
-PAPI_DIR            = $(HOME)/papi
+#GRASS_TOPDIR        = /usr/local/src/grass-6.4.2/dist.x86_64-unknown-linux-gnu
+GRASS_TOPDIR        = /home/luka/grass-6.4.2
+#CUDA_DIR            = $(HOME)/AMD_SDK
+CUDA_DIR            = $(ATISTREAMSDKROOT)
+PAPI_DIR            = $(HOME)
 OCL_COMMON_LIB_DIR  = ../ocl_common
 PERFORMANCE_LIB_DIR = ../performance
 
-CC          = gcc
+CC          = /home/luka/bin/gcc
 #PRJCFLAGS   = -D_DEBUG_INFO_ -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 #PRJCFLAGS   = -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJCFLAGS   = -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
