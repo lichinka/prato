@@ -1,0 +1,86 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19283,
+			n: "celica ATOPNI1",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI1 ÷ CI: 511 ÷ RF: 120\nEDGE\nTMA\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 04.02.2000"
+		}, {
+			i: 19284,
+			n: "celica ATOPNI2",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI2 ÷ CI: 512 ÷ RF: 108\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 150 ÷ Nagib: 0 + 0\nDatum vklopa: 04.02.2000"
+		}, {
+			i: 19285,
+			n: "celica ATOPNI3",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI3 ÷ CI: 513 ÷ RF: 116\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 270 ÷ Nagib: 0 + 0\nDatum vklopa: 04.02.2000"
+		}, {
+			i: 20761,
+			n: "celica ATOPNIA",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNIA / D ÷ CI: 20511/20514 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=300/310 cBm ÷ ant=264/274 cBm\nPA=430/430 cBm ÷ cable loss=36 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 29.07.2003/28.05.2008"
+		}, {
+			i: 20762,
+			n: "celica ATOPNIB",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNIB / E ÷ CI: 20512/20515 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=300/310 cBm ÷ ant=264/274 cBm\nPA=430/430 cBm ÷ cable loss=36 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 29.07.2003/28.05.2008"
+		}, {
+			i: 20763,
+			n: "celica ATOPNIC",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNIC / F ÷ CI: 20513/20516 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=300/300 cBm ÷ ant=264/264 cBm\nPA=430/430 cBm ÷ cable loss=36 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 29.07.2003/28.05.2008"
+		}, {
+			i: 28264,
+			n: "celica ATOPNI18A",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI18A ÷ CI: 1305631 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOPNI00 ÷ DUL20 ÷ eNBid: 5100\nRSTP: rbs=182 cBm ÷ ant=153 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=29 cBm\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 05.02.2013"
+		}, {
+			i: 28262,
+			n: "celica ATOPNI18B",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI18B ÷ CI: 1305632 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOPNI00 ÷ DUL20 ÷ eNBid: 5100\nRSTP: rbs=182 cBm ÷ ant=153 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=29 cBm\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 05.02.2013"
+		}, {
+			i: 28263,
+			n: "celica ATOPNI18C",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI18C ÷ CI: 1305633 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOPNI00 ÷ DUL20 ÷ eNBid: 5100\nRSTP: rbs=182 cBm ÷ ant=153 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=29 cBm\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17.7m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 05.02.2013"
+		}, {
+			i: 20518,
+			n: "celica ATOPNI4",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI4 ÷ Faza: 10\nTip: K 739 494 ÷ Kot: 65°\nVišina_p: 28.7m\nAzimut_p: 150 ÷ Nagib_p: 3 + 0\nDatum vklopa: 06.02.2002"
+		}, {
+			i: 20518,
+			n: "celica ATOPNI4",
+			t: 3,
+			x: 462439,
+			y: 102821,
+			info: "ATOPNI4 ÷ Faza: 10\nTip: K 742 212 ÷ Kot: 65°\nVišina_p: 28.7m\nAzimut_p: 280 ÷ Nagib_p: 3 + 3"
+		}],
+		len: 11
+	}],
+	len: 1
+}

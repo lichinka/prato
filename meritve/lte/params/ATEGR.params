@@ -1,0 +1,79 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19473,
+			n: "celica ATEGR1",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR1 ÷ CI: 461 ÷ RF: 114\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18.8m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 04.10.1999"
+		}, {
+			i: 19474,
+			n: "celica ATEGR2",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR2 ÷ CI: 462 ÷ RF: 121\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18.8m\nAzimut: 150 ÷ Nagib: 3 + 0\nDatum vklopa: 04.10.1999"
+		}, {
+			i: 19475,
+			n: "celica ATEGR3",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR3 ÷ CI: 463 ÷ RF: 109\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18.8m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 04.10.1999"
+		}, {
+			i: 22238,
+			n: "celica ATEGR4",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR4 ÷ CI: 464 ÷ RF: 665\nTip: K 739 494 ÷ Kot: 65°\nVišina: 18.8m\nAzimut: 70 ÷ Nagib: -2 + 0\nDatum vklopa: 02.12.2003"
+		}, {
+			i: 20749,
+			n: "celica ATEGRA",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGRA / D ÷ CI: 20461/20464 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/318 cBm ÷ ant=290/290 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 30 ÷ Nagib: 0 + 6\nDatum vklopa: 06.08.2003/10.06.2011"
+		}, {
+			i: 20750,
+			n: "celica ATEGRB",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGRB / E ÷ CI: 20462/20465 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/318 cBm ÷ ant=290/290 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 150 ÷ Nagib: 3 + 2\nDatum vklopa: 06.08.2003/10.06.2011"
+		}, {
+			i: 20751,
+			n: "celica ATEGRC",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGRC / F ÷ CI: 20463/20466 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/318 cBm ÷ ant=290/290 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 245 ÷ Nagib: 0 + 6\nDatum vklopa: 06.08.2003/10.06.2011"
+		}, {
+			i: 28177,
+			n: "celica ATEGR18A",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR18A ÷ CI: 1177631 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATEGR00 ÷ DUL20 ÷ eNBid: 4600\nRSTP: rbs=182 cBm ÷ ant=173 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=9 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 30 ÷ Nagib: 0 + 6\nDatum vklopa: 09.01.2013"
+		}, {
+			i: 28179,
+			n: "celica ATEGR18B",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR18B ÷ CI: 1177632 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATEGR00 ÷ DUL20 ÷ eNBid: 4600\nRSTP: rbs=182 cBm ÷ ant=173 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=9 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 150 ÷ Nagib: 3 + 2\nDatum vklopa: 09.01.2013"
+		}, {
+			i: 28178,
+			n: "celica ATEGR18C",
+			t: 3,
+			x: 461860,
+			y: 103148,
+			info: "ATEGR18C ÷ CI: 1177633 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATEGR00 ÷ DUL20 ÷ eNBid: 4600\nRSTP: rbs=182 cBm ÷ ant=173 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=9 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15.8m\nAzimut: 245 ÷ Nagib: 0 + 6\nDatum vklopa: 09.01.2013"
+		}],
+		len: 10
+	}],
+	len: 1
+}

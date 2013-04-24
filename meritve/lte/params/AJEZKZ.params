@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 21884,
+			n: "celica AJEZKZ1",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ1 ÷ CI: 10041 ÷ RF: 120\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 30 ÷ Nagib: 2 + 0\nDatum vklopa: 09.08.2004"
+		}, {
+			i: 21885,
+			n: "celica AJEZKZ2",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ2 ÷ CI: 10042 ÷ RF: 123\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 130 ÷ Nagib: 2 + 0\nDatum vklopa: 09.08.2004"
+		}, {
+			i: 21886,
+			n: "celica AJEZKZ3",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ3 ÷ CI: 10043 ÷ RF: 107\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 240 ÷ Nagib: 3 + 0\nDatum vklopa: 09.08.2004"
+		}, {
+			i: 20607,
+			n: "celica AJEZKZA",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZA / D ÷ CI: 30041/30044 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=283/293 cBm\nPA=448/446 cBm ÷ cable loss=25 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 30 ÷ Nagib: 2 + 2\nDatum vklopa: 09.08.2004/22.06.2009"
+		}, {
+			i: 20608,
+			n: "celica AJEZKZB",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZB / E ÷ CI: 30042/30045 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=283/293 cBm\nPA=448/446 cBm ÷ cable loss=25 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 130 ÷ Nagib: 2 + 2\nDatum vklopa: 09.08.2004/22.06.2009"
+		}, {
+			i: 20609,
+			n: "celica AJEZKZC",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZC / F ÷ CI: 30043/30046 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=283/293 cBm\nPA=446/446 cBm ÷ cable loss=25 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 240 ÷ Nagib: 3 + 2\nDatum vklopa: 09.08.2004/22.06.2009"
+		}, {
+			i: 28071,
+			n: "celica AJEZKZ18A",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ18A ÷ CI: 2662431 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJEZKZ00 ÷ DUL20 ÷ eNBid: 10400\nRSTP: rbs=182 cBm ÷ ant=165 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=17 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 30 ÷ Nagib: 2 + 2\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28070,
+			n: "celica AJEZKZ18B",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ18B ÷ CI: 2662432 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJEZKZ00 ÷ DUL20 ÷ eNBid: 10400\nRSTP: rbs=182 cBm ÷ ant=165 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=17 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 130 ÷ Nagib: 2 + 2\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28072,
+			n: "celica AJEZKZ18C",
+			t: 3,
+			x: 462672,
+			y: 105540,
+			info: "AJEZKZ18C ÷ CI: 2662433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJEZKZ00 ÷ DUL20 ÷ eNBid: 10400\nRSTP: rbs=182 cBm ÷ ant=165 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=17 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 14.5m\nAzimut: 240 ÷ Nagib: 3 + 2\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

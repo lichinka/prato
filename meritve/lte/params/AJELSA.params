@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19418,
+			n: "celica AJELSA1",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA1 ÷ CI: 321 ÷ RF: 122\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 50 ÷ Nagib: 0 + 0\nNagib_p: 2 + -\nDatum vklopa: 10.05.1999"
+		}, {
+			i: 19419,
+			n: "celica AJELSA2",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA2 ÷ CI: 322 ÷ RF: 117\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 150 ÷ Nagib: 0 + 0\nNagib_p: 2 + -\nDatum vklopa: 10.05.1999"
+		}, {
+			i: 19420,
+			n: "celica AJELSA3",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA3 ÷ CI: 323 ÷ RF: 106\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 270 ÷ Nagib: 0 + 0\nNagib_p: 2 + -\nDatum vklopa: 10.05.1999"
+		}, {
+			i: 20604,
+			n: "celica AJELSAA",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSAA / D ÷ CI: 20321/20324 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=310/310 cBm ÷ ant=286/286 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 50 ÷ Nagib: 0 + 4\nNagib_p: 2 + -\nDatum vklopa: 28.08.2003/02.02.2009"
+		}, {
+			i: 20605,
+			n: "celica AJELSAB",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSAB / E ÷ CI: 20322/20325 ÷ RF: 10789/10814\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=320/320 cBm ÷ ant=296/296 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 150 ÷ Nagib: 0 + 3\nNagib_p: 2 + -\nDatum vklopa: 28.08.2003/02.02.2009"
+		}, {
+			i: 20606,
+			n: "celica AJELSAC",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSAC / F ÷ CI: 20323/20326 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=316/320 cBm ÷ ant=292/296 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 270 ÷ Nagib: 0 + 3\nNagib_p: 2 + -\nDatum vklopa: 28.08.2003/02.02.2009"
+		}, {
+			i: 28095,
+			n: "celica AJELSA18A",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA18A ÷ CI: 819231 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJELSA00 ÷ DUL20 ÷ eNBid: 3200\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 50 ÷ Nagib: 0 + 4\nNagib_p: 2 + -\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28093,
+			n: "celica AJELSA18B",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA18B ÷ CI: 819232 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJELSA00 ÷ DUL20 ÷ eNBid: 3200\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 150 ÷ Nagib: 0 + 3\nNagib_p: 2 + -\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28094,
+			n: "celica AJELSA18C",
+			t: 3,
+			x: 461558,
+			y: 98120,
+			info: "AJELSA18C ÷ CI: 819233 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AJELSA00 ÷ DUL20 ÷ eNBid: 3200\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20m ÷ Višina_p: 31.3m\nAzimut: 270 ÷ Nagib: 0 + 3\nNagib_p: 2 + -\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

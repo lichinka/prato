@@ -1,0 +1,86 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19532,
+			n: "celica AZITO1",
+			t: 3,
+			x: 465500,
+			y: 102765,
+			info: "AZITO1 ÷ CI: 51 ÷ RF: 117\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 20m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 14.04.1997"
+		}, {
+			i: 19533,
+			n: "celica AZITO2",
+			t: 3,
+			x: 465500,
+			y: 102765,
+			info: "AZITO2 ÷ CI: 52 ÷ RF: 121\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 20m\nAzimut: 150 ÷ Nagib: 0 + 0\nDatum vklopa: 14.04.1997"
+		}, {
+			i: 19534,
+			n: "celica AZITO3",
+			t: 3,
+			x: 465500,
+			y: 102765,
+			info: "AZITO3 ÷ CI: 53 ÷ RF: 114\nEDGE\nTip: K 741 324 ÷ Kot: 65°\nVišina: 20m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 14.04.1997"
+		}, {
+			i: 22431,
+			n: "celica AZITO4",
+			t: 3,
+			x: 465500,
+			y: 102765,
+			info: "AZITO4 ÷ CI: 54 ÷ RF: 667\nTip: K 741 990 ÷ Kot: 88°\nVišina: 25m\nAzimut: 230 ÷ Nagib: 8 + 0\nDatum vklopa: 02.07.2004"
+		}, {
+			i: 20469,
+			n: "celica AZITO5",
+			t: 3,
+			x: 465500,
+			y: 102765,
+			info: "AZITO5 ÷ CI: 55 ÷ RF: 663\nTip: K 741 324 ÷ Kot: 65°\nVišina: 20m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 18.12.2001"
+		}, {
+			i: 20827,
+			n: "celica AZITOA",
+			t: 3,
+			x: 465524,
+			y: 102727,
+			info: "AZITOA / D ÷ CI: 20051/20054 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=273/283 cBm\nPA=446/446 cBm ÷ cable loss=35 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 130 ÷ Nagib: 3 + 2\nDatum vklopa: 28.11.2003/02.02.2009"
+		}, {
+			i: 20828,
+			n: "celica AZITOB",
+			t: 3,
+			x: 465507,
+			y: 102721,
+			info: "AZITOB / E ÷ CI: 20052/20055 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=282/297 cBm\nPA=446/446 cBm ÷ cable loss=36 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 230 ÷ Nagib: 8 + 4\nDatum vklopa: 28.11.2003/02.02.2009"
+		}, {
+			i: 20829,
+			n: "celica AZITOC",
+			t: 3,
+			x: 465489,
+			y: 102767,
+			info: "AZITOC / F ÷ CI: 20053/20056 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=283/293 cBm\nPA=446/446 cBm ÷ cable loss=25 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 330 ÷ Nagib: 4 + 3\nDatum vklopa: 28.11.2003/02.02.2009"
+		}, {
+			i: 28365,
+			n: "celica AZITO18A",
+			t: 3,
+			x: 465524,
+			y: 102727,
+			info: "AZITO18A ÷ CI: 128031 (31) ÷ RF: 1579 ÷ RRUS12 B3\nBB: AZITO00 ÷ DUL20 ÷ eNBid: 500\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 130 ÷ Nagib: 3 + 2\nDatum vklopa: 14.03.2013"
+		}, {
+			i: 28366,
+			n: "celica AZITO18B",
+			t: 3,
+			x: 465507,
+			y: 102721,
+			info: "AZITO18B ÷ CI: 128032 (32) ÷ RF: 1579 ÷ RRUS12 B3\nBB: AZITO00 ÷ DUL20 ÷ eNBid: 500\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 230 ÷ Nagib: 8 + 4\nDatum vklopa: 14.03.2013"
+		}, {
+			i: 28367,
+			n: "celica AZITO18C",
+			t: 3,
+			x: 465489,
+			y: 102767,
+			info: "AZITO18C ÷ CI: 128033 (33) ÷ RF: 1579 ÷ RRUS12 B3\nBB: AZITO00 ÷ DUL20 ÷ eNBid: 500\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 25m\nAzimut: 330 ÷ Nagib: 4 + 3\nDatum vklopa: 14.03.2013"
+		}],
+		len: 11
+	}],
+	len: 1
+}

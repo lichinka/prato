@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19535,
+			n: "celica APETER1",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER1 ÷ CI: 711 ÷ RF: 108\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 30 ÷ Nagib: 3 + 0\nDatum vklopa: 01.12.2000"
+		}, {
+			i: 19536,
+			n: "celica APETER2",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER2 ÷ CI: 712 ÷ RF: 115\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 150 ÷ Nagib: 3 + 0\nDatum vklopa: 01.12.2000"
+		}, {
+			i: 19537,
+			n: "celica APETER3",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER3 ÷ CI: 713 ÷ RF: 111\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 01.12.2000"
+		}, {
+			i: 20667,
+			n: "celica APETERA",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETERA / D ÷ CI: 20711/20714 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=286/286 cBm\nPA=430/430 cBm ÷ cable loss=22 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 30 ÷ Nagib: 3 + 2\nDatum vklopa: 20.08.2003/09.01.2009"
+		}, {
+			i: 20668,
+			n: "celica APETERB",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETERB / E ÷ CI: 20712/20715 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=300/310 cBm ÷ ant=268/278 cBm\nPA=430/430 cBm ÷ cable loss=32 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 150 ÷ Nagib: 3 + 0\nDatum vklopa: 20.08.2003/09.01.2009"
+		}, {
+			i: 20669,
+			n: "celica APETERC",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETERC / F ÷ CI: 20713/20716 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=286/286 cBm\nPA=430/430 cBm ÷ cable loss=22 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 270 ÷ Nagib: 3 + 2\nDatum vklopa: 20.08.2003/09.01.2009"
+		}, {
+			i: 28233,
+			n: "celica APETER18A",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER18A ÷ CI: 1817631 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APETER00 ÷ DUL20 ÷ eNBid: 7100\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 30 ÷ Nagib: 3 + 2\nDatum vklopa: 25.01.2013"
+		}, {
+			i: 28234,
+			n: "celica APETER18B",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER18B ÷ CI: 1817632 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APETER00 ÷ DUL20 ÷ eNBid: 7100\nRSTP: rbs=182 cBm ÷ ant=157 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=25 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 150 ÷ Nagib: 3 + 0\nDatum vklopa: 25.01.2013"
+		}, {
+			i: 28232,
+			n: "celica APETER18C",
+			t: 3,
+			x: 463026,
+			y: 100976,
+			info: "APETER18C ÷ CI: 1817633 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APETER00 ÷ DUL20 ÷ eNBid: 7100\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16m\nAzimut: 270 ÷ Nagib: 3 + 2\nDatum vklopa: 25.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

@@ -1,0 +1,51 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 20572,
+			n: "celica ATOTRAA",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRAA / D ÷ CI: 30161/30164 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=284/284 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 50 ÷ Nagib: 3 + 2\nDatum vklopa: 30.05.2005/07.10.2011"
+		}, {
+			i: 23578,
+			n: "celica ATOTRAB",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRAB / E ÷ CI: 30162/30165 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=284/284 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 218 ÷ Kot: 45°\nVišina: 20m\nAzimut: 190 ÷ Nagib: 0 + 1\nDatum vklopa: 28.10.2010/07.10.2011"
+		}, {
+			i: 20573,
+			n: "celica ATOTRAC",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRAC / F ÷ CI: 30163/30166 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=284/284 cBm\nPA=430/430 cBm ÷ cable loss=24 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 310 ÷ Nagib: 3 + 2\nDatum vklopa: 30.05.2005/07.10.2011"
+		}, {
+			i: 28136,
+			n: "celica ATOTRA18A",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRA18A ÷ CI: 2969631 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOTRA00 ÷ DUL20 ÷ eNBid: 11600\nRSTP: rbs=182 cBm ÷ ant=169 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=13 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 50 ÷ Nagib: 3 + 2\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28134,
+			n: "celica ATOTRA18B",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRA18B ÷ CI: 2969632 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOTRA00 ÷ DUL20 ÷ eNBid: 11600\nRSTP: rbs=182 cBm ÷ ant=168 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=14 cBm\np-RET\nTip: K 742 218 ÷ Kot: 45°\nVišina: 20m\nAzimut: 190 ÷ Nagib: 0 + 1\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28135,
+			n: "celica ATOTRA18C",
+			t: 3,
+			x: 466266,
+			y: 100737,
+			info: "ATOTRA18C ÷ CI: 2969633 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATOTRA00 ÷ DUL20 ÷ eNBid: 11600\nRSTP: rbs=182 cBm ÷ ant=169 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=13 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 310 ÷ Nagib: 3 + 2\nDatum vklopa: 02.01.2013"
+		}],
+		len: 6
+	}],
+	len: 1
+}

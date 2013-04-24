@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 23735,
+			n: "celica APOLCE1",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE1 ÷ CI: 10431 ÷ RF: 106\nEDGE\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 5 ÷ Nagib: 0 + 1\nDatum vklopa: 29.08.2007"
+		}, {
+			i: 23736,
+			n: "celica APOLCE2",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE2 ÷ CI: 10432 ÷ RF: 118\nEDGE\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 150 ÷ Nagib: 0 + 2\nDatum vklopa: 29.08.2007"
+		}, {
+			i: 23737,
+			n: "celica APOLCE3",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE3 ÷ CI: 10433 ÷ RF: 111\nEDGE\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 270 ÷ Nagib: 0 + 3\nDatum vklopa: 29.08.2007"
+		}, {
+			i: 23738,
+			n: "celica APOLCEA",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCEA / D ÷ CI: 30431/30434 ÷ RF: 10789/10814\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=318/328 cBm ÷ ant=299/309 cBm\nPA=448/446 cBm ÷ cable loss=19 cBm\np-ASC ÷ p-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 5 ÷ Nagib: 0 + 3\nDatum vklopa: 29.08.2007/25.11.2008"
+		}, {
+			i: 23739,
+			n: "celica APOLCEB",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCEB / E ÷ CI: 30432/30435 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=308/318 cBm ÷ ant=291/301 cBm\nPA=448/448 cBm ÷ cable loss=17 cBm\np-ASC ÷ p-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 29.08.2007/25.11.2008"
+		}, {
+			i: 23740,
+			n: "celica APOLCEC",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCEC / F ÷ CI: 30433/30436 ÷ RF: 10789/10814\n2xHSDPA+ ÷ EUL 2ms ÷ DC\nCPICH: rbs=308/328 cBm ÷ ant=288/308 cBm\nPA=448/446 cBm ÷ cable loss=20 cBm\np-ASC ÷ p-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 29.08.2007/25.11.2008"
+		}, {
+			i: 28159,
+			n: "celica APOLCE18A",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE18A ÷ CI: 3660831 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APOLCE00 ÷ DUL20 ÷ eNBid: 14300\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 5 ÷ Nagib: 0 + 3\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28161,
+			n: "celica APOLCE18B",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE18B ÷ CI: 3660832 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APOLCE00 ÷ DUL20 ÷ eNBid: 14300\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28160,
+			n: "celica APOLCE18C",
+			t: 3,
+			x: 468151,
+			y: 101205,
+			info: "APOLCE18C ÷ CI: 3660833 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: APOLCE00 ÷ DUL20 ÷ eNBid: 14300\nRSTP: rbs=182 cBm ÷ ant=163 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=19 cBm\np-RET\nTip: K 742 266 ÷ Kot: 65°\nVišina: 21m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

@@ -1,0 +1,1 @@
+https://mgis.mobitel.si/readdata/wrapwms.php?request=GetFeatureInfo&layers=empty_layer,cel&cel_srch=@@&cel_filter=1&cel_region=0&cel_regionea=vsa&cel_municip=vse&cel_out_in_tun=101&cel_phaseG=16382&cel_g9wp=14&cel_g18wp=14&cel_carrier=14&cel_phaseU=2046&cel_uwp=14&cel_l18wp=14&cel_name=1&bbox=297911.25,10582.5,702088.75,214417.5&width=1273&height=642&queryx=#x#&queryy=#y#

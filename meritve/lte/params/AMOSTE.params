@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19400,
+			n: "celica AMOSTE1",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE1 ÷ CI: 671 ÷ RF: 114\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 30 ÷ Nagib: 0 + 3\nDatum vklopa: 13.10.2000"
+		}, {
+			i: 19401,
+			n: "celica AMOSTE2",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE2 ÷ CI: 672 ÷ RF: 116\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 150 ÷ Nagib: 0 + 3\nDatum vklopa: 13.10.2000"
+		}, {
+			i: 19402,
+			n: "celica AMOSTE3",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE3 ÷ CI: 673 ÷ RF: 110\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 13.10.2000"
+		}, {
+			i: 20655,
+			n: "celica AMOSTEA",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTEA / D ÷ CI: 20671/20674 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=297/307 cBm\nPA=446/446 cBm ÷ cable loss=11 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 11.08.2003/05.08.2003"
+		}, {
+			i: 20656,
+			n: "celica AMOSTEB",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTEB / E ÷ CI: 20672/20675 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=307/322 cBm\nPA=446/446 cBm ÷ cable loss=11 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 150 ÷ Nagib: 0 + 6\nDatum vklopa: 11.08.2003/05.08.2003"
+		}, {
+			i: 20657,
+			n: "celica AMOSTEC",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTEC / F ÷ CI: 20673/20676 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=307/322 cBm\nPA=446/446 cBm ÷ cable loss=11 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 270 ÷ Nagib: 3 + 2\nDatum vklopa: 11.08.2003/05.08.2003"
+		}, {
+			i: 28090,
+			n: "celica AMOSTE18A",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE18A ÷ CI: 1715231 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMOSTE00 ÷ DUL20 ÷ eNBid: 6700\nRSTP: rbs=182 cBm ÷ ant=171 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=11 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28092,
+			n: "celica AMOSTE18B",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE18B ÷ CI: 1715232 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMOSTE00 ÷ DUL20 ÷ eNBid: 6700\nRSTP: rbs=182 cBm ÷ ant=171 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=11 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 150 ÷ Nagib: 0 + 6\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28091,
+			n: "celica AMOSTE18C",
+			t: 3,
+			x: 464277,
+			y: 101391,
+			info: "AMOSTE18C ÷ CI: 1715233 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMOSTE00 ÷ DUL20 ÷ eNBid: 6700\nRSTP: rbs=182 cBm ÷ ant=171 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=11 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 20.2m\nAzimut: 270 ÷ Nagib: 3 + 2\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

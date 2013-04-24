@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 25584,
+			n: "celica ASMELT1",
+			t: 3,
+			x: 462814,
+			y: 104413,
+			info: "ASMELT1 ÷ CI: 911 ÷ RF: 116\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 34.6m\nAzimut: 0 ÷ Nagib: 3 + 3\nDatum vklopa: 18.01.2010"
+		}, {
+			i: 25585,
+			n: "celica ASMELT2",
+			t: 3,
+			x: 462822,
+			y: 104370,
+			info: "ASMELT2 ÷ CI: 912 ÷ RF: 108\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 41.3m\nAzimut: 270 ÷ Nagib: 3 + 6\nDatum vklopa: 18.01.2010"
+		}, {
+			i: 21563,
+			n: "celica ASMELT4",
+			t: 3,
+			x: 462836,
+			y: 104367,
+			info: "ASMELT4 ÷ CI: 914 ÷ RF: 667\nEDGE\nTip: K 742 212 ÷ Kot: 65°\nVišina: 41.3m\nAzimut: 150 ÷ Nagib: 7 + 0\nDatum vklopa: 20.06.2003"
+		}, {
+			i: 20737,
+			n: "celica ASMELTA",
+			t: 3,
+			x: 462814,
+			y: 104413,
+			info: "ASMELTA / D ÷ CI: 20911/20914 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=253/263 cBm\nPA=430/430 cBm ÷ cable loss=45 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 31.3m\nAzimut: 30 ÷ Nagib: 3 + 3\nDatum vklopa: 01.08.2003/31.07.2008"
+		}, {
+			i: 20738,
+			n: "celica ASMELTB",
+			t: 3,
+			x: 462822,
+			y: 104370,
+			info: "ASMELTB / E ÷ CI: 20912/20915 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=293/293 cBm\nPA=430/430 cBm ÷ cable loss=15 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 38.1m\nAzimut: 175 ÷ Nagib: 3 + 6\nDatum vklopa: 01.08.2003/31.07.2008"
+		}, {
+			i: 20739,
+			n: "celica ASMELTC",
+			t: 3,
+			x: 462814,
+			y: 104413,
+			info: "ASMELTC / F ÷ CI: 20913/20916 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=253/263 cBm\nPA=430/430 cBm ÷ cable loss=45 cBm\nASC ÷ RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 31.3m\nAzimut: 320 ÷ Nagib: 3 + 4\nDatum vklopa: 01.08.2003/31.07.2008"
+		}, {
+			i: 28373,
+			n: "celica ASMELT18A",
+			t: 3,
+			x: 462814,
+			y: 104413,
+			info: "ASMELT18A ÷ CI: 2329631 (31) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ASMELT00 ÷ DUL20 ÷ eNBid: 9100\nRSTP: rbs=182 cBm ÷ ant=182 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=0 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 31.3m\nAzimut: 30 ÷ Nagib: 3 + 3\nDatum vklopa: 19.03.2013"
+		}, {
+			i: 28374,
+			n: "celica ASMELT18B",
+			t: 3,
+			x: 462822,
+			y: 104370,
+			info: "ASMELT18B ÷ CI: 2329632 (32) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ASMELT00 ÷ DUL20 ÷ eNBid: 9100\nRSTP: rbs=182 cBm ÷ ant=182 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=0 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 38.1m\nAzimut: 175 ÷ Nagib: 3 + 6\nDatum vklopa: 19.03.2013"
+		}, {
+			i: 28375,
+			n: "celica ASMELT18C",
+			t: 3,
+			x: 462814,
+			y: 104413,
+			info: "ASMELT18C ÷ CI: 2329633 (33) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ASMELT00 ÷ DUL20 ÷ eNBid: 9100\nRSTP: rbs=182 cBm ÷ ant=182 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=0 cBm\nTip: K 742 212 ÷ Kot: 65°\nVišina: 31.3m\nAzimut: 320 ÷ Nagib: 3 + 4\nDatum vklopa: 19.03.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

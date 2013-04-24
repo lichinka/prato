@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 22767,
+			n: "celica ALIVAD1",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD1 ÷ CI: 10371 ÷ RF: 116\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 22m\nAzimut: 110 ÷ Nagib: 0 + 2\nDatum vklopa: 17.10.2006"
+		}, {
+			i: 22768,
+			n: "celica ALIVAD2",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD2 ÷ CI: 10372 ÷ RF: 111\nEDGE\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 210 ÷ Nagib: 0 + 2\nDatum vklopa: 17.10.2006"
+		}, {
+			i: 22769,
+			n: "celica ALIVAD3",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD3 ÷ CI: 10373 ÷ RF: 107\nEDGE\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 310 ÷ Nagib: 0 + 2\nDatum vklopa: 17.10.2006"
+		}, {
+			i: 22770,
+			n: "celica ALIVADA",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVADA / D ÷ CI: 30371/30374 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=297/307 cBm\nPA=448/448 cBm ÷ cable loss=21 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 22m\nAzimut: 110 ÷ Nagib: 0 + 4\nDatum vklopa: 23.11.2006/03.02.2009"
+		}, {
+			i: 22771,
+			n: "celica ALIVADB",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVADB / E ÷ CI: 30372/30375 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/318 cBm ÷ ant=294/294 cBm\nPA=448/448 cBm ÷ cable loss=24 cBm\nASC ÷ RET\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 210 ÷ Nagib: 0 + 4\nDatum vklopa: 23.11.2006/03.02.2009"
+		}, {
+			i: 22772,
+			n: "celica ALIVADC",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVADC / F ÷ CI: 30373/30376 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=294/304 cBm\nPA=448/448 cBm ÷ cable loss=24 cBm\nASC ÷ RET\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 310 ÷ Nagib: 0 + 4\nDatum vklopa: 23.11.2006/03.02.2009"
+		}, {
+			i: 28409,
+			n: "celica ALIVAD18A",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD18A ÷ CI: 3507231 (31) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ALIVAD00 ÷ DUL20 ÷ eNBid: 13700\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 22m\nAzimut: 110 ÷ Nagib: 0 + 4\nDatum vklopa: 03.04.2013"
+		}, {
+			i: 28410,
+			n: "celica ALIVAD18B",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD18B ÷ CI: 3507232 (32) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ALIVAD00 ÷ DUL20 ÷ eNBid: 13700\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 210 ÷ Nagib: 0 + 4\nDatum vklopa: 03.04.2013"
+		}, {
+			i: 28411,
+			n: "celica ALIVAD18C",
+			t: 3,
+			x: 462214,
+			y: 99233,
+			info: "ALIVAD18C ÷ CI: 3507233 (33) ÷ RF: 1579 ÷ RRUS12 B3\nBB: ALIVAD00 ÷ DUL20 ÷ eNBid: 13700\nRSTP: rbs=182 cBm ÷ ant=179 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=3 cBm\nTip: 80010122 ÷ Kot: 90°\nVišina: 22m\nAzimut: 310 ÷ Nagib: 0 + 4\nDatum vklopa: 03.04.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

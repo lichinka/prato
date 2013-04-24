@@ -1,0 +1,51 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 20734,
+			n: "celica ASTEPA",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEPA / D ÷ CI: 30031/30034 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=270/280 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 218 ÷ Kot: 45°\nVišina: 15m\nAzimut: 40 ÷ Nagib: 3 + 2\nDatum vklopa: 14.07.2004/27.05.2008"
+		}, {
+			i: 20735,
+			n: "celica ASTEPB",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEPB / E ÷ CI: 30032/30035 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=270/280 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15m\nAzimut: 110 ÷ Nagib: 3 + 3\nDatum vklopa: 14.07.2004/27.05.2008"
+		}, {
+			i: 20736,
+			n: "celica ASTEPC",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEPC / F ÷ CI: 30033/30036 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=270/280 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15m\nAzimut: 300 ÷ Nagib: 0 + 5\nDatum vklopa: 14.07.2004/27.05.2008"
+		}, {
+			i: 28142,
+			n: "celica ASTEP18A",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEP18A ÷ CI: 2636831 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASTEP00 ÷ DUL20 ÷ eNBid: 10300\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 218 ÷ Kot: 45°\nVišina: 15m\nAzimut: 40 ÷ Nagib: 3 + 2\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28140,
+			n: "celica ASTEP18B",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEP18B ÷ CI: 2636832 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASTEP00 ÷ DUL20 ÷ eNBid: 10300\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15m\nAzimut: 110 ÷ Nagib: 3 + 3\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28141,
+			n: "celica ASTEP18C",
+			t: 3,
+			x: 464935,
+			y: 100554,
+			info: "ASTEP18C ÷ CI: 2636833 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASTEP00 ÷ DUL20 ÷ eNBid: 10300\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 15m\nAzimut: 300 ÷ Nagib: 0 + 5\nDatum vklopa: 02.01.2013"
+		}],
+		len: 6
+	}],
+	len: 1
+}

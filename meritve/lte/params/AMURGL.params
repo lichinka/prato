@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19394,
+			n: "celica AMURGL1",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL1 ÷ CI: 571 ÷ RF: 109\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 30 ÷ Nagib: 0 + 3\nDatum vklopa: 22.04.2000"
+		}, {
+			i: 19395,
+			n: "celica AMURGL2",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL2 ÷ CI: 572 ÷ RF: 119\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 150 ÷ Nagib: 0 + 3\nDatum vklopa: 22.04.2000"
+		}, {
+			i: 19396,
+			n: "celica AMURGL3",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL3 ÷ CI: 573 ÷ RF: 116\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 270 ÷ Nagib: 0 + 3\nDatum vklopa: 22.04.2000"
+		}, {
+			i: 20658,
+			n: "celica AMURGLA",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGLA / D ÷ CI: 20571/20574 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=291/306 cBm\nPA=448/446 cBm ÷ cable loss=27 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 30 ÷ Nagib: 0 + 5\nDatum vklopa: 13.08.2003/16.03.2009"
+		}, {
+			i: 20659,
+			n: "celica AMURGLB",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGLB / E ÷ CI: 20572/20575 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=289/304 cBm\nPA=448/446 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 13.08.2003/16.03.2009"
+		}, {
+			i: 20660,
+			n: "celica AMURGLC",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGLC / F ÷ CI: 20573/20576 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/333 cBm ÷ ant=287/302 cBm\nPA=448/446 cBm ÷ cable loss=31 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 13.08.2003/16.03.2009"
+		}, {
+			i: 28084,
+			n: "celica AMURGL18A",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL18A ÷ CI: 1459231 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMURGL00 ÷ DUL20 ÷ eNBid: 5700\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 30 ÷ Nagib: 0 + 5\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28086,
+			n: "celica AMURGL18B",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL18B ÷ CI: 1459232 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMURGL00 ÷ DUL20 ÷ eNBid: 5700\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 150 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28085,
+			n: "celica AMURGL18C",
+			t: 3,
+			x: 461473,
+			y: 99420,
+			info: "AMURGL18C ÷ CI: 1459233 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AMURGL00 ÷ DUL20 ÷ eNBid: 5700\nRSTP: rbs=182 cBm ÷ ant=163 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=19 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 16.5m\nAzimut: 270 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

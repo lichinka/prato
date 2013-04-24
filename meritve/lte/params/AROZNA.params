@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19425,
+			n: "celica AROZNA1",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA1 ÷ CI: 541 ÷ RF: 109\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 30 ÷ Nagib: 1 + 0\nDatum vklopa: 08.03.2000"
+		}, {
+			i: 19426,
+			n: "celica AROZNA2",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA2 ÷ CI: 542 ÷ RF: 111\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 135 ÷ Nagib: 2 + 1\nDatum vklopa: 08.03.2000"
+		}, {
+			i: 19427,
+			n: "celica AROZNA3",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA3 ÷ CI: 543 ÷ RF: 105\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 270 ÷ Nagib: 2 + 0\nDatum vklopa: 08.03.2000"
+		}, {
+			i: 20695,
+			n: "celica AROZNAA",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNAA / D ÷ CI: 20541/20544 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=279/289 cBm\nPA=430/430 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 30 ÷ Nagib: 1 + 5\nDatum vklopa: 28.11.2003/07.06.2011"
+		}, {
+			i: 20696,
+			n: "celica AROZNAB",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNAB / E ÷ CI: 20542/20545 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=279/289 cBm\nPA=430/430 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 135 ÷ Nagib: 2 + 3\nDatum vklopa: 28.11.2003/07.06.2011"
+		}, {
+			i: 20697,
+			n: "celica AROZNAC",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNAC / F ÷ CI: 20543/20546 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=320/320 cBm ÷ ant=291/291 cBm\nPA=430/430 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 270 ÷ Nagib: 2 + 4\nDatum vklopa: 28.11.2003/07.06.2011"
+		}, {
+			i: 28096,
+			n: "celica AROZNA18A",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA18A ÷ CI: 1382431 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AROZNA00 ÷ DUL20 ÷ eNBid: 5400\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 30 ÷ Nagib: 1 + 5\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28097,
+			n: "celica AROZNA18B",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA18B ÷ CI: 1382432 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AROZNA00 ÷ DUL20 ÷ eNBid: 5400\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 135 ÷ Nagib: 2 + 3\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28098,
+			n: "celica AROZNA18C",
+			t: 3,
+			x: 460340,
+			y: 100532,
+			info: "AROZNA18C ÷ CI: 1382433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AROZNA00 ÷ DUL20 ÷ eNBid: 5400\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 19.7m\nAzimut: 270 ÷ Nagib: 2 + 4\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

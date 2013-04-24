@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19328,
+			n: "celica AFUZIN1",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN1 ÷ CI: 641 ÷ RF: 105\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 05.09.2000"
+		}, {
+			i: 19329,
+			n: "celica AFUZIN2",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN2 ÷ CI: 642 ÷ RF: 108\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 110 ÷ Nagib: 0 + 0\nDatum vklopa: 05.09.2000"
+		}, {
+			i: 19330,
+			n: "celica AFUZIN3",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN3 ÷ CI: 643 ÷ RF: 115\nEDGE\nTMA\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 260 ÷ Nagib: 0 + 1\nDatum vklopa: 05.09.2000"
+		}, {
+			i: 20575,
+			n: "celica AFUZINA",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZINA / D ÷ CI: 20641/20644 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=293/303 cBm\nPA=430/430 cBm ÷ cable loss=15 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 12.08.2003/27.07.2009"
+		}, {
+			i: 20576,
+			n: "celica AFUZINB",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZINB / E ÷ CI: 20642/20645 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=293/303 cBm\nPA=430/430 cBm ÷ cable loss=15 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 110 ÷ Nagib: 0 + 4\nDatum vklopa: 12.08.2003/27.07.2009"
+		}, {
+			i: 20577,
+			n: "celica AFUZINC",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZINC / F ÷ CI: 20643/20646 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/318 cBm ÷ ant=293/303 cBm\nPA=430/430 cBm ÷ cable loss=15 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 260 ÷ Nagib: 0 + 3\nDatum vklopa: 12.08.2003/27.07.2009"
+		}, {
+			i: 28236,
+			n: "celica AFUZIN18A",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN18A ÷ CI: 1638431 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AFUZIN00 ÷ DUL20 ÷ eNBid: 6400\nRSTP: rbs=182 cBm ÷ ant=174 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=8 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 30 ÷ Nagib: 0 + 4\nDatum vklopa: 25.01.2013"
+		}, {
+			i: 28237,
+			n: "celica AFUZIN18B",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN18B ÷ CI: 1638432 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AFUZIN00 ÷ DUL20 ÷ eNBid: 6400\nRSTP: rbs=182 cBm ÷ ant=174 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=8 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 110 ÷ Nagib: 0 + 4\nDatum vklopa: 25.01.2013"
+		}, {
+			i: 28235,
+			n: "celica AFUZIN18C",
+			t: 3,
+			x: 466238,
+			y: 101280,
+			info: "AFUZIN18C ÷ CI: 1638433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AFUZIN00 ÷ DUL20 ÷ eNBid: 6400\nRSTP: rbs=182 cBm ÷ ant=174 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=8 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 12.3m\nAzimut: 260 ÷ Nagib: 0 + 3\nDatum vklopa: 25.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

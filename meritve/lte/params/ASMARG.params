@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19464,
+			n: "celica ASMARG1",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG1 ÷ CI: 791 ÷ RF: 119\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 85 ÷ Nagib: 0 + 0\nDatum vklopa: 11.07.2001"
+		}, {
+			i: 19465,
+			n: "celica ASMARG2",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG2 ÷ CI: 792 ÷ RF: 123\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 180 ÷ Nagib: 3 + 0\nDatum vklopa: 11.07.2001"
+		}, {
+			i: 19466,
+			n: "celica ASMARG3",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG3 ÷ CI: 793 ÷ RF: 112\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 310 ÷ Nagib: 3 + 0\nDatum vklopa: 11.07.2001"
+		}, {
+			i: 20722,
+			n: "celica ASMARGA",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARGA / D ÷ CI: 20791/20794 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=290/300 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 85 ÷ Nagib: 0 + 3\nDatum vklopa: 13.08.2003/12.10.2009"
+		}, {
+			i: 20723,
+			n: "celica ASMARGB",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARGB / E ÷ CI: 20792/20795 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=290/300 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 180 ÷ Nagib: 3 + 2\nDatum vklopa: 13.08.2003/12.10.2009"
+		}, {
+			i: 20724,
+			n: "celica ASMARGC",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARGC / F ÷ CI: 20793/20796 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=290/300 cBm\nPA=430/430 cBm ÷ cable loss=28 cBm\nASC ÷ RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 310 ÷ Nagib: 3 + 0\nDatum vklopa: 13.08.2003/12.10.2009"
+		}, {
+			i: 28266,
+			n: "celica ASMARG18A",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG18A ÷ CI: 2022431 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASMARG00 ÷ DUL20 ÷ eNBid: 7900\nRSTP: rbs=182 cBm ÷ ant=170 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=12 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 85 ÷ Nagib: 0 + 3\nDatum vklopa: 05.02.2013"
+		}, {
+			i: 28267,
+			n: "celica ASMARG18B",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG18B ÷ CI: 2022432 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASMARG00 ÷ DUL20 ÷ eNBid: 7900\nRSTP: rbs=182 cBm ÷ ant=170 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=12 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 180 ÷ Nagib: 3 + 2\nDatum vklopa: 05.02.2013"
+		}, {
+			i: 28265,
+			n: "celica ASMARG18C",
+			t: 3,
+			x: 465964,
+			y: 103735,
+			info: "ASMARG18C ÷ CI: 2022433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ASMARG00 ÷ DUL20 ÷ eNBid: 7900\nRSTP: rbs=182 cBm ÷ ant=170 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=12 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 15m\nAzimut: 310 ÷ Nagib: 3 + 0\nDatum vklopa: 05.02.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}

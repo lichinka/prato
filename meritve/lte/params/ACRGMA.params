@@ -1,0 +1,51 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 22728,
+			n: "celica ACRGMA1",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMA1 ÷ CI: 10251 ÷ RF: 110\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 100 ÷ Nagib: 0 + 2\nDatum vklopa: 25.10.2005"
+		}, {
+			i: 22729,
+			n: "celica ACRGMA2",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMA2 ÷ CI: 10252 ÷ RF: 117\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 200 ÷ Nagib: 0 + 2\nDatum vklopa: 25.10.2005"
+		}, {
+			i: 20546,
+			n: "celica ACRGMAA",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMAA / D ÷ CI: 30251/30254 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/318 cBm ÷ ant=289/289 cBm\nPA=430/430 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 100 ÷ Nagib: 0 + 5\nDatum vklopa: 25.10.2005/04.03.2009"
+		}, {
+			i: 20547,
+			n: "celica ACRGMAB",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMAB / E ÷ CI: 30252/30255 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=289/299 cBm\nPA=430/430 cBm ÷ cable loss=29 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 200 ÷ Nagib: 0 + 4\nDatum vklopa: 25.10.2005/04.03.2009"
+		}, {
+			i: 28227,
+			n: "celica ACRGMA18A",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMA18A ÷ CI: 3200031 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ACRGMA00 ÷ DUL20 ÷ eNBid: 12500\nRSTP: rbs=182 cBm ÷ ant=163 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=19 cBm\np-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 100 ÷ Nagib: 0 + 5\nDatum vklopa: 21.01.2013"
+		}, {
+			i: 28228,
+			n: "celica ACRGMA18B",
+			t: 3,
+			x: 463805,
+			y: 107467,
+			info: "ACRGMA18B ÷ CI: 3200032 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ACRGMA00 ÷ DUL20 ÷ eNBid: 12500\nRSTP: rbs=182 cBm ÷ ant=163 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=19 cBm\np-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 23.15m\nAzimut: 200 ÷ Nagib: 0 + 4\nDatum vklopa: 21.01.2013"
+		}],
+		len: 6
+	}],
+	len: 1
+}

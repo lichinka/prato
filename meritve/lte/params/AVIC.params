@@ -1,0 +1,107 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19397,
+			n: "celica AVIC1",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC1 ÷ CI: 281 ÷ RF: 110\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 70 ÷ Nagib: 3 + 0\nDatum vklopa: 02.03.1999"
+		}, {
+			i: 19398,
+			n: "celica AVIC2",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC2 ÷ CI: 282 ÷ RF: 113\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 150 ÷ Nagib: 3 + 0\nDatum vklopa: 02.03.1999"
+		}, {
+			i: 19399,
+			n: "celica AVIC3",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC3 ÷ CI: 283 ÷ RF: 119\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 02.03.1999"
+		}, {
+			i: 26046,
+			n: "celica AVICTK1",
+			t: 3,
+			x: 460220,
+			y: 100060,
+			info: "AVICTK1 ÷ CI: 10061 ÷ RF: 122\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 18.5m\nAzimut: 140 ÷ Nagib: 2 + 2\nDatum vklopa: 07.06.2011"
+		}, {
+			i: 24717,
+			n: "celica AVICTK2",
+			t: 3,
+			x: 460207,
+			y: 100075,
+			info: "AVICTK2 ÷ CI: 10062 ÷ RF: 106\nEDGE\nTip: K 742 265 ÷ Kot: 65°\nVišina: 25m\nAzimut: 255 ÷ Nagib: 0 + 0\nDatum vklopa: 27.10.2008"
+		}, {
+			i: 20791,
+			n: "celica AVICA",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVICA / D ÷ CI: 20281/20284 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/313 cBm ÷ ant=290/295 cBm\nPA=430/430 cBm ÷ cable loss=18 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 70 ÷ Nagib: 3 + 6\nDatum vklopa: 23.09.2003/09.03.2009"
+		}, {
+			i: 20792,
+			n: "celica AVICB",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVICB / E ÷ CI: 20282/20285 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/313 cBm ÷ ant=290/295 cBm\nPA=430/430 cBm ÷ cable loss=18 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 150 ÷ Nagib: 3 + 3\nDatum vklopa: 23.09.2003/09.03.2009"
+		}, {
+			i: 20793,
+			n: "celica AVICC",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVICC / F ÷ CI: 20283/20286 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=310/315 cBm ÷ ant=279/284 cBm\nPA=430/430 cBm ÷ cable loss=31 cBm\np-ASC ÷ p-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 270 ÷ Nagib: 3 + 3\nDatum vklopa: 23.09.2003/09.03.2009"
+		}, {
+			i: 21758,
+			n: "celica AVICTKA",
+			t: 3,
+			x: 460209,
+			y: 100087,
+			info: "AVICTKA / D ÷ CI: 30061/30064 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/310 cBm ÷ ant=282/284 cBm\nPA=430/430 cBm ÷ cable loss=26 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 18.5m\nAzimut: 0 ÷ Nagib: 2 + 4\nDatum vklopa: 01.10.2004/01.06.2011"
+		}, {
+			i: 21759,
+			n: "celica AVICTKB",
+			t: 3,
+			x: 460220,
+			y: 100060,
+			info: "AVICTKB / E ÷ CI: 30062/30065 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/311 cBm ÷ ant=283/286 cBm\nPA=430/430 cBm ÷ cable loss=25 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 18.5m\nAzimut: 140 ÷ Nagib: 2 + 3\nDatum vklopa: 01.10.2004/01.06.2011"
+		}, {
+			i: 21760,
+			n: "celica AVICTKC",
+			t: 3,
+			x: 460207,
+			y: 100075,
+			info: "AVICTKC / F ÷ CI: 30063/30066 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/314 cBm ÷ ant=276/282 cBm\nPA=430/430 cBm ÷ cable loss=32 cBm\nTip: K 742 265 ÷ Kot: 65°\nVišina: 25m\nAzimut: 255 ÷ Nagib: 0 + 5\nDatum vklopa: 01.10.2004/01.06.2011"
+		}, {
+			i: 28088,
+			n: "celica AVIC18A",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC18A ÷ CI: 716831 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIC00 ÷ DUL20 ÷ eNBid: 2800\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 70 ÷ Nagib: 3 + 6\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28089,
+			n: "celica AVIC18B",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC18B ÷ CI: 716832 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIC00 ÷ DUL20 ÷ eNBid: 2800\nRSTP: rbs=182 cBm ÷ ant=166 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=16 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 150 ÷ Nagib: 3 + 3\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28087,
+			n: "celica AVIC18C",
+			t: 3,
+			x: 461300,
+			y: 100457,
+			info: "AVIC18C ÷ CI: 716833 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIC00 ÷ DUL20 ÷ eNBid: 2800\nRSTP: rbs=182 cBm ÷ ant=167 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=15 cBm\np-RET\nTip: K 742 265 ÷ Kot: 65°\nVišina: 26m\nAzimut: 270 ÷ Nagib: 3 + 3\nDatum vklopa: 02.01.2013"
+		}],
+		len: 14
+	}],
+	len: 1
+}

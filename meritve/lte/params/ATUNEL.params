@@ -1,0 +1,93 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 22534,
+			n: "celica ATUNEL1",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL1 ÷ CI: 291 ÷ RF: 112\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 130 ÷ Nagib: 0 + 4\nDatum vklopa: 31.03.1999"
+		}, {
+			i: 22535,
+			n: "celica ATUNEL2",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL2 ÷ CI: 292 ÷ RF: 117\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 230 ÷ Nagib: 0 + 4\nDatum vklopa: 06.09.2004"
+		}, {
+			i: 22536,
+			n: "celica ATUNEL3",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL3 ÷ CI: 293 ÷ RF: 108\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 9m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 06.09.2004"
+		}, {
+			i: 22536,
+			n: "celica ATUNEL3",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL3 ÷ CI: 293 ÷ RF: 108\nEDGE\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 300 ÷ Nagib: 0 + 4\nDatum vklopa: 06.09.2004"
+		}, {
+			i: 22073,
+			n: "celica ATUNELA",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNELA / D ÷ CI: 20291/20294 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=318/328 cBm ÷ ant=288/298 cBm\nPA=448/446 cBm ÷ cable loss=30 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 130 ÷ Nagib: 0 + 6\nDatum vklopa: 06.09.2004/29.01.2009"
+		}, {
+			i: 22074,
+			n: "celica ATUNELB",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNELB / E ÷ CI: 20292/20295 ÷ RF: 10789/10814\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=323/333 cBm ÷ ant=293/303 cBm\nPA=448/446 cBm ÷ cable loss=30 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 230 ÷ Nagib: 0 + 8\nDatum vklopa: 06.09.2004/29.01.2009"
+		}, {
+			i: 22075,
+			n: "celica ATUNELC",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNELC / F ÷ CI: 20293/20296 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=320/320 cBm ÷ ant=320/320 cBm\nPA=448/446 cBm ÷ cable loss=0 cBm\nTip: K 742 264 ÷ Kot: 65°\nVišina: 9m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 06.09.2004/29.01.2009"
+		}, {
+			i: 22075,
+			n: "celica ATUNELC",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNELC / F ÷ CI: 20293/20296 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=320/320 cBm ÷ ant=320/320 cBm\nPA=448/446 cBm ÷ cable loss=0 cBm\np-ASC ÷ p-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 300 ÷ Nagib: 0 + 5\nDatum vklopa: 06.09.2004/29.01.2009"
+		}, {
+			i: 28064,
+			n: "celica ATUNEL18A",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL18A ÷ CI: 742431 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATUNEL00 ÷ DUL20 ÷ eNBid: 2900\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 130 ÷ Nagib: 0 + 6\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28065,
+			n: "celica ATUNEL18B",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL18B ÷ CI: 742432 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATUNEL00 ÷ DUL20 ÷ eNBid: 2900\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 230 ÷ Nagib: 0 + 8\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28063,
+			n: "celica ATUNEL18C",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL18C ÷ CI: 742433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATUNEL00 ÷ DUL20 ÷ eNBid: 2900\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\nTip: K 742 264 ÷ Kot: 65°\nVišina: 9m\nAzimut: 30 ÷ Nagib: 0 + 0\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28063,
+			n: "celica ATUNEL18C",
+			t: 3,
+			x: 462378,
+			y: 100177,
+			info: "ATUNEL18C ÷ CI: 742433 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: ATUNEL00 ÷ DUL20 ÷ eNBid: 2900\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 264 ÷ Kot: 65°\nVišina: 17m\nAzimut: 300 ÷ Nagib: 0 + 5\nDatum vklopa: 02.01.2013"
+		}],
+		len: 12
+	}],
+	len: 1
+}

@@ -1,0 +1,65 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19514,
+			n: "celica AVIZMA1",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMA1 ÷ CI: 831 ÷ RF: 116\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 20m\nAzimut: 140 ÷ Nagib: 3 + 0\nDatum vklopa: 29.11.2001"
+		}, {
+			i: 19515,
+			n: "celica AVIZMA2",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMA2 ÷ CI: 832 ÷ RF: 109\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 20m\nAzimut: 260 ÷ Nagib: 0 + 0\nDatum vklopa: 29.11.2001"
+		}, {
+			i: 20798,
+			n: "celica AVIZMAA",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMAA / D ÷ CI: 20831/20834 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=277/287 cBm\nPA=400/400 cBm ÷ cable loss=21 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 140 ÷ Nagib: 4 + 1\nDatum vklopa: 10.09.2003/09.03.2011"
+		}, {
+			i: 20799,
+			n: "celica AVIZMAB",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMAB / E ÷ CI: 20832/20835 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/308 cBm ÷ ant=287/287 cBm\nPA=400/400 cBm ÷ cable loss=21 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 260 ÷ Nagib: 0 + 3\nDatum vklopa: 10.09.2003/09.03.2011"
+		}, {
+			i: 21910,
+			n: "celica AVIZMAC",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMAC / F ÷ CI: 20833/20836 ÷ RF: 10789/10837\n2xHSDPA+ ÷ EUL 2ms\nCPICH: rbs=298/308 cBm ÷ ant=277/287 cBm\nPA=400/400 cBm ÷ cable loss=21 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 355 ÷ Nagib: 0 + 6\nDatum vklopa: 10.09.2003/09.03.2011"
+		}, {
+			i: 28287,
+			n: "celica AVIZMA18A",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMA18A ÷ CI: 2124831 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIZMA00 ÷ DUL20 ÷ eNBid: 8300\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 140 ÷ Nagib: 4 + 1\nDatum vklopa: 12.02.2013"
+		}, {
+			i: 28286,
+			n: "celica AVIZMA18B",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMA18B ÷ CI: 2124832 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIZMA00 ÷ DUL20 ÷ eNBid: 8300\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 260 ÷ Nagib: 0 + 3\nDatum vklopa: 12.02.2013"
+		}, {
+			i: 28285,
+			n: "celica AVIZMA18C",
+			t: 3,
+			x: 458538,
+			y: 106770,
+			info: "AVIZMA18C ÷ CI: 2124833 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVIZMA00 ÷ DUL20 ÷ eNBid: 8300\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 20m\nAzimut: 355 ÷ Nagib: 0 + 6\nDatum vklopa: 12.02.2013"
+		}],
+		len: 8
+	}],
+	len: 1
+}

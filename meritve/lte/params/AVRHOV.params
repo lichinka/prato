@@ -1,0 +1,72 @@
+{
+	tabs: [{
+		name: "celice",
+		ct: 2300,
+		desc: [{
+			i: 19511,
+			n: "celica AVRHOV1",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV1 ÷ CI: 211 ÷ RF: 124\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18m\nAzimut: 30 ÷ Nagib: 4 + 0\nDatum vklopa: 20.10.1998"
+		}, {
+			i: 19512,
+			n: "celica AVRHOV2",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV2 ÷ CI: 212 ÷ RF: 116\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18m\nAzimut: 150 ÷ Nagib: 4 + 0\nDatum vklopa: 20.10.1998"
+		}, {
+			i: 19513,
+			n: "celica AVRHOV3",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV3 ÷ CI: 213 ÷ RF: 107\nEDGE\nTip: K 739 624 ÷ Kot: 65°\nVišina: 18m\nAzimut: 270 ÷ Nagib: 3 + 0\nDatum vklopa: 20.10.1998"
+		}, {
+			i: 20806,
+			n: "celica AVRHOVA",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOVA / D ÷ CI: 20211/20214 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/313 cBm ÷ ant=277/282 cBm\nPA=430/430 cBm ÷ cable loss=31 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 40 ÷ Nagib: 0 + 5\nNagib_p: - + 7\nDatum vklopa: 07.08.2003/07.08.2003"
+		}, {
+			i: 20807,
+			n: "celica AVRHOVB",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOVB / E ÷ CI: 20212/20215 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/313 cBm ÷ ant=277/282 cBm\nPA=430/430 cBm ÷ cable loss=31 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 150 ÷ Nagib: 0 + 5\nNagib_p: - + 6\nDatum vklopa: 07.08.2003/07.08.2003"
+		}, {
+			i: 20808,
+			n: "celica AVRHOVC",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOVC / F ÷ CI: 20213/20216 ÷ RF: 10789/10837\nHSDPA+ ÷ EUL 2ms\nCPICH: rbs=308/313 cBm ÷ ant=277/282 cBm\nPA=430/430 cBm ÷ cable loss=31 cBm\np-ASC ÷ p-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 260 ÷ Nagib: 0 + 4\nDatum vklopa: 07.08.2003/07.08.2003"
+		}, {
+			i: 28105,
+			n: "celica AVRHOV18A",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV18A ÷ CI: 537631 (31) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVRHOV00 ÷ DUL20 ÷ eNBid: 2100\nRSTP: rbs=182 cBm ÷ ant=164 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=18 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 40 ÷ Nagib: 0 + 5\nNagib_p: - + 7\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28107,
+			n: "celica AVRHOV18B",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV18B ÷ CI: 537632 (32) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVRHOV00 ÷ DUL20 ÷ eNBid: 2100\nRSTP: rbs=182 cBm ÷ ant=161 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=21 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 150 ÷ Nagib: 0 + 5\nNagib_p: - + 6\nDatum vklopa: 02.01.2013"
+		}, {
+			i: 28106,
+			n: "celica AVRHOV18C",
+			t: 3,
+			x: 459301,
+			y: 99898,
+			info: "AVRHOV18C ÷ CI: 537633 (33) ÷ RF: 1579 ÷ RUS01 B3 x2\nBB: AVRHOV00 ÷ DUL20 ÷ eNBid: 2100\nRSTP: rbs=182 cBm ÷ ant=160 cBm\nPA=460 cBm ÷ Psector=100 % ÷ cable loss=22 cBm\np-RET\nTip: K 742 212 ÷ Kot: 65°\nVišina: 18m\nAzimut: 260 ÷ Nagib: 0 + 4\nDatum vklopa: 02.01.2013"
+		}],
+		len: 9
+	}],
+	len: 1
+}
