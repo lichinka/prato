@@ -92,7 +92,7 @@ struct Tx_parameters
     // full path to the antenna diagram file
     char    antenna_diagram_file [_CHAR_BUFFER_SIZE_];
 
-    // binary file from which the field measurements are read
+    // raster map file from which the field measurements are read
     char    field_meas_map [_CHAR_BUFFER_SIZE_];
 
     // number of rows and columns of each of the 2D RADIUS area matrices

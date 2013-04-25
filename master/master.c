@@ -105,7 +105,7 @@ send_tx_data (Parameters *params,
     //
     if (params->use_opt)
     {
-        MPI_Send (&(tx_params->m_field_meas[tx_params->map_north_idx][tx_params->map_west_idx]),
+        MPI_Send (&(params->m_field_meas[tx_params->map_north_idx][tx_params->map_west_idx]),
                   1,
                   Radius_area,
                   worker_rank,
@@ -185,20 +185,6 @@ init_coverage_for_tx (FILE          *ini_file,
     init_tx_params (params,
                     tx_params,
                     tx_params);
-    //
-    // if in optimization mode, load the field measurements of this Tx
-    //
-    if (params->use_opt)
-    {
-        //
-        // load the measurements from a raster map
-        //
-        load_field_measurements_from_map (tx_params->field_meas_map,
-                                          tx_params->m_field_meas);
-    }
-    else
-        fprintf (stdout, 
-                 "*** INFO: Not loading transmitter measurements in coverage prediction mode\n");
 }
 
 
@@ -407,6 +393,24 @@ optimize_mpi (Parameters *params,
                               _WORKER_KEEP_WORKING_TAG_,
                               *worker_comm);
 #ifdef _PERFORMANCE_METRICS_
+                    measure_time_id ("Load field measurements", 
+                                     worker_rank);
+#endif
+                    //
+                    // allocate a matrix for loading the field measurements
+                    //
+                    if (params->m_field_meas == NULL)
+                        params->m_field_meas = prato_alloc_double_matrix (params->nrows,
+                                                                          params->ncols,
+                                                                          params->m_field_meas);
+                    //
+                    // load the measurements from a raster map
+                    //
+                    load_field_measurements_from_map (params->tx_params[-- tx_count].field_meas_map,
+                                                      params->m_field_meas);
+#ifdef _PERFORMANCE_METRICS_
+                    measure_time_id (NULL,
+                                     worker_rank);
                     measure_time_id ("Transmitter data send", 
                                      worker_rank);
 #endif
@@ -414,13 +418,9 @@ optimize_mpi (Parameters *params,
                     // starting transmitter-data send
                     //
                     send_tx_data (params,
-                                  &(params->tx_params[-- tx_count]),
+                                  &(params->tx_params[tx_count]),
                                   *worker_comm,
                                   worker_rank);
-                    //
-                    // reduce the number of transmitter-data still to be sent
-                    //
-                    running_workers --;
 #ifdef _PERFORMANCE_METRICS_
                     //
                     // transmitter-data send finished,
@@ -428,6 +428,20 @@ optimize_mpi (Parameters *params,
                     measure_time_id (NULL, 
                                      worker_rank);
 #endif
+                    //
+                    // clear the field-measurement matrix to
+                    // avoid data clashing with the next transmitter
+                    //
+                    if (params->m_field_meas != NULL)
+                    {
+                        free (params->m_field_meas[0]);
+                        free (params->m_field_meas);
+                        params->m_field_meas = NULL;
+                    }
+                    //
+                    // reduce the number of transmitter-data still to be sent
+                    //
+                    running_workers --;
                 }
                 break;
 
@@ -437,7 +451,8 @@ optimize_mpi (Parameters *params,
                          worker_rank);
         }   
     }
-    printf ("*** INFO: All transmitter data sent. Starting optimization ...\n");
+    fprintf (stdout,
+             "*** INFO: All transmitter data sent. Starting optimization ...\n");
     optimize_on_master (params,
                         params->tx_params,
                         worker_comm);
@@ -473,7 +488,7 @@ init_coverage (FILE       *ini_file,
     params->m_field_meas = NULL;
 
     //
-    // initialize the clutter categories to zero (0)
+    // initialize all clutter categories to zero (0)
     //
     params->clutter_category_count = 0;
     for (i = 0; i < _CHAR_BUFFER_SIZE_; i ++)
@@ -663,7 +678,7 @@ init_coverage (FILE       *ini_file,
     //
     // create an array containing the transmitters to be processed
     //
-    char *tx_sections [10 * _CHAR_BUFFER_SIZE_];
+    char *tx_sections [_CHAR_BUFFER_SIZE_];
     params->ntx = split_sections (tx_sections_list,
                                   tx_sections);
     // 
@@ -752,7 +767,6 @@ init_mpi (int argc,
                  nworkers);
         params->ntx = nworkers;
     }
-
     //
     // sync point: pass common input data to all workers
     //
