@@ -1,7 +1,7 @@
 #!/bin/bash
 
 REDIR=$1
-RUN_DIR="/home/luka/etc/dr/tun_par/prato/src"
+RUN_DIR="${HOME}/etc/dr/tun_par/prato/src"
 #CMD="valgrind --leak-check=yes ${RUN_DIR}/worker/worker"
 CMD="${RUN_DIR}/worker/worker"
 #PSQL_SERVER=ninestein

@@ -12,7 +12,7 @@ if [ -n "${OUTPUT}" ] && [ -n "${CELLS}" ] && [ -n "${OPTIONS}" ]; then
     #
     # start MPI jobs for LTE network
     #
-    mpirun --mca btl tcp,sm,self -np 1 --hostfile hostfile.degima r.coverage ${OPTIONS} ini_file=./parameters_lte.ini tx_ini_sections=${CELLS} : -np ${NP} /home/luka/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
+    mpirun --mca btl_tcp_if_include 192.168.1.0/24 --mca btl tcp,sm,self --host localhost -np 1 r.coverage ${OPTIONS} ini_file=./parameters_lte.ini tx_ini_sections=${CELLS} : --hostfile hostfile.ninestein -np ${NP} ${HOME}/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
 else
     echo "Usage: $0 [output] [comma-separated cell list] [module opts ...]"
     echo "Runs the [r.coverage] tool module for the LTE network with the given parameters.-"

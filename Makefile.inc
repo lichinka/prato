@@ -5,7 +5,7 @@ GRASS_TOPDIR        = /usr/local/src/grass-6.4.2/dist.x86_64-unknown-linux-gnu
 #GRASS_TOPDIR        = /home/luka/grass-6.4.2
 #CUDA_DIR            = $(HOME)/AMD_SDK
 CUDA_DIR            = $(ATISTREAMSDKROOT)
-PAPI_DIR            = $(HOME)
+PAPI_DIR            = $(HOME)/papi
 OCL_COMMON_LIB_DIR  = ../ocl_common
 PERFORMANCE_LIB_DIR = ../performance
 
@@ -14,7 +14,7 @@ CC          = gcc
 #PRJCFLAGS   = -D_PERFORMANCE_METRICS_ -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJCFLAGS   = -fno-strict-aliasing -mtune=native -g -O0 -Wall -Wno-unused-function -pipe
 PRJINCS     = -I$(PAPI_DIR)/include -I$(CUDA_DIR)/include -I$(GRASS_TOPDIR)/include $(shell mpicc --showme:compile) -I.
-PRJLIBS     = -L$(PAPI_DIR)/lib -lpapi -L$(CUDA_DIR)/lib/x86_64 $(shell mpicc --showme:link)
+PRJLIBS     = -L$(PAPI_DIR)/lib -lpapi -L$(CUDA_DIR)/lib/x86_64 -L$(GRASS_TOPDIR)/lib $(shell mpicc --showme:link)
 RM          = rm
 ECHO        = echo
 
