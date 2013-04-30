@@ -677,6 +677,7 @@ parameter_fine_tuning (Parameters    *params,
     // use the GSL library to solve the linear system of equations
     //
     int s;
+	double det;
     gsl_vector      *x  = gsl_vector_alloc (Dim);
     gsl_vector      *r  = gsl_vector_alloc (Dim);
     gsl_permutation *p  = gsl_permutation_alloc (Dim);
@@ -691,47 +692,66 @@ parameter_fine_tuning (Parameters    *params,
         gsl_vector_set (b, ix, b_data[ix]);
     }
 
-    //
-    // solve the linear system
-    //
+	//
+	// if the matrix is singular (i.e. its determinant is 0), the system is not solvable
+	//
     gsl_linalg_LU_decomp (A, p, &s);
-    gsl_linalg_LU_solve  (A, p, b, x);
+	det = gsl_linalg_LU_det (A, s);
+	if (det != 0)
+	{
+		//
+		// solve the linear system
+		//
+		gsl_linalg_LU_solve  (A, p, b, x);
 
-    //
-    // copy the original values back into A, i.e.
-    // the values before the decomposition
-    //
-    for (ix = 0; ix < Dim; ix ++)
-        for (iy = 0; iy < Dim; iy ++)
-            gsl_matrix_set (A, ix, iy, A_data[ix][iy]);
+		//
+		// copy the original values back into A, i.e.
+		// the values before the decomposition
+		//
+		for (ix = 0; ix < Dim; ix ++)
+			for (iy = 0; iy < Dim; iy ++)
+				gsl_matrix_set (A, ix, iy, A_data[ix][iy]);
 
-    //
-    // r = A * x - b
-    //
-    gsl_blas_dgemv (CblasNoTrans, 1.0, A, x, 0.0, r);
-    gsl_vector_sub (r, b);
+		//
+		// r = A * x - b
+		//
+		gsl_blas_dgemv (CblasNoTrans, 1.0, A, x, 0.0, r);
+		gsl_vector_sub (r, b);
 
-    // 
-    // if the norm of the residual is not 0 (zero), then the system
-    // does not have a unique solution
-    //
-    double residual_norm = gsl_blas_dnrm2 (r);
+		// 
+		// if the norm of the residual is not 0 (zero), then the system
+		// does not have a unique solution
+		//
+		double residual_norm = gsl_blas_dnrm2 (r);
 
-    //
-    // save the solution in the parameters of the propagation model
-    //
-    fprintf (stdout,
-             "*** INFO: found optimal values for E/// (residual is %g)\n", 
-             residual_norm);
-    for (ix = 0; ix < Dim; ix ++)
-    {
-        tx_params->eric_params[ix] = gsl_vector_get (x, ix);
-        fprintf (stdout,
-                 "\tA%d\t%g\n",
-                 ix,
-                 tx_params->eric_params[ix]);
-    }
-
+		//
+		// save the solution in the parameters of the propagation model
+		//
+		fprintf (stdout,
+				 "*** INFO: found optimal values for E/// (residual is %g)\n", 
+				 residual_norm);
+		for (ix = 0; ix < Dim; ix ++)
+			tx_params->eric_params[ix] = gsl_vector_get (x, ix);
+	}
+	else
+	{
+		fprintf (stderr,
+				 "*** WARNING: Linear system for transmitter %s is not solvable. Using default values.\n",
+				 tx_params->tx_name);
+		tx_params->eric_params[0] = 38.0;
+		tx_params->eric_params[1] = 32.0;
+		tx_params->eric_params[2] = -12.0;
+		tx_params->eric_params[3] = 0.1;
+	}
+	//
+	// display the parameter values for E///
+	//
+	for (ix = 0; ix < Dim; ix ++)
+		fprintf (stdout,
+				 "\tA%d\t%g\n",
+				 ix,
+				 tx_params->eric_params[ix]);
+	
 #ifdef _DEBUG_INFO_
     //
     // DEBUG: dump the matrices
