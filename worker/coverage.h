@@ -332,14 +332,17 @@ struct Parameters
     char *  ini_file_content;
     int     ini_file_content_size;
 
-    // a flag to indicate the framework starts in optimization mode
-    char    use_opt;
+    // the number of generations to run the optimization algorithm within 
+    // the framework, i.e. per-worker optimization mode 
+    // (a value of 0 turns this off)
+    int     use_opt;
 
-    // a flag to indicate the optimization algorithm runs globally, i.e.
-    // using the workers just to calculate the objective function value
-    // in every iteration of the optimization algorithm running on the 
-    // master process
-    char    use_master_opt;
+    // the number of generations to run the optimization algorithm, but
+    // using the workers just to calculate the objective function value;
+    // this happens in every iteration of the optimization algorithm,
+    // which runs on the master process 
+    // (a value of 0 turns this off)
+    int    use_master_opt;
 
     // a flag to indicate the GPU should be used 
     // on the worker side, if available

@@ -44,8 +44,9 @@ int main (int argc, char **argv)
 {
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output,
-                   *eric_a0, *eric_a1, *eric_a2, *eric_a3;
-    struct Flag    *use_mpi, *use_gpu, *use_opt, *use_master_opt;
+                   *eric_a0, *eric_a1, *eric_a2, *eric_a3,
+                   *worker_opt, *master_opt;
+    struct Flag    *use_mpi, *use_gpu;
 
     //
     // initialize the GIS environment
@@ -116,13 +117,19 @@ int main (int argc, char **argv)
     use_gpu->key = 'g';
     use_gpu->description = "Use the GPU implementation. Implies -m.";
 
-    use_opt = G_define_flag ( );
-    use_opt->key = 't';
-    use_opt->description = "Optimize the clutter-category losses locally, i.e. per worker. Implies -m.";
+    worker_opt = G_define_option ( );
+    worker_opt->key = "t";
+    worker_opt->type = TYPE_INTEGER;
+    worker_opt->required = NO;
+    worker_opt->answer = "0";
+    worker_opt->label = "Optimize the clutter-category losses locally, i.e. per worker, for the given number of generations. Implies -m.";
 
-    use_master_opt = G_define_flag ( );
-    use_master_opt->key = 'p';
-    use_master_opt->description = "Optimize the clutter-category losses globally, i.e. workers calculate only the objective function. Implies -t.";
+    master_opt = G_define_option ( );
+    master_opt->key = "p";
+    master_opt->type = TYPE_INTEGER;
+    master_opt->required = NO;
+    master_opt->answer = "0";
+    master_opt->label = "Optimize the clutter-category losses globally, i.e. workers calculate only the objective function, for the given number of generations. Implies -t.";
 
     //
     // ... and parse them
@@ -147,11 +154,15 @@ int main (int argc, char **argv)
     sscanf (eric_a3->answer, "%lf", &(params->eric_params[3]));
 
     //
-    // flags for optimization modes and GPU implementation
+    // number of evaluations in case of optimization
     //
-    params->use_gpu        = use_gpu->answer;
-    params->use_opt        = use_opt->answer;
-    params->use_master_opt = use_master_opt->answer;
+    sscanf (worker_opt->answer, "%d", &(params->use_opt));
+    sscanf (master_opt->answer, "%d", &(params->use_master_opt));
+
+    //
+    // flag for enabling the GPU implementation on the workers
+    //
+    params->use_gpu = use_gpu->answer;
 
     if (params->use_gpu)
     {
@@ -160,7 +171,7 @@ int main (int argc, char **argv)
                  "*** INFO: GPU hardware will be used on the workers, if available\n");
     }
     if (params->use_master_opt)
-        params->use_opt = 1;
+        params->use_opt = params->use_master_opt;
 
     if (params->use_opt)
     {
