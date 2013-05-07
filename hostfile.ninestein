@@ -1,3 +1,5 @@
+localhost max-slots=10
+
 k1	max-slots=6
 k2	max-slots=6
 k3	max-slots=6

@@ -18,8 +18,8 @@ if [ -n "${CELL}" ]; then
     #
     RASTER="field_meas_${CELL}"
     echo "Creating raster [${RASTER}] ..."
-    echo -e "${sql}" | psql -h mg_joe.mobitel.si -U garufa -d lte | tr -d ' ' | egrep '^[0-9]'  > ${CELL}.xyz
-    #| r.in.xyz input=- output=${RASTER} method=median type=FCELL
+    #echo -e "${sql}" | psql -h mg_joe.mobitel.si -U garufa -d lte | tr -d ' ' | egrep '^[0-9]' > ${CELL}.xyz 
+    echo -e "${sql}" | psql -h mg_joe.mobitel.si -U garufa -d lte | tr -d ' ' | egrep '^[0-9]' | r.in.xyz input=- output=${RASTER} method=median type=FCELL
 else
     echo "Usage: $0 [cell name]"
     echo "Generates SQL statement for retrieving RSRP measurements of the given cell.-"

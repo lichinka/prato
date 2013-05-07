@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for c in $( sort ../cells_lj.txt ); do
+for c in $( sort ../cells_HI.txt ); do
     DATA="$( grep -h -B2 "info: \"${c}" *.params )"
 
     NAME="${c}"
