@@ -68,12 +68,12 @@ calc_profile (double** Obst_high,
 		offset_dist = sqrt(pow(floor(xBS) + 0.5 - x_tmp,2)+pow(floor(yBS) + 0.5 - y_tmp,2));	//natancna razdalja potrebna za izracun offseta pri dolocanju bina
 	
         /*
-         * Process the whole area, without the radius restriction
-         *
-		if (temp_dist*scale > radius*1000){
+         * Do not process the whole area, take the radius restriction into account
+         */
+		if (temp_dist*scale > radius*1000)
+        {
 			break;
 		}
-        */
 			
 // interpolacija DEM-a za natancnejso visino
 			if ((x_tmp - (floor(x_tmp) + 0.5)) <= 0){
@@ -284,10 +284,12 @@ DoProfile (double **Obst_high,
 			dy = -floor(yBS)/(ix - floor(xBS));				// ctan(AZI)
 		}
 		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 1st quadrant: %d\n", ix);
+#endif
 	}
 
 	// Kvadrant III
-
 	for (ix = 0; ix < xN; ix++)
 	{
 		//Patrik AZI = atan((ix - xBS) / (yN - yBS));
@@ -309,10 +311,12 @@ DoProfile (double **Obst_high,
 		}
 				
 		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 3rd quadrant: %d\n", ix);
+#endif
 	} 
 	
 	// Kvadrant II
-
 	for (iy = 0; iy < yN; iy++)
 	{
 		//Patrik AZI = atan((iy - yBS) / (xN - xBS));
@@ -334,10 +338,12 @@ DoProfile (double **Obst_high,
 		}
 		
 		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);	
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 2nd quadrant: %d\n", ix);
+#endif
 	}
 
 	// Kvadrant IV
-
 	for (iy = 0; iy < yN; iy++)
 	{
 		//Patrik AZI = atan((iy - yBS) / xBS);
@@ -359,6 +365,9 @@ DoProfile (double **Obst_high,
 		}
 		
 		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);			
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 4th quadrant: %d\n", ix);
+#endif
 	}
 
 #ifdef _PERFORMANCE_METRICS_
@@ -384,7 +393,7 @@ coverage (Parameters    *params,
 {
     //
     // calculate the terrain profile from the top of the transmitter,
-    // i.e. line-of-sight, only once
+    // i.e. line-of-sight, only once per transmitter
     // 
     DoProfile (tx_params->m_obst_height,
                tx_params->m_obst_dist,
@@ -461,13 +470,13 @@ output_to_stdout (const Parameters *params,
     // prepare the DB server before sending the data
     //
     fprintf (stdout, 
-             "CREATE TABLE IF NOT EXISTS coverage_%s (east float, north float, pl float);\n",
+             "CREATE TABLE IF NOT EXISTS pathloss_%s (east float, north float, pl float);\n",
              tx_params->tx_name);
     fprintf (stdout, 
-             "TRUNCATE TABLE coverage_%s;\n",
+             "TRUNCATE TABLE pathloss_%s;\n",
              tx_params->tx_name);
     fprintf (stdout,
-             "\\COPY coverage_%s (east, north, pl) FROM STDIN WITH DELIMITER '|'\n",
+             "\\COPY pathloss_%s (east, north, pl) FROM STDIN WITH DELIMITER '|'\n",
              tx_params->tx_name);
    
     //

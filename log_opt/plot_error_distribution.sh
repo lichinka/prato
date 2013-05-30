@@ -12,29 +12,23 @@ if [ -n "${REGION}" ]; then
     done
     SCRIPT="$( echo "${SCRIPT}" | sed -e 's/^,//g' )"
     SCRIPT="./log_opt/error_distribution.sh ${SCRIPT}"
-    ${SCRIPT}
+    echo "${SCRIPT}"
     cp /tmp/error_distribution.eps ./log_opt/error_distribution-${REGION}-def_params.eps
-
-    #
-    # Calculate the optimal parameters for each cell
-    #
-    for c in $( cat meritve/lte/cells_${REGION}.txt ); do
-        rm -f /tmp/worker*.log
-        ./run_lte.sh - ${c} -m p=1
-        PARAMS="$( grep -A4 'found optimal' /tmp/worker*.log | grep 'A' | cut -f2,3 | tr '\t' '=' | tr '\n' ' ' )"
-        echo "${c} ${PARAMS}" > /tmp/.${c}
-    done
 
     #
     # Error distribution with optimal model parameters
     #
     SCRIPT=""
     for c in $( cat meritve/lte/cells_${REGION}.txt ); do
-        SCRIPT="${SCRIPT},$( cat /tmp/.${c} )"
+        A0="$( cat log_opt/${REGION}_opt_params.dat | grep "${c}" | tr -s ' ' | cut -d' ' -f2 )"
+        A1="$( cat log_opt/${REGION}_opt_params.dat | grep "${c}" | tr -s ' ' | cut -d' ' -f3 )"
+        A2="$( cat log_opt/${REGION}_opt_params.dat | grep "${c}" | tr -s ' ' | cut -d' ' -f4 )"
+        A3="$( cat log_opt/${REGION}_opt_params.dat | grep "${c}" | tr -s ' ' | cut -d' ' -f5 )"
+        SCRIPT="${SCRIPT},${c} A0=${A0} A1=${A1} A2=${A2} A3=${A3}"
     done
     SCRIPT="$( echo "${SCRIPT}" | sed -e 's/^,//g' )"
     SCRIPT="./log_opt/error_distribution.sh ${SCRIPT}"
-    ${SCRIPT}
+    echo "${SCRIPT}"
     cp /tmp/error_distribution.eps ./log_opt/error_distribution-${REGION}-opt_params.eps
 else
     echo "Usage: $0 [region]"

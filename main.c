@@ -42,6 +42,7 @@ read_file_into_memory (const char *file_name,
  */
 int main (int argc, char **argv)
 {
+    int i;
     struct GModule *module;
     struct Option  *ini_file, *tx_ini_sections, *output,
                    *eric_a0, *eric_a1, *eric_a2, *eric_a3,
@@ -195,7 +196,7 @@ int main (int argc, char **argv)
                                       params->ini_file_content_size,
                                       "r");
     //
-    // initialize the coverage calculation ...
+    // initialize the coverage calculation
     //
     init_coverage (ini_file_stream,
                    tx_ini_sections->answer,
@@ -223,7 +224,8 @@ int main (int argc, char **argv)
     {
         if (params->ntx > 1)
             fprintf (stderr, 
-                     "*** WARNING Only the first transmitter will be processed\n");
+                     "*** WARNING: The coverage of the %d transmitters will be serially processed\n",
+                     params->ntx);
         //
         // set the tuning parameters for the prediction model
         //
@@ -233,57 +235,59 @@ int main (int argc, char **argv)
         sscanf (eric_a3->answer, "%lf", &(params->tx_params->eric_params[3]));
 
         //
-        // calculate the coverage for this transmitter
+        // calculate the coverage for all transmitters, serially
         //
-        coverage (params,
-                  params->tx_params);
-
-        //
-        // calculation finished, do we have to write the raster output?
-        //
-        if (output->answer == NULL)
-            output_to_stdout (params,
-                              params->tx_params);
-        else
+        for (i = 0; i < params->ntx; i ++)
         {
-            int outfd, row, col;
-            void *outrast = G_allocate_raster_buf (FCELL_TYPE);    // output buffer
-            double path_loss_num;
-            FCELL  null_f_out;
-            G_set_f_null_value (&null_f_out, 1);   
+            Tx_parameters *tx_params = &(params->tx_params[i]);
+            coverage (params,
+                      tx_params);
 
-            // controlling, if we can write the raster 
-            if ((outfd = G_open_raster_new (output->answer, FCELL_TYPE)) < 0)
-                G_fatal_error ("Unable to create raster map <%s>", 
-			                   output->answer);
-
-            for (row = 0; row < params->nrows; row++)
+            //
+            // calculation finished, do we have to write the raster output?
+            //
+            if (output->answer == NULL)
+                output_to_stdout (params,
+                                  tx_params);
+            else
             {
-                G_percent(row, params->nrows, 2);
-                for (col = 0; col < params->ncols; col++) 
+                int outfd, row, col;
+                void *outrast = G_allocate_raster_buf (FCELL_TYPE);    // output buffer
+                double path_loss_num;
+                FCELL  null_f_out;
+                G_set_f_null_value (&null_f_out, 1);   
+
+                // controlling, if we can write the raster 
+                if ((outfd = G_open_raster_new (output->answer, FCELL_TYPE)) < 0)
+                    G_fatal_error ("Unable to create raster map <%s>", 
+                                   output->answer);
+
+                for (row = 0; row < params->nrows; row++)
                 {
-                    path_loss_num = params->m_loss[row][col];
-                    if (path_loss_num == 0)
-                        ((FCELL *) outrast)[col] = null_f_out;
-                    else
-                        ((FCELL *) outrast)[col] = (FCELL)path_loss_num;
+                    G_percent(row, params->nrows, 2);
+                    for (col = 0; col < params->ncols; col++) 
+                    {
+                        path_loss_num = params->m_loss[row][col];
+                        if (path_loss_num == 0)
+                            ((FCELL *) outrast)[col] = null_f_out;
+                        else
+                            ((FCELL *) outrast)[col] = (FCELL)path_loss_num;
+                    }
+                    // write raster row to output raster map
+                    if (G_put_raster_row (outfd, outrast, FCELL_TYPE) < 0)
+                        G_fatal_error ("Failed writing raster map <%s>", 
+                                       output->answer);
                 }
-                // write raster row to output raster map
-                if (G_put_raster_row (outfd, outrast, FCELL_TYPE) < 0)
-                    G_fatal_error ("Failed writing raster map <%s>", 
-				                   output->answer);
+                G_close_cell (outfd);
+                G_free (outrast);
             }
-            G_close_cell (outfd);
-            G_free (outrast);
         }
     }
     //
     // deallocate memory before exiting
     //
-    int i;
-    for (i = 0; i < params->ntx; i ++)
-        free_tx_params (params,
-                        params->tx_params);
+    free_tx_params (params,
+                    params->tx_params);
     free (params->ini_file_content);
     free (params->tx_params);
     free (params);
