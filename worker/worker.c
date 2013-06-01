@@ -594,7 +594,7 @@ worker (const int rank,
                 coverage (params,
                           params->tx_params);
                 //
-                // wait for previous result dump to finish
+                // wait for the (possible) previous result dump to finish
                 //
                 if (dump_thread != NULL)
                 {
@@ -615,7 +615,7 @@ worker (const int rank,
                 //
                 err = pthread_create (dump_thread, 
                                       NULL,
-                                      output_to_stdout, 
+                                      &output_to_stdout, 
                                       (void *) params);
                 if (err)
                 {
@@ -632,16 +632,26 @@ worker (const int rank,
         }
     }
     //
+    // wait for the last result dump to finish
+    //
+    if (dump_thread != NULL)
+    {
+        err = pthread_join (*dump_thread, NULL);
+        if (err)
+        {
+            fprintf (stderr,
+                     "*** ERROR: failed (%d) waiting for dump thread\n", 
+                     err);
+            exit (-1);
+        }
+        free (dump_thread);
+    }
+    //
     // deallocate memory before exiting
     //
     free_tx_params (params,
                     params->tx_params);
     free (params->tx_params);
     free (params);
-    //
-    // deactivate thread context
-    //
-    free (dump_thread);
-    pthread_exit (NULL);
 }
 

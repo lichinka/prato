@@ -247,8 +247,30 @@ int main (int argc, char **argv)
             // calculation finished, do we have to write the raster output?
             //
             if (output->answer == NULL)
-                output_to_stdout (params,
-                                  tx_params);
+            {
+                pthread_t dump_thread;
+                //
+                // start result dump
+                //
+                int err = pthread_create (&dump_thread, 
+                                          NULL,
+                                          &output_to_stdout, 
+                                          (void *) params);
+                if (err)
+                {
+                    fprintf (stderr,
+                             "*** ERROR: number (%d) while creating result dump thread\n", 
+                             err);
+                    exit (-1);
+                }
+                else
+                {
+                    //
+                    // wait for it to finish
+                    //
+                    err = pthread_join (dump_thread, NULL);
+                }
+            }
             else
             {
                 int outfd, row, col;

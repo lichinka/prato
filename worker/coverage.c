@@ -455,16 +455,16 @@ coverage (Parameters    *params,
 /**
  * Displays the calculation result in the standard output.
  *
- * params           a structure holding configuration parameters which are common
- *                  to all transmitters;
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
+ * params_ptr   a pointer to the structure holding configuration parameters 
+ *              which are common to all transmitters;
  */
-void 
-output_to_stdout (const Parameters *params,
-                  const Tx_parameters *tx_params)
+void *
+output_to_stdout (void *params_ptr)
 {
     int r, c;
+
+    Parameters *params       = (Parameters *) params_ptr;
+    Tx_parameters *tx_params = params->tx_params;
     
     // 
     // prepare the DB server before sending the data
@@ -503,7 +503,7 @@ output_to_stdout (const Parameters *params,
             float east_coord  = tx_params->map_west + c * params->map_ew_res;
             float north_coord = tx_params->map_north - r * params->map_ns_res;
 
-            float pl = (float) params->tx_params->m_loss[r][c];
+            float pl = (float) tx_params->m_loss[r][c];
 
             if ((!isnan (pl)) && (pl != params->fcell_null_value))
                 fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
@@ -515,5 +515,6 @@ output_to_stdout (const Parameters *params,
     // mark end-of transmitter data
     //
     fprintf (stdout, "\\.\n");
-}
 
+    return NULL;
+}
