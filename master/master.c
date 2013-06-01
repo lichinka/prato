@@ -117,6 +117,126 @@ send_tx_data (Parameters *params,
 
 
 /**
+ * Receives the path-loss results of one transmitter from a worker process.
+ *
+ * params       a structure holding configuration parameters which are 
+ *              common to all transmitters;
+ * worker_rank  rank of the worker sending the data;
+ * tx_name      name of the transmitter for which the results are being 
+ *              received;
+ * comm         the MPI communicator to use.-
+ *
+ */
+static void 
+receive_tx_results (Parameters *params,
+                    const int  worker_rank,
+                    const char *tx_name,
+                    MPI_Comm   *comm)
+{
+    MPI_Status status;
+    Tx_parameters *tx_params = params->tx_params;
+
+    //
+    // look for the correct transmitter
+    //
+    int tx_id;
+    for (tx_id = 0; tx_id < params->ntx; tx_id ++)
+    {
+        if (strncmp (tx_name, tx_params[tx_id].tx_name, strlen (tx_name)) == 0)
+            break;
+    }
+    //
+    // this should never happen
+    //
+    assert (tx_id < params->ntx);
+
+    //
+    // the received results will be saved here
+    //
+    double *rcv_results = (double *) calloc (sizeof (double), 
+                                             tx_params[tx_id].nrows *
+                                             tx_params[tx_id].ncols);
+    //
+    // receive the transmitter-specific results
+    //
+    MPI_Recv (rcv_results,
+              tx_params[tx_id].nrows * tx_params[tx_id].ncols,
+              MPI_DOUBLE,
+              worker_rank,
+              _WORKER_SENDING_RESULT_TAG_,
+              *comm,
+              &status);
+    if (status.MPI_ERROR)
+    {
+        fprintf (stderr, 
+                 "*** ERROR: Transmitter parameters incorrectly received\n");
+        exit (-1);
+    }
+    else
+    {
+        //
+        // save the received results on the corresponding
+        // location of the transmitter
+        //
+        int r_work, c_work;
+
+        /*
+        // DEBUG only!
+        //
+        fprintf (stdout,
+                 "-- Rank %d (%s) -- Map extent (N, W)\t(%.2f,%.2f)\n",
+                 worker_rank,
+                 tx_name,
+                 tx_params[tx_id].map_north,
+                 tx_params[tx_id].map_west);*/
+
+        for (r_work = 0; r_work < tx_params[tx_id].nrows; r_work ++)
+        {
+            int r_mast  = r_work + tx_params[tx_id].map_north_idx;
+
+            for (c_work = 0; c_work < tx_params[tx_id].ncols; c_work ++)
+            {
+                int c_mast  = c_work + tx_params[tx_id].map_west_idx;
+                int elem_id = r_work * tx_params[tx_id].ncols + c_work;
+
+                //
+                // best server aggregation
+                //
+                if (!isnan (rcv_results[elem_id]))
+                {
+                    double signal_level = tx_params[tx_id].tx_power;
+                    signal_level -= rcv_results[elem_id];
+
+                    if (isnan (params->m_loss[r_mast][c_mast]))
+                        params->m_loss[r_mast][c_mast] = signal_level;
+                    else
+                    {
+                        if (signal_level > params->m_loss[r_mast][c_mast])
+                            params->m_loss[r_mast][c_mast] = signal_level;
+                    }
+                }
+                /*
+                // DEBUG only!
+                //
+                float east_coord  = tx_params[tx_id].map_west + c_work * params->map_ew_res;
+                float north_coord = tx_params[tx_id].map_north - r_work * params->map_ns_res;
+
+                float rcv_signal = (float) rcv_results[elem_id];
+
+                if ((!isnan (rcv_signal)) && (rcv_signal != params->fcell_null_value))
+                    fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
+                                                         north_coord,
+                                                         rcv_signal);
+                */
+            }
+        }
+    }
+    free (rcv_results);
+}
+
+
+
+/**
  * Initializes the coverage calculation by reading the configuration 
  * parameters in the INI file passed as argument.
  * This function uses the 'params' parameter to save its results.-
@@ -164,6 +284,10 @@ init_coverage_for_tx (FILE          *ini_file,
     tx_params->map_west_idx       = 0;
     tx_params->map_east_idx       = params->ncols - 1;
     tx_params->map_south_idx      = 0;
+    tx_params->tx_north_coord    -= ((int) tx_params->tx_north_coord) % 
+                                    ((int) params->map_ns_res);
+    tx_params->tx_east_coord     -= ((int) tx_params->tx_east_coord) %
+                                    ((int) params->map_ew_res);
     tx_params->tx_north_coord_idx = (tx_params->map_north - tx_params->tx_north_coord) /
                                     params->map_ns_res;
     tx_params->tx_east_coord_idx  = (tx_params->map_east - tx_params->tx_east_coord) /
@@ -256,7 +380,7 @@ coverage_mpi (Parameters *params,
     while (running_workers > 0)
     {   
         MPI_Recv (&buff, 
-                  0,
+                  _CHAR_BUFFER_SIZE_,
                   MPI_BYTE,
                   MPI_ANY_SOURCE,
                   MPI_ANY_TAG,
@@ -266,9 +390,10 @@ coverage_mpi (Parameters *params,
 
 #ifdef _PERFORMANCE_METRICS_
         //
-        // previous calculation and result dump finished
+        // previous result dump finished
         //
-        measure_time_id (NULL, worker_rank);
+        measure_time_id (NULL, 
+                         worker_rank);
 #endif
 
         switch (status.MPI_TAG)
@@ -308,7 +433,7 @@ coverage_mpi (Parameters *params,
                     //
                     // start coverage calculation
                     // 
-                    measure_time_id ("Calculation and result dump",
+                    measure_time_id ("Coverage calculation",
                                      worker_rank);
 #endif
                 }
@@ -331,11 +456,58 @@ coverage_mpi (Parameters *params,
                 }
                 break;
 
+            case (_WORKER_SENDING_RESULT_TAG_):
+#ifdef _PERFORMANCE_METRICS_
+                //
+                // coverage calculation finished,
+                // 
+                //
+                measure_time_id (NULL, 
+                                 worker_rank);
+                //
+                // start result dump
+                // 
+                measure_time_id ("Result dump",
+                                 worker_rank);
+#endif
+                receive_tx_results (params,
+                                    worker_rank,
+                                    buff,
+                                    worker_comm);
+                break;
+
             default:
                 fprintf (stderr, 
-                         "WARNING Unknown message from %d. worker\n", 
+                         "*** WARNING: Unknown message from %d. worker\n", 
                          worker_rank);
         }   
+    }
+    //
+    // output the coverage data that has been already aggregated
+    //
+    int r, c;
+
+    fprintf (stderr,
+             "*** WARNING: the following data is valid only in the case when workers send the\n");
+    fprintf (stderr,
+             "\tintermediate results back to the master; otherwise external DB\n");
+    fprintf (stderr,
+             "\taggregation is needed for the coverage to be valid\n");
+
+    for (r = 0; r < params->nrows; r ++)
+    {
+        for (c = 0; c < params->ncols; c ++)
+        {
+            float east_coord  = params->map_west + c * params->map_ew_res;
+            float north_coord = params->map_north - r * params->map_ns_res;
+
+            float rcv_signal = (float) params->m_loss[r][c];
+
+            if ((!isnan (rcv_signal)) && (rcv_signal != params->fcell_null_value) && (rcv_signal != 0))
+                fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
+                                                     north_coord,
+                                                     rcv_signal);
+        }
     }
 }
 
@@ -626,9 +798,18 @@ init_coverage (FILE       *ini_file,
     // allocate memory for the resulting path-loss matrix
     //
     if (params->m_loss == NULL)
+    {
         params->m_loss = prato_alloc_double_matrix (params->nrows,
                                                     params->ncols,
                                                     params->m_loss);
+        //
+        // initialize all matrix elements to the NULL value
+        //
+        int r, c;
+        for (r = 0; r < params->nrows; r ++)
+            for (c = 0; c < params->ncols; c ++)
+                params->m_loss[r][c] = params->fcell_null_value;
+    }
     //
     // allocate the reading buffers for DEM and clutter data
     //

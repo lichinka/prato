@@ -305,8 +305,9 @@ receive_tx_data (Parameters *params,
     //
     // transmitter height above sea level
     //
-    params->tx_params->total_tx_height  = params->tx_params->m_dem[params->tx_params->tx_east_coord_idx]
-                                                  [params->tx_params->tx_north_coord_idx];
+    params->tx_params->total_tx_height  = params->tx_params->m_dem
+                                           [params->tx_params->tx_east_coord_idx]
+                                           [params->tx_params->tx_north_coord_idx];
     params->tx_params->total_tx_height += params->tx_params->antenna_height_AGL;
 
     //
@@ -348,6 +349,78 @@ receive_tx_data (Parameters *params,
         }
     }
     free (rcv_tx_params);
+}
+
+
+
+/**
+ * Sends the calculation results back to the master process.
+ * 
+ * params       a structure holding configuration parameters which are common
+ *              to all transmitters;
+ * tx_params    a structure holding transmitter-specific configuration
+ *              parameters;
+ * comm         the MPI communicator to use.-
+ */
+static void 
+output_to_master (const Parameters *params,
+                  const Tx_parameters *tx_params,
+                  MPI_Comm comm)
+{
+    //
+    // inform master we are about to send the results
+    //
+    MPI_Send (&(tx_params->tx_name),
+              _CHAR_BUFFER_SIZE_,
+              MPI_BYTE,
+              _COVERAGE_MASTER_RANK_,
+              _WORKER_SENDING_RESULT_TAG_,
+              comm);
+    //
+    // MPI data type for the radius-calculation area of this transmitter
+    //
+    MPI_Datatype Radius_area;
+    MPI_Type_vector (tx_params->nrows,
+                     tx_params->ncols,
+                     tx_params->ncols,
+                     MPI_DOUBLE,
+                     &Radius_area);
+    MPI_Type_commit (&Radius_area);
+
+    //
+    // send calculated path-loss matrix to the master
+    //
+    MPI_Send (tx_params->m_loss[0],
+              1,
+              Radius_area,
+              _COVERAGE_MASTER_RANK_,
+              _WORKER_SENDING_RESULT_TAG_,
+              comm);
+    /*
+    // DEBUG only!
+    //
+    int r, c;
+    fprintf (stdout,
+             "Map extent (N, W)\t(%.2f,%.2f)\n",
+             tx_params->map_north,
+             tx_params->map_west);
+    for (r = 0; r < tx_params->nrows; r ++)
+    {
+        for (c = 0; c < tx_params->ncols; c ++)
+        {
+            float east_coord  = tx_params->map_west + c * params->map_ew_res;
+            float north_coord = tx_params->map_north - r * params->map_ns_res;
+
+            float rcv_signal = (float) tx_params->m_loss[r][c];
+
+            if ((!isnan (rcv_signal)) && (rcv_signal != params->fcell_null_value))
+            {
+                fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
+                                                     north_coord,
+                                                     rcv_signal);
+            }
+        }
+    }*/
 }
 
 
@@ -447,8 +520,9 @@ void
 worker (const int rank,
         MPI_Comm comm)
 {
-    int has_finished;
-    MPI_Status status;
+    int             has_finished, err;
+    pthread_t      *dump_thread = NULL;
+    MPI_Status      status;
 
     Parameters *params = (Parameters *) malloc (sizeof (Parameters));
 
@@ -520,14 +594,43 @@ worker (const int rank,
                 coverage (params,
                           params->tx_params);
                 //
+                // wait for previous result dump to finish
+                //
+                if (dump_thread != NULL)
+                {
+                    err = pthread_join (*dump_thread, NULL);
+                    if (err)
+                    {
+                        fprintf (stderr,
+                                 "*** ERROR: failed (%d) waiting for dump thread\n", 
+                                 err);
+                        exit (-1);
+                    }
+                }
+                else
+                    dump_thread = (pthread_t *) malloc (sizeof (pthread_t));
+
+                //
                 // start result dump
                 //
-                output_to_stdout (params,
-                                  params->tx_params);
+                err = pthread_create (dump_thread, 
+                                      NULL,
+                                      output_to_stdout, 
+                                      (void *) params);
+                if (err)
+                {
+                    fprintf (stderr,
+                             "*** ERROR: number (%d) while creating result dump thread\n", 
+                             err);
+                    exit (-1);
+                }
+                //
+                //output_to_master (params,
+                //                  params->tx_params,
+                //                  comm);
             }
         }
     }
-
     //
     // deallocate memory before exiting
     //
@@ -535,5 +638,10 @@ worker (const int rank,
                     params->tx_params);
     free (params->tx_params);
     free (params);
+    //
+    // deactivate thread context
+    //
+    free (dump_thread);
+    pthread_exit (NULL);
 }
 

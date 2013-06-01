@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <pthread.h>
 #include <grass/gis.h>
 #include <grass/glocale.h>
 
@@ -530,14 +531,11 @@ coverage (Parameters    *params,
 /**
  * Displays the calculation result in the standard output.
  *
- * params           a structure holding configuration parameters which are common
- *                  to all transmitters;
- * tx_params        a structure holding transmitter-specific configuration
- *                  parameters;
+ * params_ptr   a pointer to the structure holding configuration parameters 
+ *              which are common to all transmitters;
  */
-void 
-output_to_stdout (const Parameters *params,
-                  const Tx_parameters *tx_params);
+void *
+output_to_stdout (void *params_ptr);
 
 
 #endif
