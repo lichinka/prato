@@ -224,8 +224,7 @@ int main (int argc, char **argv)
     {
         if (params->ntx > 1)
             fprintf (stderr, 
-                     "*** WARNING: The coverage of the %d transmitters will be serially processed\n",
-                     params->ntx);
+                     "*** WARNING: the results of the serial execution mode have not been tested!\n");
         //
         // set the tuning parameters for the prediction model
         //

@@ -42,27 +42,6 @@ send_tx_data (Parameters *params,
               int worker_rank)
 {
     //
-    // calculate the subregion (within the area) where this transmitter is 
-    // located, taking into account its location and the calculation radius
-    //
-    double radius_in_meters       = params->radius * 1000;
-    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
-    tx_params->nrows              = 2 * radius_in_pixels;
-    tx_params->ncols              = 2 * radius_in_pixels;
-    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
-    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
-    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
-    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
-    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
-                                            params->map_ns_res);
-    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
-    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
-    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
-                                            params->map_ew_res);
-    tx_params->tx_north_coord_idx = radius_in_pixels;
-    tx_params->tx_east_coord_idx  = radius_in_pixels;
-
-    //
     // MPI data type for the radius-calculation area of this transmitter
     //
     MPI_Datatype Radius_area;
@@ -146,8 +125,8 @@ receive_tx_results (Parameters *params,
             break;
     }
     //
-    // this should never happen
-    //
+    // the transmitter is always found
+    // 
     assert (tx_id < params->ntx);
 
     //
@@ -269,29 +248,26 @@ init_coverage_for_tx (FILE          *ini_file,
         G_fatal_error ("Can't parse INI memory buffer\n");
 
     //
-    // by default, a transmitter subregion is the whole input region;
-    // when using the MPI implementation, this subregion is reduced
-    // (taking the calculation radius into account) to lower the memory
-    // consumption on the workers
+    // calculate the subregion (within the area) where this transmitter is 
+    // located, taking into account its location and the calculation radius
     //
-    tx_params->nrows              = params->nrows;
-    tx_params->ncols              = params->ncols;
-    tx_params->map_north          = params->map_north;
-    tx_params->map_east           = params->map_east;
-    tx_params->map_south          = params->map_south;
-    tx_params->map_west           = params->map_west;
-    tx_params->map_north_idx      = params->nrows - 1;
-    tx_params->map_west_idx       = 0;
-    tx_params->map_east_idx       = params->ncols - 1;
-    tx_params->map_south_idx      = 0;
-    tx_params->tx_north_coord    -= ((int) tx_params->tx_north_coord) % 
-                                    ((int) params->map_ns_res);
-    tx_params->tx_east_coord     -= ((int) tx_params->tx_east_coord) %
-                                    ((int) params->map_ew_res);
-    tx_params->tx_north_coord_idx = (tx_params->map_north - tx_params->tx_north_coord) /
-                                    params->map_ns_res;
-    tx_params->tx_east_coord_idx  = (tx_params->map_east - tx_params->tx_east_coord) /
-                                    params->map_ew_res;
+    double radius_in_meters       = params->radius * 1000;
+    int radius_in_pixels          = (int) (radius_in_meters / params->map_ew_res);
+    tx_params->nrows              = 2 * radius_in_pixels;
+    tx_params->ncols              = 2 * radius_in_pixels;
+    tx_params->map_north          = tx_params->tx_north_coord + radius_in_meters;
+    tx_params->map_east           = tx_params->tx_east_coord + radius_in_meters;
+    tx_params->map_south          = tx_params->tx_north_coord - radius_in_meters;
+    tx_params->map_west           = tx_params->tx_east_coord - radius_in_meters;
+    tx_params->map_north_idx      = (int) ((params->map_north - tx_params->map_north) /
+                                            params->map_ns_res);
+    tx_params->map_east_idx       = tx_params->map_west_idx + tx_params->ncols;
+    tx_params->map_south_idx      = tx_params->map_north_idx + tx_params->nrows;
+    tx_params->map_west_idx       = (int) ((tx_params->map_west - params->map_west) / 
+                                            params->map_ew_res);
+    tx_params->tx_north_coord_idx = radius_in_pixels;
+    tx_params->tx_east_coord_idx  = radius_in_pixels;
+
     //
     // initialize the pointers within the transmitter structure
     //

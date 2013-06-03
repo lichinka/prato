@@ -625,6 +625,8 @@ worker (const int rank,
                     exit (-1);
                 }
                 //
+                // dump the results to the master process
+                //
                 //output_to_master (params,
                 //                  params->tx_params,
                 //                  comm);
