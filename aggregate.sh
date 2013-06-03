@@ -4,10 +4,9 @@ TX=$1
 INI=$2
 RAST=$3
 #PSQL_SERVER=ninestein
-PSQL_SERVER=localhost
-#PSQL_USER=grassuser
-PSQL_USER=garufa
-PSQL_DB=grass
+PSQL_SERVER=k1
+PSQL_USER=grassuser
+PSQL_DB=grassuser
 
 if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     echo "*** INFO: Aggregating partial predictions for ${TX} ..."
@@ -19,13 +18,14 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     done 
     SQL="$( echo "${SQL}" | sed -e 's/UNION$//g' )"
     SQL="${SQL}) AS agg GROUP BY x, y "
-    echo ${SQL}
-
-    echo "*** INFO: Importing path-loss predictions from the database ..."
+    #echo ${SQL}
     echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | gzip -c - > /tmp/.prediction.dat.gz
-    gunzip -c /tmp/.prediction.dat.gz | v.in.ascii -t output=temp format=point -z z=3 --overwrite
-    echo "*** INFO: Converting vector to raster map ..."
-    v.to.rast input=temp type=point output=${RAST} use=z --overwrite
+
+    #echo "*** INFO: Importing path-loss predictions from the database ..."
+    #gunzip -c /tmp/.prediction.dat.gz | v.in.ascii -t output=temp format=point -z z=3 --overwrite
+
+    #echo "*** INFO: Converting vector to raster map ..."
+    #v.to.rast input=temp type=point output=${RAST} use=z --overwrite
     #r.colors -n map=${RAST} color=elevation
 else
     echo -e "Usage:\t$0 [comma-separated transmitter's section names] [INI file] [raster name]"

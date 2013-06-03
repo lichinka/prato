@@ -5,10 +5,9 @@ RUN_DIR="${HOME}/etc/dr/tun_par/prato/src"
 #CMD="valgrind --leak-check=yes ${RUN_DIR}/worker/worker"
 CMD="${RUN_DIR}/worker/worker"
 #PSQL_SERVER=ninestein
-PSQL_SERVER=localhost
-#PSQL_USER=grassuser
-PSQL_USER=garufa
-PSQL_DB=grass
+PSQL_SERVER=k1
+PSQL_USER=grassuser
+PSQL_DB=grassuser
 
 #
 # update LD_LIBRARY_PATH only if necessary
@@ -21,7 +20,7 @@ if [ "${REDIR}" = "-db" ]; then
     #
     # redirect worker's output to the database server
     #
-    ${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
+    ${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | grep -v 'TIME' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
 else 
     if [ "${REDIR}" = "-rast" ]; then
         ${CMD} | grep '^[0-9]' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 

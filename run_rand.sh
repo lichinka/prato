@@ -1,15 +1,15 @@
 #!/bin/bash
 
 NTX=$1
-TX=CGBRIA,CGBRIB,CGBRIC,CSOSTA,CSOSTB,CSOSTC,CTOPOLA,CVELCEA,CVELCEB,SBANOVA
-TX_LEN=10
+TX="$( cat meritve/lte/cells_??.txt )"
 
 if [ -n "${NTX}" ]; then
-    for i in $(seq 1 10);
+    rm -f /tmp/.cells
+    for i in $(seq 1 100);
     do
-        TX="${TX},${TX}"
+        echo "${TX}" >> /tmp/.cells
     done
-    TX=$( echo "${TX}" | cut -d',' -f 1-${NTX} )
+    TX="$( cat /tmp/.cells | shuf -n${NTX} | tr '\n' ',' | sed -e 's/,$//' )"
     echo "${TX}"
 else
     echo -e "Usage:\t$0 [number of transmitters]"
