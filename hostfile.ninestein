@@ -1,6 +1,6 @@
 #localhost max-slots=1
 
-#k1	max-slots=2
+#k1	max-slots=2	DB runs on this node
 k2	max-slots=4
 k3	max-slots=4
 k4	max-slots=4

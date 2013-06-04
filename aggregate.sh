@@ -19,7 +19,8 @@ if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     SQL="$( echo "${SQL}" | sed -e 's/UNION$//g' )"
     SQL="${SQL}) AS agg GROUP BY x, y "
     #echo ${SQL}
-    echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | gzip -c - > /tmp/.prediction.dat.gz
+    #echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} | tr -d ' ' | gzip -c - > /tmp/.prediction.dat.gz
+    echo -e "\t${SQL}" | psql -q -t -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB} > /dev/null
 
     #echo "*** INFO: Importing path-loss predictions from the database ..."
     #gunzip -c /tmp/.prediction.dat.gz | v.in.ascii -t output=temp format=point -z z=3 --overwrite
