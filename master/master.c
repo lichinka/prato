@@ -271,20 +271,29 @@ init_coverage_for_tx (FILE          *ini_file,
     //
     // initialize the pointers within the transmitter structure
     //
-    tx_params->m_dem            = params->m_dem;
-    tx_params->m_clut           = params->m_clut;
-    tx_params->m_field_meas     = NULL;
-    tx_params->field_meas_count = 0;
-    tx_params->m_loss           = params->m_loss;
-    tx_params->m_antenna_loss   = NULL;
-    tx_params->m_radio_zone     = NULL;
-
-    //
-    // initialize the rest of the data structures within this structure
-    // 
-    init_tx_params (params,
-                    tx_params,
-                    tx_params);
+    tx_params->diagram            = NULL;
+    tx_params->m_dem              = params->m_dem;
+    tx_params->m_dem_dev          = NULL;
+    tx_params->m_clut             = params->m_clut;
+    tx_params->m_clut_dev         = NULL;
+    tx_params->m_field_meas       = NULL;
+    tx_params->m_field_meas_dev   = NULL;
+    tx_params->field_meas_count   = 0;
+    tx_params->m_loss             = params->m_loss;
+    tx_params->m_loss_dev         = NULL;
+    tx_params->m_antenna_loss     = NULL;
+    tx_params->m_antenna_loss_dev = NULL;
+    tx_params->m_radio_zone       = NULL;
+    tx_params->m_radio_zone_dev   = NULL;
+    tx_params->m_obst_height      = NULL;
+    tx_params->m_obst_height_dev  = NULL;
+    tx_params->m_obst_dist        = NULL;
+    tx_params->m_obst_dist_dev    = NULL;
+    tx_params->m_obst_offset      = NULL;
+    tx_params->v_partial_sum      = NULL;
+    tx_params->v_partial_sum_dev  = NULL;
+    tx_params->v_clutter_loss_dev = NULL;
+    tx_params->ocl_obj            = NULL;
 }
 
 
@@ -835,7 +844,7 @@ init_coverage (FILE       *ini_file,
     //
     // create an array containing the transmitters to be processed
     //
-    char *tx_sections [_CHAR_BUFFER_SIZE_];
+    char *tx_sections [20 * _CHAR_BUFFER_SIZE_];
     params->ntx = split_sections (tx_sections_list,
                                   tx_sections);
     // 

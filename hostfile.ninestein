@@ -1,6 +1,7 @@
-#localhost max-slots=1
+#localhost max-slots=1	the master process runs here
 
 #k1	max-slots=2	DB runs on this node
+#k23	max-slots=4	this host is not working
 k2	max-slots=4
 k3	max-slots=4
 k4	max-slots=4
@@ -22,7 +23,6 @@ k19	max-slots=4
 k20	max-slots=4
 k21	max-slots=4
 k22	max-slots=4
-k23	max-slots=4
 k24	max-slots=4
 k25	max-slots=4
 k26	max-slots=4
@@ -33,6 +33,6 @@ k30	max-slots=4
 k31	max-slots=4
 k32	max-slots=4
 k33	max-slots=4
-k34	max-slots=4
+#k34	max-slots=4
 k35	max-slots=4
 k36	max-slots=4
