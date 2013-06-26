@@ -1,0 +1,17 @@
+TIME:1371389995.40319610:	Read input data	14.52664300 sec
+TIME:1371389995.41875792:	Common data distribution	0.00035300 sec
+TIME:1371389995.50632691:	Transmitter data send (1)	0.08752300 sec
+TIME:1371389997.05148292:	Coverage calculation (1)	1.54511900 sec
+TIME:1371389997.13890505:	Transmitter data send (1)	0.08735300 sec
+TIME:1371390000.33573389:	Coverage calculation (1)	3.19678200 sec
+TIME:1371390000.42322397:	Transmitter data send (1)	0.08743200 sec
+TIME:1371390008.29730201:	Coverage calculation (1)	7.87404300 sec
+TIME:1371390008.38404393:	Transmitter data send (1)	0.08665400 sec
+TIME:1371390009.95844889:	Coverage calculation (1)	1.57435500 sec
+TIME:1371390010.04621291:	Transmitter data send (1)	0.08766900 sec
+TIME:1371390012.56248212:	Coverage calculation (1)	2.51621800 sec
+*** INFO: Aggregating partial predictions for ASKZ18A,ATRUB18A,ASMARG18A,AJELSA18C,ATRUB18A ...
+
+real	0m9.654s
+user	0m2.444s
+sys	0m0.100s

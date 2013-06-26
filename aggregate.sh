@@ -3,15 +3,14 @@
 TX=$1
 INI=$2
 RAST=$3
-#PSQL_SERVER=ninestein
-PSQL_SERVER=k1
+PSQL_SERVER=ninestein
 PSQL_USER=grassuser
-PSQL_DB=grassuser
+PSQL_DB=grass
 
 if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then
     echo "*** INFO: Aggregating partial predictions for ${TX} ..."
     SQL="SELECT x, y, MAX(rscp) AS rscp FROM ("
-    TX="$( echo "${TX}" | tr ',' ' ' )"
+    TX="$( echo "${TX}" | tr ',' '\n' | sort -u )"
     for tx in ${TX}; do
         PWR="$( grep -A 9 ${tx} ${INI}  | grep power | cut -d'=' -f2 | cut -d';' -f1 | tr -d ' ' )"
         SQL="${SQL} SELECT east::integer-(east::integer % 25) AS x, north::integer-(north::integer % 25) AS y, (${PWR} - pl) AS rscp FROM pathloss_${tx} WHERE pl > 0 UNION"

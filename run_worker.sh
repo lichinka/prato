@@ -4,10 +4,9 @@ REDIR=$1
 RUN_DIR="${HOME}/etc/dr/tun_par/prato/src"
 #CMD="valgrind --leak-check=yes ${RUN_DIR}/worker/worker"
 CMD="${RUN_DIR}/worker/worker"
-#PSQL_SERVER=ninestein
 PSQL_SERVER=k1
 PSQL_USER=grassuser
-PSQL_DB=grassuser
+PSQL_DB=grass
 
 #
 # update LD_LIBRARY_PATH only if necessary
@@ -17,10 +16,16 @@ if [ -z "$( echo ${LD_LIBRARY_PATH} | grep -f "${RUN_DIR}" )" ]; then
 fi
 
 if [ "${REDIR}" = "-db" ]; then
+    # 
+    # wait some time to avoid SSH authentication lock
+    #
+    #SEC="$( hostname | sed -e 's/k//g' )"
+    #sleep ${SEC}
     #
     # redirect worker's output to the database server
     #
-    ${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | grep -v 'TIME' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
+    #${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | grep -v 'TIME' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
+    ${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | grep -v 'TIME' - | ssh ${PSQL_SERVER} 'cat - > /dev/null'
 else 
     if [ "${REDIR}" = "-rast" ]; then
         ${CMD} | grep '^[0-9]' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 
@@ -40,4 +45,3 @@ else
         fi
     fi
 fi
-

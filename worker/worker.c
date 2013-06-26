@@ -593,7 +593,7 @@ worker (const int rank,
                 //
                 coverage (params,
                           params->tx_params);
-                /*
+                //
                 // wait for the (possible) previous result dump to finish
                 //
                 if (dump_thread != NULL)
@@ -623,13 +623,13 @@ worker (const int rank,
                              "*** ERROR: number (%d) while creating result dump thread\n", 
                              err);
                     exit (-1);
-                }*/
+                }
                 //
                 // dump the results to the master process
                 //
-                output_to_master (params,
-                                  params->tx_params,
-                                  comm);
+                //output_to_master (params,
+                //                  params->tx_params,
+                //                  comm);
             }
         }
     }
@@ -651,8 +651,8 @@ worker (const int rank,
     //
     // deallocate memory before exiting
     //
-    free_tx_params (params,
-                    params->tx_params);
+    //free_tx_params (params,
+    //                params->tx_params);
     free (params->tx_params);
     free (params);
 }

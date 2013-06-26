@@ -470,7 +470,7 @@ output_to_stdout (void *params_ptr)
     // prepare the DB server before sending the data
     //
     fprintf (stdout, 
-             "CREATE TABLE IF NOT EXISTS pathloss_%s (east float, north float, pl float);\n",
+             "CREATE TABLE IF NOT EXISTS pathloss_%s (east integer, north integer, pl real);\n",
              tx_params->tx_name);
     fprintf (stdout, 
              "TRUNCATE TABLE pathloss_%s;\n",
@@ -506,9 +506,9 @@ output_to_stdout (void *params_ptr)
             float pl = (float) tx_params->m_loss[r][c];
 
             if ((!isnan (pl)) && (pl != params->fcell_null_value))
-                fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
-                                                     north_coord,
-                                                     pl);
+                fprintf (stdout, "%.f|%.f|%.6f\n", east_coord,
+                                                   north_coord,
+                                                   pl);
         }
     }
     //
