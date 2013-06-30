@@ -379,6 +379,11 @@ coverage_mpi (Parameters *params,
         //
         measure_time_id (NULL, 
                          worker_rank);
+        //
+        // async messaging for heterogeneous-system support
+        //
+        measure_time_id ("Async message",
+                         worker_rank);
 #endif
 
         switch (status.MPI_TAG)
@@ -399,6 +404,14 @@ coverage_mpi (Parameters *params,
                               _WORKER_KEEP_WORKING_TAG_,
                               *worker_comm);
 #ifdef _PERFORMANCE_METRICS_
+                    //
+                    // async messaging finished
+                    //
+                    measure_time_id (NULL,
+                                     worker_rank);
+                    //
+                    // start transmitter-data send
+                    //
                     measure_time_id ("Transmitter data send", 
                                      worker_rank);
 #endif
@@ -411,7 +424,7 @@ coverage_mpi (Parameters *params,
                                   worker_rank);
 #ifdef _PERFORMANCE_METRICS_
                     //
-                    // transmitter-data send finished,
+                    // transmitter-data send finished
                     //
                     measure_time_id (NULL, 
                                      worker_rank);
@@ -433,11 +446,19 @@ coverage_mpi (Parameters *params,
                               worker_rank,
                               _WORKER_SHUTDOWN_TAG_,
                               *worker_comm);
+                    running_workers --;
+#ifdef _PERFORMANCE_METRICS_
+                    //
+                    // async messaging finished
+                    //
+                    measure_time_id (NULL,
+                                     worker_rank);
                     //
                     // coverage calculation and result dump finished
                     //
-                    measure_time_id (NULL, worker_rank);
-                    running_workers --;
+                    measure_time_id (NULL, 
+                                     worker_rank);
+#endif
                 }
                 break;
 
