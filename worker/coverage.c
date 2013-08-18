@@ -447,7 +447,21 @@ coverage (Parameters    *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
 #endif
-
+    //
+    // if the coverage calculation happened on the GPU,
+    // we need to refresh the memory buffers on the host
+    //
+    if (params->use_gpu)
+    {
+        size_t buff_size = tx_params->nrows * 
+                           tx_params->ncols * 
+                           sizeof (tx_params->m_loss[0][0]);
+        read_buffer_blocking (tx_params->ocl_obj,
+                              0,
+                              tx_params->m_loss_dev,
+                              buff_size,
+                              tx_params->m_loss[0]);
+    }
 }
 
 

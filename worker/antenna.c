@@ -27,7 +27,9 @@ read_antenna_diagram (const char *file_name,
     //
 	if ( (in = fopen (file_name, "r")) == NULL )
     {
-        fprintf (stderr, "Unable to open antenna diagram from file <%s>", file_name);
+        fprintf (stderr, 
+                 "Unable to open antenna diagram from file <%s>\n", 
+                 file_name);
         exit (1);
     }
 
@@ -325,9 +327,9 @@ antenna_influence_cpu (Parameters    *params,
        
             //
             // ignore pixels exceeding params->radius distance between Rx and Tx or
-            // if they are too close (less than 200 mts)
+            // if they are too close (less than 10 mts)
             // 
-            if ((dist_Tx_Rx < 0.2) || (dist_Tx_Rx > params->radius))
+            if ((dist_Tx_Rx < 0.01) || (dist_Tx_Rx > params->radius))
             {
                 loss_out                       = params->fcell_null_value;
                 tx_params->m_radio_zone[r][c] &= _RADIO_ZONE_MODEL_DISTANCE_OFF_;
@@ -685,7 +687,9 @@ calculate_antenna_influence (Parameters    *params,
         char fileName [1000];
         if (strlen (params->antenna_diagram_dir) == 0)
         {
-            fprintf (stderr, "ERROR Directory containing antenna files not given\n");
+            fprintf (stderr, 
+                     "ERROR Directory containing antenna files not given\n");
+            fflush (stderr);
             exit (1);
         }
         strcpy (fileName, params->antenna_diagram_dir);

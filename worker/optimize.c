@@ -638,15 +638,10 @@ init_optimize (Parameters    *params,
     {
         size_t dbl_buff_size = tx_params->nrows * 
                                tx_params->ncols * 
-                               sizeof (tx_params->m_loss[0][0]);
+                               sizeof (tx_params->m_antenna_loss[0][0]);
         size_t ch_buff_size = tx_params->nrows * 
                               tx_params->ncols * 
                               sizeof (tx_params->m_radio_zone[0][0]);
-        read_buffer (tx_params->ocl_obj,
-                     0,
-                     tx_params->m_loss_dev,
-                     dbl_buff_size,
-                     tx_params->m_loss[0]);
         read_buffer (tx_params->ocl_obj,
                      0,
                      tx_params->m_antenna_loss_dev,

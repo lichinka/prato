@@ -410,7 +410,9 @@ eric_pathloss_on_gpu (Parameters    *params,
     tx_data.s[2] = (double) tx_params->total_tx_height; // antenna height above sea level
     tx_data.s[3] = (double) tx_params->antenna_height_AGL; // antenna height above ground
 
+    //
     // set kernel parameters, specific for this transmitter
+    //
     set_kernel_value_arg (tx_params->ocl_obj,
                           3,
                           sizeof (cl_double4),

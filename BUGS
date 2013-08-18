@@ -1,5 +1,6 @@
-- Results from the CPU and GPU implementations do not completely match.
+- Check that the Clutter maps covers at least the same area as the DEM, otherwise SEGFAULT occurs.
+- Giving the name of a non-existent transmitter closes the program without an error message. 
+- Results from the CPU and GPU implementations do not match perfectly. This may be due to the GPU implementation not correctly replacing the clutter categories.
 - Check that there is data available within the defined calculation radius around each transmitter.
   The current version does not check this, and generates a SEGFAULT.
-- Check that the Clutter maps covers at least the same area as the DEM, otherwise SEGFAULT occurs.
 

@@ -13,8 +13,8 @@ if [ -n "${OUTPUT}" ] && [ -n "${CELLS}" ] && [ -n "${OPTIONS}" ]; then
     #
     # start MPI jobs for LTE network
     #
-    mpirun --mca btl_tcp_if_include 192.168.1.0/24 --mca btl tcp,sm,self --host localhost -np 1 r.coverage ${OPTIONS} ini_file=${INI} tx_ini_sections=${CELLS} : --hostfile hostfile.ninestein -np ${NP} ${HOME}/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
-    #mpirun --mca btl tcp,sm,self --host localhost -np 1 r.coverage ${OPTIONS} ini_file=${INI} tx_ini_sections=${CELLS} : --hostfile hostfile.local -np 2 ${HOME}/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
+    #mpirun --mca btl_tcp_if_include 192.168.1.0/24 --mca btl tcp,sm,self --host localhost -np 1 r.coverage ${OPTIONS} ini_file=${INI} tx_ini_sections=${CELLS} : --hostfile hostfile.ninestein -np ${NP} ${HOME}/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
+    mpirun --mca btl tcp,sm,self --host localhost -np 1 r.coverage ${OPTIONS} ini_file=${INI} tx_ini_sections=${CELLS} : --hostfile hostfile.local -np 4 ${HOME}/etc/dr/tun_par/prato/src/run_worker.sh ${OUTPUT}
     #
     # aggregate the partial prediction only if output is database
     #

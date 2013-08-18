@@ -3,8 +3,8 @@
 TX=$1
 INI=$2
 RAST=$3
-PSQL_SERVER=ninestein
-PSQL_USER=grassuser
+PSQL_SERVER=localhost
+PSQL_USER=garufa
 PSQL_DB=grass
 
 if [ -n "${TX}" ] && [ -n "${INI}" ] && [ -n "${RAST}" ]; then

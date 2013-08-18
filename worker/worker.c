@@ -223,15 +223,6 @@ receive_common_data (Parameters *params,
     params->ini_file_content_size = -1;
 
     //
-    // check flag indicating whether to run in optimization mode
-    //
-    if (params->use_opt)
-        fprintf (stdout, 
-                 "*** INFO: Optimization mode enabled\n");
-    else
-        fprintf (stdout, 
-                 "*** INFO: Coverage prediction mode enabled\n");
-    //
     // check flag indicating whether to use the GPU if available
     //
     if (params->use_gpu)
@@ -578,22 +569,30 @@ worker (const int rank,
             // 
             if (params->use_master_opt)
             {
+                fprintf (stdout, 
+                         "*** INFO: Master-optimization mode enabled\n");
                 optimize_from_master (params,
                                       params->tx_params,
                                       &comm);
                 has_finished = 1;
             }
             else if (params->use_opt)
+            {
+                fprintf (stdout, 
+                         "*** INFO: Optimization mode enabled\n");
                 optimize_on_worker (params,
                                     params->tx_params);
+            }
             else
             {
+                fprintf (stdout, 
+                         "*** INFO: Coverage-prediction mode enabled\n");
                 //
                 // calculate coverage for the received transmitter
                 //
                 coverage (params,
                           params->tx_params);
-                //
+                /*
                 // wait for the (possible) previous result dump to finish
                 //
                 if (dump_thread != NULL)
@@ -623,13 +622,13 @@ worker (const int rank,
                              "*** ERROR: number (%d) while creating result dump thread\n", 
                              err);
                     exit (-1);
-                }
+                }*/
                 //
                 // dump the results to the master process
                 //
-                //output_to_master (params,
-                //                  params->tx_params,
-                //                  comm);
+                output_to_master (params,
+                                  params->tx_params,
+                                  comm);
             }
         }
     }
