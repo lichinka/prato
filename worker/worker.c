@@ -586,7 +586,8 @@ worker (const int rank,
             else
             {
                 fprintf (stdout, 
-                         "*** INFO: Coverage-prediction mode enabled\n");
+                         "*** INFO: Coverage-prediction mode enabled [%s]\n",
+                         params->tx_params->tx_name);
                 //
                 // calculate coverage for the received transmitter
                 //

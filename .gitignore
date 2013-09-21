@@ -1,3 +1,6 @@
+log_opt/
+log_perf/
+meritve/
 performance
 __pycache__/
 r.coverage
