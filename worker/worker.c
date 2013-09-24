@@ -592,7 +592,8 @@ worker (const int rank,
                 // calculate coverage for the received transmitter
                 //
                 coverage (params,
-                          params->tx_params);
+                          params->tx_params,
+                          rank);
                 /*
                 // wait for the (possible) previous result dump to finish
                 //

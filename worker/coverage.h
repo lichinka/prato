@@ -520,12 +520,14 @@ prato_alloc_char_matrix (const int    nrows,
  * params           a structure holding configuration parameters which are 
  *                  common to all transmitters;
  * tx_params        a structure holding transmitter-specific configuration
- *                  parameters.-
+ *                  parameters;
+ * rank             rank of the worker process.-
  *
  */
 void 
 coverage (Parameters    *params,
-          Tx_parameters *tx_params);
+          Tx_parameters *tx_params,
+          const int rank);
 
 
 /**

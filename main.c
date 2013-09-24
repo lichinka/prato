@@ -240,7 +240,8 @@ int main (int argc, char **argv)
         {
             Tx_parameters *tx_params = &(params->tx_params[i]);
             coverage (params,
-                      tx_params);
+                      tx_params,
+                      0);
 
             //
             // calculation finished, do we have to write the raster output?

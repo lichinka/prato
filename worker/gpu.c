@@ -23,60 +23,70 @@ release_gpu (Tx_parameters *tx_params)
         //
         if (tx_params->m_dem_dev != NULL)
         {
+            release_buffer (tx_params->m_dem_dev);
             free (tx_params->m_dem_dev);
             tx_params->m_dem_dev = NULL;
         }
         
         if (tx_params->m_clut_dev != NULL)
         {
+            release_buffer (tx_params->m_clut_dev);
             free (tx_params->m_clut_dev);
             tx_params->m_clut_dev = NULL;
         }
         
         if (tx_params->m_field_meas_dev != NULL)
         {
+            release_buffer (tx_params->m_field_meas_dev);
             free (tx_params->m_field_meas_dev);
             tx_params->m_field_meas_dev = NULL;
         }
         
         if (tx_params->m_loss_dev != NULL)
         {
+            release_buffer (tx_params->m_loss_dev);
             free (tx_params->m_loss_dev);
             tx_params->m_loss_dev = NULL;
         }
         
         if (tx_params->m_antenna_loss_dev != NULL)
         {
+            release_buffer (tx_params->m_antenna_loss_dev);
             free (tx_params->m_antenna_loss_dev);
             tx_params->m_antenna_loss_dev = NULL;
         }
         
         if (tx_params->m_radio_zone_dev != NULL)
         {
+            release_buffer (tx_params->m_radio_zone_dev);
             free (tx_params->m_radio_zone_dev);
             tx_params->m_radio_zone_dev = NULL;
         }
         
         if (tx_params->m_obst_height_dev != NULL)
         {
+            release_buffer (tx_params->m_obst_height_dev);
             free (tx_params->m_obst_height_dev);
             tx_params->m_obst_height_dev = NULL;
         }
         
         if (tx_params->m_obst_dist_dev != NULL)
         {
+            release_buffer (tx_params->m_obst_dist_dev);
             free (tx_params->m_obst_dist_dev);
             tx_params->m_obst_dist_dev = NULL;
         }
 
         if (tx_params->v_partial_sum_dev != NULL)
         {
+            release_buffer (tx_params->v_partial_sum_dev);
             free (tx_params->v_partial_sum_dev);
             tx_params->v_partial_sum_dev = NULL;
         }
         
         if (tx_params->v_clutter_loss_dev != NULL)
         {
+            release_buffer (tx_params->v_clutter_loss_dev);
             free (tx_params->v_clutter_loss_dev);
             tx_params->v_clutter_loss_dev = NULL;
         }
@@ -111,15 +121,18 @@ close_gpu (Tx_parameters *tx_params)
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
  *
- * params       a structure holding configuration parameters which are 
- *              common to all transmitters;
- * tx_params    a structure holding transmitter-specific configuration
- *              parameters;
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ * device_hint     sends a hint to the OpenCL backend about which device
+ *                  id to select and use; useful for using multiple GPUs.-
  *
  */
 void
-init_gpu (Parameters *params,
-          Tx_parameters *tx_params)
+init_gpu (Parameters    *params,
+          Tx_parameters *tx_params,
+          const int     device_hint)
 {
     //
     // initialize the OpenCL environment if we haven't already;
@@ -127,7 +140,8 @@ init_gpu (Parameters *params,
     if (tx_params->ocl_obj == NULL)
     {
         tx_params->ocl_obj = init_opencl (tx_params->ocl_obj, 
-                                          1);
+                                          1,
+                                          device_hint);
         //
         // build the OpenCL source file (only the first time);
         // in this case, all kernels reside in one source file

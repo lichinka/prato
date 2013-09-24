@@ -379,6 +379,160 @@ DoProfile (double **Obst_high,
 
 
 /**
+ * Simulates the line-of-sight calculation on GPU.-
+ *
+ */
+static int 
+DoProfile_gpu (double **Obst_high,
+               double **Obst_dist,
+               double **Offset,
+               double ResDist, 
+               double **Raster, 
+               double xBS, 
+               double yBS, 
+               double ZoTransBS, 
+               int xN, 
+               int yN, 
+               double scale, 
+               double radius)
+{
+#ifdef _PERFORMANCE_METRICS_
+    measure_time ("Simulating Line-of-sight on GPU");
+#endif
+	double AZI;
+	int ix, iy;
+	double dx, dy;
+	
+    //
+    // LOS and obstacle height calculation is executed only once, 
+    // because its results are constant throughout the optimization
+    //
+
+    /* Offset ini
+	for (ix = 0; ix < xN; ix++)
+    {
+		for (iy = 0; iy < yN; iy++)
+        {
+			Offset[ix][iy]=999;
+		}
+	}*/
+	
+	// Kvadrant I
+	for (ix = 0; ix < xN; ix++)
+	{
+		//Patrik AZI = atan((ix - xBS) / yBS);
+		AZI = atan((ix - floor(xBS)) / floor(yBS));
+		
+		if (cos(AZI) > sin(AZI))
+        {
+			//Patrik dx = sin(AZI) / cos(AZI);
+			//Patrik dy = -cos(AZI) / cos(AZI);
+			dx = (ix - floor(xBS)) / floor(yBS);			// tan(AZI)
+			dy = -1;
+		}
+		else
+        {
+			//Patrik dx = sin(AZI) / sin(AZI);
+			//Patrik dy = -cos(AZI) / sin(AZI);
+			dx = 1;
+			dy = -floor(yBS)/(ix - floor(xBS));				// ctan(AZI)
+		}
+		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 1st quadrant: %d\n", ix);
+#endif
+	}
+
+	/* Kvadrant III
+	for (ix = 0; ix < xN; ix++)
+	{
+		//Patrik AZI = atan((ix - xBS) / (yN - yBS));
+		AZI = atan((ix - floor(xBS)) / (yN - floor(yBS)));
+		
+		if (cos(AZI) > sin(AZI))
+        {
+			//Patrik dx = sin(AZI) / cos(AZI);
+			//Patrik dy = cos(AZI) / cos(AZI);
+			dx = (ix - floor(xBS)) / (yN - floor(yBS));			// tan(AZI)
+			dy = 1;
+		}
+		else
+        {
+			//Patrik dx = sin(AZI) / sin(AZI);
+			//Patrik dy = cos(AZI) / sin(AZI);
+			dx = 1;
+			dy = (yN - floor(yBS)) / (ix - floor(xBS));				// ctan(AZI)
+		}
+				
+		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 3rd quadrant: %d\n", ix);
+#endif
+	} 
+	
+	// Kvadrant II
+	for (iy = 0; iy < yN; iy++)
+	{
+		//Patrik AZI = atan((iy - yBS) / (xN - xBS));
+		AZI = atan((iy - floor(yBS)) / (xN - floor(xBS)));
+			
+		if (cos(AZI) > sin(AZI))
+        {
+			//Patrik dx = cos(AZI) / cos(AZI);
+			//Patrik dy = sin(AZI) / cos(AZI);
+			dx = 1;			
+			dy = (iy - floor(yBS)) / (xN - floor(xBS));		// tan(AZI)
+		}
+		else
+        {
+			//Patrik dx = cos(AZI) / sin(AZI);
+			//Patrik dy = sin(AZI) / sin(AZI);
+			dx = (xN - floor(xBS)) / (iy - floor(yBS));				// ctan(AZI)
+			dy = 1;
+		}
+		
+		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);	
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 2nd quadrant: %d\n", ix);
+#endif
+	}
+
+	// Kvadrant IV
+	for (iy = 0; iy < yN; iy++)
+	{
+		//Patrik AZI = atan((iy - yBS) / xBS);
+		AZI = atan((iy - floor(yBS)) / floor(xBS));
+		
+		if (cos(AZI) > sin(AZI))
+        {
+			//Patrik dx = -cos(AZI) / cos(AZI);
+			//Patrik dy = sin(AZI) / cos(AZI);
+			dx = -1;			
+			dy = (iy - floor(yBS)) / floor(xBS);		// tan(AZI)
+		}
+		else
+        {
+			//Patrik dx = -cos(AZI) / sin(AZI);
+			//Patrik dy = sin(AZI) / sin(AZI);
+			dx = -floor(xBS) / (iy - floor(yBS));				// ctan(AZI)
+			dy = 1;
+		}
+		
+		calc_profile (Obst_high, Obst_dist, Raster, Offset, dx, dy, xBS, yBS, ZoTransBS, xN, yN, scale, radius);			
+#ifdef _DEBUG_INFO_
+        printf ("DoProfile -> 4th quadrant: %d\n", ix);
+#endif
+	}*/
+
+#ifdef _PERFORMANCE_METRICS_
+    measure_time (NULL);
+#endif
+	return 0;
+}
+
+
+
+/**
  * Calculates the coverage prediction for one transmitter, using the E/// model.
  *
  * params           a structure holding configuration parameters which are 
@@ -389,24 +543,9 @@ DoProfile (double **Obst_high,
  */
 void 
 coverage (Parameters    *params,
-          Tx_parameters *tx_params)
+          Tx_parameters *tx_params,
+          const int     rank)
 {
-    //
-    // calculate the terrain profile from the top of the transmitter,
-    // i.e. line-of-sight, only once per transmitter
-    // 
-    DoProfile (tx_params->m_obst_height,
-               tx_params->m_obst_dist,
-               tx_params->m_obst_offset,
-               1.0,
-               tx_params->m_dem,
-               tx_params->tx_north_coord_idx,
-               tx_params->tx_east_coord_idx,
-               tx_params->total_tx_height,
-               tx_params->nrows,
-               tx_params->ncols,
-               params->map_ew_res,
-               params->radius);
     //
     // execute the path-loss calculation on CPU or GPU?
     //
@@ -416,7 +555,23 @@ coverage (Parameters    *params,
         // initialize the OpenCL environment
         //
         init_gpu (params,
-                  tx_params);
+                  tx_params,
+                  rank % 2);
+        //
+        // SIMULATE the LOS calculation on GPU
+        //
+        DoProfile_gpu (tx_params->m_obst_height,
+                       tx_params->m_obst_dist,
+                       tx_params->m_obst_offset,
+                       1.0,
+                       tx_params->m_dem,
+                       tx_params->tx_north_coord_idx,
+                       tx_params->tx_east_coord_idx,
+                       tx_params->total_tx_height,
+                       tx_params->nrows,
+                       tx_params->ncols,
+                       params->map_ew_res,
+                       params->radius);
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on GPU");
 #endif
@@ -425,6 +580,22 @@ coverage (Parameters    *params,
     }
     else
     {
+        //
+        // calculate the terrain profile from the top of the transmitter,
+        // i.e. line-of-sight, only once per transmitter
+        // 
+        DoProfile (tx_params->m_obst_height,
+                   tx_params->m_obst_dist,
+                   tx_params->m_obst_offset,
+                   1.0,
+                   tx_params->m_dem,
+                   tx_params->tx_north_coord_idx,
+                   tx_params->tx_east_coord_idx,
+                   tx_params->total_tx_height,
+                   tx_params->nrows,
+                   tx_params->ncols,
+                   params->map_ew_res,
+                   params->radius);
 #ifdef _PERFORMANCE_METRICS_
         measure_time ("E/// on CPU");
 #endif

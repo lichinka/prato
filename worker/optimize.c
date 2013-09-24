@@ -629,7 +629,8 @@ init_optimize (Parameters    *params,
     // calculate the coverage for the first time to initialize all needed structures
     //
     coverage (params,
-              tx_params);
+              tx_params,
+              0);
     //
     // if the first coverage calculation happened on the GPU,
     // we need to refresh the memory buffers on the host

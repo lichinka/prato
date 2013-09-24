@@ -26,15 +26,18 @@ release_gpu (Tx_parameters *tx_params);
  * Initializes the OpenCL environment that enabled calculation using
  * GPU hardware on the workers, if available.
  *
- * params       a structure holding configuration parameters which are 
- *              common to all transmitters;
- * tx_params    a structure holding transmitter-specific configuration
- *              parameters;
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration
+ *                  parameters;
+ * device_hint      sends a hint to the OpenCL backend about which device
+ *                  id to select and use; useful for using multiple GPUs.-
  *
- */
+ */ 
 void
-init_gpu (Parameters *params,
-          Tx_parameters *tx_params);
+init_gpu (Parameters    *params,
+          Tx_parameters *tx_params,
+          const int     device_hint);
 
 /**
  * Defines a 2D execution range for a kernel, consisting of square tiles,
