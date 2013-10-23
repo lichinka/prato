@@ -68,7 +68,8 @@ obj_func (Parameters    *params,
             fprintf (stderr, 
                      "*** ERROR: Objective-function value incorrectly received from %d. worker\n",
                      worker_rank);
-            exit (-1);
+            fflush (stderr);
+            exit (1);
         }
         //
         // aggregate the received squared error

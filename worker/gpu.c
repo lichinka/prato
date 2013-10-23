@@ -259,6 +259,7 @@ define_2D_range (const Parameters *params,
     {
         fprintf (stderr, 
                  "*** ERROR: Cannot execute on GPU. Increase the calculation radius and try again.\n");
+        fflush (stderr);
         exit (1);
     }
     if ((diameter_in_pixels % _WORK_ITEMS_PER_DIMENSION_) != 0)
@@ -266,6 +267,7 @@ define_2D_range (const Parameters *params,
         fprintf (stderr, 
                  "*** ERROR: Cannot execute on GPU. Try setting a calculation radius multiple of %d.\n",
                  _WORK_ITEMS_PER_DIMENSION_);
+        fflush (stderr);
         exit (1);
     }
 

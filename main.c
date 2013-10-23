@@ -23,7 +23,10 @@ read_file_into_memory (const char *file_name,
 
     if (fr == NULL)
     {
-        fprintf (stderr, "ERROR Cannot open [%s] for reading\n", file_name);
+        fprintf (stderr,
+                 "*** ERROR: Cannot open [%s] for reading\n", 
+                 file_name);
+        fflush (stderr);
         exit (1);
     }
 
@@ -136,7 +139,7 @@ int main (int argc, char **argv)
     // ... and parse them
     //
     if (G_parser (argc, argv) < 0)
-	    exit (EXIT_FAILURE);
+	    exit (1);
 
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("Read input data");
@@ -261,7 +264,8 @@ int main (int argc, char **argv)
                     fprintf (stderr,
                              "*** ERROR: number (%d) while creating result dump thread\n", 
                              err);
-                    exit (-1);
+                    fflush (stderr);
+                    exit (1);
                 }
                 else
                 {

@@ -201,11 +201,12 @@ typedef struct Tx_parameters Tx_parameters;
  * tx_section   the name of the transmitter's section to be parsed.-
  *
  */
-static int tx_params_handler (void *user_struct, 
-                              const char *section, 
-                              const char *name,
-                              const char *value,
-                              const char *tx_section)
+static int
+tx_params_handler (void *user_struct, 
+                   const char *section, 
+                   const char *name,
+                   const char *value,
+                   const char *tx_section)
 {
     Tx_parameters *pconfig = (Tx_parameters *) user_struct;
 
@@ -256,6 +257,22 @@ static int tx_params_handler (void *user_struct,
         strncpy (pconfig->field_meas_map, 
                  value, 
                  _CHAR_BUFFER_SIZE_);
+    }
+    else if (MATCH (tx_section, "a0"))
+    {
+        pconfig->eric_params[0] = atof (value);
+    }
+    else if (MATCH (tx_section, "a1"))
+    {
+        pconfig->eric_params[1] = atof (value);
+    }
+    else if (MATCH (tx_section, "a2"))
+    {
+        pconfig->eric_params[2] = atof (value);
+    }
+    else if (MATCH (tx_section, "a3"))
+    {
+        pconfig->eric_params[3] = atof (value);
     }
     else
         return 0;  /* unknown section/name, error */
@@ -363,11 +380,12 @@ typedef struct Parameters Parameters;
  * tx_section   ignored in this context.-
  *
  */
-static int common_params_handler (void *user_struct, 
-                                  const char *section, 
-                                  const char *name,
-                                  const char *value,
-                                  const char *tx_section)
+static int
+common_params_handler (void *user_struct, 
+                       const char *section, 
+                       const char *name,
+                       const char *value,
+                       const char *tx_section)
 {
     Parameters *pconfig = (Parameters *) user_struct;
 

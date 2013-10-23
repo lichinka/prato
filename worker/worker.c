@@ -27,10 +27,6 @@ init_tx_params (Parameters    *params,
         //
         tx_params = (Tx_parameters *) malloc (sizeof (Tx_parameters));
 
-        tx_params->eric_params[0]     = params->eric_params[0];
-        tx_params->eric_params[1]     = params->eric_params[1];
-        tx_params->eric_params[2]     = params->eric_params[2];
-        tx_params->eric_params[3]     = params->eric_params[3];
         tx_params->diagram            = NULL;
         tx_params->m_dem              = NULL;
         tx_params->m_dem_dev          = NULL;
@@ -78,6 +74,10 @@ init_tx_params (Parameters    *params,
     tx_params->map_east_idx         = rcv_tx_params->map_east_idx;
     tx_params->map_south_idx        = rcv_tx_params->map_south_idx;
     tx_params->map_west_idx         = rcv_tx_params->map_west_idx;
+    tx_params->eric_params[0]       = rcv_tx_params->eric_params[0];
+    tx_params->eric_params[1]       = rcv_tx_params->eric_params[1];
+    tx_params->eric_params[2]       = rcv_tx_params->eric_params[2];
+    tx_params->eric_params[3]       = rcv_tx_params->eric_params[3];
 
     //
     // also copy the received character arrays
@@ -267,7 +267,8 @@ receive_tx_data (Parameters *params,
     {
         fprintf (stderr, 
                  "*** ERROR: Transmitter parameters incorrectly received\n");
-        exit (-1);
+        fflush (stderr);
+        exit (1);
     }
 
     //
@@ -291,7 +292,8 @@ receive_tx_data (Parameters *params,
     {
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of DEM data\n");
-        exit (-1);
+        fflush (stderr);
+        exit (1);
     }
     //
     // transmitter height above sea level
@@ -315,7 +317,8 @@ receive_tx_data (Parameters *params,
     {
         fprintf (stderr, 
                  "*** ERROR: Incorrect receive of clutter data\n");
-        exit (-1);
+        fflush (stderr);
+        exit (1);
     }
     //
     // field-measurements matrix is only used in optimization mode
@@ -336,7 +339,8 @@ receive_tx_data (Parameters *params,
         {
             fprintf (stderr, 
                      "*** ERROR: Incorrect receive of field measurements data\n");
-            exit (-1);
+            fflush (stderr);
+            exit (1);
         }
     }
     free (rcv_tx_params);
@@ -594,7 +598,7 @@ worker (const int rank,
                 coverage (params,
                           params->tx_params,
                           rank);
-                /*
+                //
                 // wait for the (possible) previous result dump to finish
                 //
                 if (dump_thread != NULL)
@@ -605,7 +609,8 @@ worker (const int rank,
                         fprintf (stderr,
                                  "*** ERROR: failed (%d) waiting for dump thread\n", 
                                  err);
-                        exit (-1);
+                        fflush (stderr);
+                        exit (1);
                     }
                 }
                 else
@@ -623,14 +628,15 @@ worker (const int rank,
                     fprintf (stderr,
                              "*** ERROR: number (%d) while creating result dump thread\n", 
                              err);
-                    exit (-1);
-                }*/
+                    fflush (stderr);
+                    exit (1);
+                }
                 //
                 // dump the results to the master process
                 //
-                output_to_master (params,
-                                  params->tx_params,
-                                  comm);
+                //output_to_master (params,
+                //                  params->tx_params,
+                //                  comm);
             }
         }
     }
@@ -645,7 +651,8 @@ worker (const int rank,
             fprintf (stderr,
                      "*** ERROR: failed (%d) waiting for dump thread\n", 
                      err);
-            exit (-1);
+            fflush (stderr);
+            exit (1);
         }
         free (dump_thread);
     }

@@ -149,7 +149,8 @@ receive_tx_results (Parameters *params,
     {
         fprintf (stderr, 
                  "*** ERROR: Transmitter parameters incorrectly received\n");
-        exit (-1);
+        fflush (stderr);
+        exit (1);
     }
     else
     {
@@ -879,6 +880,8 @@ init_coverage (FILE       *ini_file,
                               tx_sections[i],
                               params,
                               &(params->tx_params[i]));
+        printf ("*** INFO: Tx [%s] initialized!\n",
+                params->tx_params[i].tx_name);
     }
     //
     // free the allocated metadata
@@ -911,7 +914,8 @@ init_coverage (FILE       *ini_file,
                      params->tx_params->m_clut[r][c]);
         }
     }
-    exit (-1);
+    fflush (stderr);
+    exit (1);
 #endif
 }
 

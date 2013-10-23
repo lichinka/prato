@@ -46,9 +46,9 @@ if [ -n "${ALL_PARAMS}" ]; then
     PLOT_CMD=$( cat <<EOF
 set term postscript eps enhanced font "Helvetica,20";
 set output "/tmp/error_distribution.eps";
-set xlabel "Absolute error (dB)";
+set xlabel "Absolute error [dB]";
 set xtics ("[0,5)" 0, "[5,10)" 1, "[10,15)" 2, "[15,20)" 3, "[20,25)" 4, "[25,30)" 5, "[30,35)" 6, "[35,...)" 7);
-set ylabel "Proportion (%)";
+set ylabel "Proportion [%]";
 set yrange [0:40];
 set grid ytics;
 plot '/tmp/.plot.dat' using ((\$2/${TOT})*100) with boxes lt -1 fs pattern 2 notitle;

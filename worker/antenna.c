@@ -28,8 +28,9 @@ read_antenna_diagram (const char *file_name,
 	if ( (in = fopen (file_name, "r")) == NULL )
     {
         fprintf (stderr, 
-                 "Unable to open antenna diagram from file <%s>\n", 
+                 "*** ERROR: Unable to open antenna diagram from file <%s>\n", 
                  file_name);
+        fflush (stderr);
         exit (1);
     }
 
@@ -41,8 +42,11 @@ read_antenna_diagram (const char *file_name,
 	{
 		if (!fgets (buffer, 250, in)) 
 		{	
-			fprintf (stderr, "Empty or corrupted antenna diagram file <%s>", file_name); 
-			exit (1);
+			fprintf (stderr, 
+                     "*** ERROR: Empty or corrupted antenna diagram file <%s>\n", 
+                     file_name); 
+			fflush (stderr);
+            exit (1);
 		}
 		sscanf (buffer, "%s %lf", text, &temp_gain);
 		if (strcmp (text, "GAIN") == 0)		  
@@ -65,7 +69,9 @@ read_antenna_diagram (const char *file_name,
 		sscanf (buffer, "%lf %lf", &angle, &loss);
 		if (j != (int)angle)
 		{
-			fprintf (stderr, "Bad antenna diagram format."); 
+			fprintf (stderr, 
+                     "*** ERROR: Bad antenna diagram format.\n"); 
+            fflush (stderr);
 			exit (1);
 		}
 		horiz_diag[j] = loss;
@@ -84,7 +90,9 @@ read_antenna_diagram (const char *file_name,
 		sscanf (buffer, "%lf %lf", &angle, &loss);
 		if (j != (int)angle)
 		{
-			fprintf (stderr, "Bad antenna diagram format."); 
+			fprintf (stderr, 
+                     "*** ERROR: Bad antenna diagram format.\n"); 
+            fflush (stderr);
 			exit (1);
 		}
 		vert_diag[j] = loss;
@@ -230,7 +238,9 @@ antenna_influence_on_point (double d_east,
         mechanicalAntennaTilt_Corrected = (double)mech_tilt * ((hor_diag_angle / 90) - 3);
     else
     {
-        fprintf (stderr, "Horizontal angle is not between 0 and 360 degrees."); 
+        fprintf (stderr, 
+                 "*** ERROR: Horizontal angle is not between 0 and 360 degrees.\n");
+        fflush (stderr);
 	    exit (1);
     }
 
@@ -688,7 +698,7 @@ calculate_antenna_influence (Parameters    *params,
         if (strlen (params->antenna_diagram_dir) == 0)
         {
             fprintf (stderr, 
-                     "ERROR Directory containing antenna files not given\n");
+                     "*** ERROR: Directory containing antenna files not given\n");
             fflush (stderr);
             exit (1);
         }
@@ -696,7 +706,10 @@ calculate_antenna_influence (Parameters    *params,
         strcat (fileName, "/");
         if (strlen (tx_params->antenna_diagram_file) == 0)
         {
-            fprintf (stderr, "ERROR File name of antenna diagram not given\n");
+            fprintf (stderr, 
+                     "*** ERROR: File name of antenna diagram not given for [%s]\n",
+                     tx_params->tx_name);
+            fflush (stderr);
             exit (1);
         }
         strcat (fileName, tx_params->antenna_diagram_file);
