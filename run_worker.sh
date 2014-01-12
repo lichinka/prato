@@ -7,6 +7,7 @@ CMD="${RUN_DIR}/worker/worker"
 PSQL_SERVER=k1
 PSQL_USER=grassuser
 PSQL_DB=grass
+WID=$$
 
 #
 # update LD_LIBRARY_PATH only if necessary
@@ -20,17 +21,15 @@ if [ "${REDIR}" = "-db" ]; then
     # redirect worker's output to the database server
     #
     #${CMD} | grep -v 'GPU' - | grep -v 'INFO' - | grep -v 'TIME' - | psql -q -h ${PSQL_SERVER} -U ${PSQL_USER} -d ${PSQL_DB}
-    #${CMD} | grep '|' - | gzip -c - | ssh ${PSQL_SERVER} 'cat - > /dev/null'
-    ${CMD} | gzip -c - > /dev/null
+    ${CMD} | grep '|' - | gzip -c - | ssh ${PSQL_SERVER} 'cat - > /dev/null'
+    #${CMD} > /dev/null
 else 
     if [ "${REDIR}" = "-rast" ]; then
-        ${CMD} | grep '^[0-9]' - | v.in.ascii -t output=temp format=point -z z=3 --overwrite 
-        v.to.rast input=temp type=point output=temp use=z --overwrite
+        #${CMD} | grep '^[0-9]' - | r.in.xyz input=- output=worker_${WID} method=median --overwrite 
+        ${CMD} > /tmp/worker.${WID}.log
     else
         if [ "${REDIR}" = "-" ]; then
-            rm -f /tmp/worker.log
-            #ln -s /tmp/worker.$$.log /tmp/worker.log
-            ${CMD} > /tmp/worker.$$.log 2>&1
+            ${CMD} > /tmp/worker.${WID}.log 2>&1
         else
             echo "Usage: $0 [-] [-db] [-rast]"
             echo "Starts a worker process, writing its results to stdout."

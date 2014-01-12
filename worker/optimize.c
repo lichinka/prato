@@ -60,11 +60,11 @@ override_clutter_losses (Parameters    *params,
  *              parameters;
  * radio_zone   radio zone for which the objective function is calculated;
  *
- */
+ */ 
 static double
-obj_func_on_gpu (Parameters    *params,
-                 Tx_parameters *tx_params,
-                 const char    radio_zone)
+squared_error_on_gpu (Parameters    *params,
+                      Tx_parameters *tx_params,
+                      const char    radio_zone)
 {
     int r, c;
     double ret_value;
@@ -205,20 +205,24 @@ obj_func_on_gpu (Parameters    *params,
 
 
 /**
- * Returns the squared error between the prediction and the field 
- * measurements of this transmitter, i.e. the objective function 
- * evaluation, used by the optimization algorithm.
+ * Returns the sum of the squared mean and the variance, calculated
+ * between the prediction and the field measurements of this transmitter, 
+ * i.e., the objective function evaluation used by the optimization algorithm.
  *
- * params       a structure holding configuration parameters which are 
- *              common to all transmitters;
- * tx_params    a structure holding transmitter-specific configuration 
- *              parameters;
- * radio_zone   radio zone for which the objective function is calculated;
- * sol_vector   solution vector over which the objective function is calculated;
- * recalculate  whether to recalculate the isotrophic prediction, e.g. for 
- *              clutter optimization there is no need to recalculate the 
- *              prediction in every iteration. This is useful to speed-up 
- *              the process on the CPU;
+ * params           a structure holding configuration parameters which are 
+ *                  common to all transmitters;
+ * tx_params        a structure holding transmitter-specific configuration 
+ *                  parameters;
+ * radio_zone       radio zone for which the objective function is calculated;
+ * sol_vector       solution vector over which the objective function is 
+ *                  calculated;
+ * sol_vector_len   length of the received solution vector;
+ * recalculate      whether to recalculate the isotrophic prediction, e.g. for 
+ *                  clutter optimization there is no need to recalculate the 
+ *                  prediction in every iteration. This is useful to speed-up 
+ *                  the process on the CPU;
+ * clut_opt         whether the solution being evaluated is clutter losses or
+ *                  the E/// parameters.-
  *
  */ 
 static double
@@ -226,17 +230,31 @@ obj_func (Parameters    *params,
           Tx_parameters *tx_params,
           const char     radio_zone,
           const double  *sol_vector,
-          const char     recalculate)
+          const int      sol_vector_len,
+          const char     recalculate,
+          const char     clut_opt)
 {
+    const int Max_meas_count = 102400;
     int r, c;
+    double mean = 0.0, variance = 0.0;
+    double *temp_variance = (double *) calloc (Max_meas_count, 
+                                               sizeof (double));
     double ret_value = 0;
 
     //
-    // copy the solution values to the internal structure,
+    // copy the solution values to the corresponding internal structure,
     // used for coverage calculation
     //
-    for (r = 0; r < params->clutter_category_count; r ++)
-        params->clutter_loss[r] = sol_vector[r];
+    if (clut_opt)
+    {
+        for (r = 0; r < sol_vector_len; r ++)
+            params->clutter_loss[r] = sol_vector[r];
+    }
+    else
+    {
+        for (r = 0; r < sol_vector_len; r ++)
+            tx_params->eric_params[r] = sol_vector[r];
+    }
 
     //
     // recalculate the isotrophic prediction using the received solution
@@ -256,11 +274,11 @@ obj_func (Parameters    *params,
                                      tx_params);
 #ifdef _PERFORMANCE_METRICS_
         measure_time (NULL);
-        measure_time ("Objective function on GPU");
+        measure_time ("Squared-error function on GPU");
 #endif
-        ret_value = obj_func_on_gpu (params,
-                                     tx_params,
-                                     radio_zone);
+        ret_value = squared_error_on_gpu (params,
+                                          tx_params,
+                                          radio_zone);
     }
     else
     {
@@ -289,7 +307,7 @@ obj_func (Parameters    *params,
                 // use only valid path-loss values
                 //
                 double pl = tx_params->m_loss[r][c];
-                if (!isnan (pl))
+                if (pl > 0.0)
                 {
                     //
                     // apply the clutter losses only if the isotrophic 
@@ -311,28 +329,43 @@ obj_func (Parameters    *params,
                     pl += tx_params->m_antenna_loss[r][c];
 
                     //
-                    // look for the target radio zone ...
+                    // look for a field measurement there
                     //
-                    char rz = tx_params->m_radio_zone[r][c];
-                    if ((rz & radio_zone) > 0)
+                    double fm = tx_params->m_field_meas[r][c];
+                    if (!isnan (fm))
                     {
-                        //
-                        // ... and a field measurement there
-                        //
-                        double fm = tx_params->m_field_meas[r][c];
-                        if (!isnan (fm))
+                        //printf ("*** DEBUG: A0...A3 [%.5f, %.5f, %.5f, %.5f], pathloss is [%.5f]\n", tx_params->eric_params[0],
+                        //                                                                             tx_params->eric_params[1],
+                        //                                                                             tx_params->eric_params[2],
+                        //                                                                             tx_params->eric_params[3],
+                        //                                                                             pl);
+                        if (tx_params->field_meas_count == Max_meas_count)
                         {
-                            //
-                            // squared error
-                            //
-                            ret_value += (tx_params->tx_power - pl - fm) *
-                                         (tx_params->tx_power - pl - fm);
-                            tx_params->field_meas_count ++;
+                            fprintf (stderr, 
+                                     "*** ERROR: cannot save all field measurements. Current array size is [%d].\n",
+                                     Max_meas_count);
+                            exit (1);
                         }
+                        mean += (tx_params->tx_power - pl) - fm;
+                        temp_variance[tx_params->field_meas_count] = (tx_params->tx_power - pl) - fm;
+                        tx_params->field_meas_count ++;
                     }
                 }
-            }
+             }
         }
+        mean /= tx_params->field_meas_count;
+        for (r = 0; r < tx_params->field_meas_count; r ++)
+            variance += (temp_variance[r] - mean) * 
+                        (temp_variance[r] - mean);
+        variance /= tx_params->field_meas_count;
+        //
+        // the unified objective-function value for mean and variance
+        //
+        ret_value = mean*mean + variance;
+        //
+        // free allocated memory
+        //
+        free (temp_variance);
     }
 #ifdef _PERFORMANCE_METRICS_
     measure_time (NULL);
@@ -358,6 +391,7 @@ obj_func (Parameters    *params,
  * radio_zone   radio zone under optimization, used for objective calculation;
  * X_low        lower bound of the search vector, should be `D` long;
  * X_up         upper bound of the search vector, should be `D` long;
+ * clut_opt     whether to optimize clutter losses or E/// parameters.-
  *
  */
 static void 
@@ -371,7 +405,8 @@ de (Parameters     *params,
     const char      reset_seed,
     const char      radio_zone,
     const double   *X_low,
-    const double   *X_up)
+    const double   *X_up,
+    const char      clut_opt)
 {
     register int i, j, k, r1, r2, r3, jrand, numofFE = 0;
     int index = -1;
@@ -392,9 +427,9 @@ de (Parameters     *params,
     printf ("NP = %d, Gmax = %d, CR = %.2f, F = %.2f\n",
             NP, Gmax, CR, F);
 
-    printf ("*** INFO: Optimization problem dimension is %d.\n", D);
+    printf ("*** INFO: The dimension of the optimization problem is [%d]\n", D);
 
-    /* Starting timer    */
+    /* Starting timer */
     starttime = clock();
 
 
@@ -417,17 +452,15 @@ de (Parameters     *params,
             popul[i][j] = X_low[j] + (X_up[j] - X_low[j])*URAND;
 
         //
-        // objective function => squared error
+        // objective-function evaluation
         //
         popul[i][D] = obj_func (params,
                                 tx_params,
                                 radio_zone,
                                 popul[i],
-                                1);
-        //
-        // mean-squared error
-        //
-        popul[i][D] /= tx_params->field_meas_count;
+                                D,
+                                1,
+                                clut_opt);
 
         numofFE++;
 
@@ -484,24 +517,28 @@ de (Parameters     *params,
                 U[j] = X_low[j];
             if (U[j] > X_up[j])
                 U[j] = X_up[j];
-        }
+         }
 
         //
-        // objective function => squared error
+        // objective-function evaluation
         //
         U[D] = obj_func (params,
                          tx_params,
                          radio_zone,
                          U,
-                         1);
-        //
-        // mean-squared error
-        //
-        U[D] /= tx_params->field_meas_count;
-
+                         D,
+                         1,
+                         clut_opt);
         numofFE++;
 
         printf ("Generation %d/%d\tscore %20.10f\n", k, Gmax, U[D]);
+
+        /* 
+        // DEBUG - print current solution out
+        //
+        for (j=0; j <= D; j++)
+            printf ("%.3f, ", U[j]);
+        printf ("\n");*/
 
         /* Comparing the trial vector 'U' and the old individual
            'next[i]' and selecting better one to continue in the
@@ -515,7 +552,7 @@ de (Parameters     *params,
         }
         else
         {
-           for (j=0; j <= D; j++)
+           for (j=0; j < D; j++)
                next[i][j] = popul[i][j];
         }
 
@@ -598,31 +635,48 @@ de (Parameters     *params,
  *              solution component may take;
  * search_up    pointer to vector containing the maximum values each 
  *              solution component may take;
+ * clut_opt     whether to optimize the clutter losses or the E///
+ *              parameters.-
  *
  */
 static void 
 init_optimize (Parameters    *params,
                Tx_parameters *tx_params,
                double       **search_low,
-               double       **search_up)
+               double       **search_up,
+               const char     clut_opt)
 {
-    int i;
+    int    i;
+    size_t search_len;
+    double search_min, search_max;
 
     //
     // define lower and upper bounds for each search-vector component,
-    // i.e. solutions should be within these limits
+    // i.e., solutions should be within these limits
     //
-    *search_low = (double *) calloc (params->clutter_category_count,
+    if (clut_opt)
+    {
+        search_len = (size_t) params->clutter_category_count;
+        search_min = 0.0;
+        search_max = 40.0;
+    }
+    else
+    {
+        search_len = (size_t) params->clutter_category_count;
+        search_min = -100.0;
+        search_max = 100.0;
+    }
+    //
+    // apply the above values
+    //
+    *search_low = (double *) calloc (search_len,
                                      sizeof (double));
-    *search_up  = (double *) calloc (params->clutter_category_count,
+    *search_up  = (double *) calloc (search_len,
                                      sizeof (double));
-    //
-    // since we are looking for clutter losses, we define a range 0~40 dB
-    //
-    for (i = 0; i < params->clutter_category_count; i ++)
+    for (i = 0; i < search_len; i ++)
     { 
-        (*search_low)[i] = 0;
-        (*search_up)[i]  = 40;
+        (*search_low)[i] = search_min;
+        (*search_up)[i]  = search_max;
     }
     
     //
@@ -669,11 +723,13 @@ init_optimize (Parameters    *params,
  *              common to all transmitters;
  * tx_params    a structure holding transmitter-specific configuration 
  *              parameters;
+ * clut_opt     whether to optimize the clutter losses or the E/// parameters.-
  *
  */
 void 
 optimize_on_worker (Parameters    *params,
-                    Tx_parameters *tx_params)
+                    Tx_parameters *tx_params,
+                    const char     clut_opt)
 {
     //
     // vectors defining the range of each solution component
@@ -684,7 +740,8 @@ optimize_on_worker (Parameters    *params,
     init_optimize (params,
                    tx_params,
                    &search_low,
-                   &search_up);
+                   &search_up,
+                   clut_opt);
     //
     // calculate parameter approximation for E/// prediction model
     //
@@ -693,16 +750,43 @@ optimize_on_worker (Parameters    *params,
     //
     // ... and its mean-squared error value
     //
-    double score = obj_func (params,
-                             tx_params,
-                             _RADIO_ZONE_MAIN_BEAM_ON_,
-                             params->clutter_loss,
-                             1);
-    score /= tx_params->field_meas_count;
+    double score;
+    double *sol_vector;
+    int    sol_vector_len;
+
+    if (clut_opt)
+    {
+        sol_vector = params->clutter_loss;
+        sol_vector_len = params->clutter_category_count;
+    }
+    else
+    {
+        sol_vector = params->eric_params;
+        sol_vector_len = 4;
+    }
+    score = obj_func (params,
+                      tx_params,
+                      _RADIO_ZONE_MAIN_BEAM_ON_,
+                      sol_vector,
+                      sol_vector_len,
+                      1,
+                      clut_opt);
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
              tx_params->tx_name,
              score);
+
+    //
+    // parameters for the optimization algorithm
+    //
+    int search_len, population_size;
+
+    if (clut_opt)
+        search_len = params->clutter_category_count;
+    else
+        search_len = 4;
+
+    population_size = 20 * search_len;
 
 #ifdef _DEBUG_INFO_
     //
@@ -710,30 +794,32 @@ optimize_on_worker (Parameters    *params,
     //
     de (params,
         tx_params,
-        params->clutter_category_count,
-        params->clutter_category_count,
+        search_len,
+        search_len,
         1,
         0.9,
         0.9,
         0,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
-        search_up);
+        search_up,
+        clut_opt);
 #else
     //
     // start optimization
     //
     de (params,
         tx_params,
-        params->clutter_category_count,
-        20 * params->clutter_category_count,
+        search_len,
+        population_size,
         params->use_opt,
         0.9,
         0.9,
         1,
         _RADIO_ZONE_MAIN_BEAM_ON_,
         search_low,
-        search_up);
+        search_up,
+        clut_opt);
 #endif
     //
     // free reserved buffer
@@ -767,7 +853,7 @@ optimize_from_master (Parameters    *params,
 
     //
     // vector used to send the squared error and the number of
-    // field measurements within the prediciton area (used to
+    // field measurements within the prediction area (used to
     // calculate the mean square error on the master side)
     //
     double score [2];
@@ -784,26 +870,29 @@ optimize_from_master (Parameters    *params,
     init_optimize (params,
                    tx_params,
                    &search_low,
-                   &search_up);
+                   &search_up,
+                   1);
     //
     // calculate parameter approximation for E/// prediction model
     //
     parameter_fine_tuning (params,
                            tx_params);
     //
-    // ... and its squared error value, using the default 
+    // ... and its objective-function value, using the default 
     // clutter-category losses
     //
     score[0] = obj_func (params,
                          tx_params,
                          _RADIO_ZONE_MAIN_BEAM_ON_,
                          params->clutter_loss,
+                         params->clutter_category_count,
+                         1,
                          1);
     score[1] = (double) tx_params->field_meas_count;
     fprintf (stdout, 
              "*** INFO: optimal values for E/// (%s) have score %g\n",
              tx_params->tx_name,
-             score[0] / score[1]);
+             score[0]);
     fflush (stdout);
     //
     // a vector to keep the received solution
@@ -840,13 +929,15 @@ optimize_from_master (Parameters    *params,
         else
         {
             //
-            // calculate the squared error value for this solution ...
+            // calculate the objective-function value for this solution ...
             //
             score[0] = obj_func (params,
                                  tx_params,
                                  _RADIO_ZONE_MAIN_BEAM_ON_,
                                  sol_vector,
-                                 0);
+                                 params->clutter_category_count,
+                                 0,
+                                 1);
             score[1] = (double) tx_params->field_meas_count;
             //
             // ... and send it back to the master process

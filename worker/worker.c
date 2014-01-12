@@ -582,10 +582,18 @@ worker (const int rank,
             }
             else if (params->use_opt)
             {
-                fprintf (stdout, 
-                         "*** INFO: Optimization mode enabled\n");
+                char clut_opt = 0;
+
+                if (clut_opt)
+                    fprintf (stdout, 
+                             "*** INFO: Clutter-optimization mode enabled on the workers\n");
+                else
+                    fprintf (stdout, 
+                             "*** INFO: Parameters-optimization mode enabled on the workers\n");
                 optimize_on_worker (params,
-                                    params->tx_params);
+                                    params->tx_params,
+                                    clut_opt);
+                has_finished = 1;
             }
             else
             {
@@ -598,7 +606,7 @@ worker (const int rank,
                 coverage (params,
                           params->tx_params,
                           rank);
-                //
+                /*
                 // wait for the (possible) previous result dump to finish
                 //
                 if (dump_thread != NULL)
@@ -630,13 +638,13 @@ worker (const int rank,
                              err);
                     fflush (stderr);
                     exit (1);
-                }
+                }*/
                 //
                 // dump the results to the master process
                 //
-                //output_to_master (params,
-                //                  params->tx_params,
-                //                  comm);
+                output_to_master (params,
+                                  params->tx_params,
+                                  comm);
             }
         }
     }

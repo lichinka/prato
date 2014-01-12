@@ -76,10 +76,8 @@
  *                  parameters;
  * ix               northern-coordinate index within the area;
  * iy               eastern-coordinate index within the area;
- * log10Zeff        logarithm of the effective antenna height 
- *                  (output parameter);
- * log10DistBS2MSKm logarithm of the distance between MS and BS in km
- *                  (output parameter);
+   DistBS2MSKm      distance between MS and BS in km;
+ * log10Zeff        logarithm of the effective antenna height (output parameter);
  * nlos             NLOS component of the path-loss formula (output parameter).-
  *
  */
@@ -88,8 +86,8 @@ eric_pathloss_on_point (const Parameters    *params,
                         const Tx_parameters *tx_params,
                         const int           ix,
                         const int           iy,
+                        const double        DistBS2MSKm,
                         double             *log10Zeff,
-                        double             *log10DistBS2MSKm,
                         double             *nlos)
 {
 	int BSxIndex       = tx_params->tx_north_coord_idx;	// position of BS in pixels
@@ -111,10 +109,8 @@ eric_pathloss_on_point (const Parameters    *params,
     double tiltBS2MS;				// (ZoBS-ZoMS)/distBS2MSNorm	
 	double PathLossFreq = 0;	    // path loss due to carrier frequency
 	double PathLossTmp = 0;			// tmp path loss
-	int DiffX, DiffY;
     double Zeff;			        // Difference in X and Y direction
 	double PathLossAntHeightMS;
-	double DistBS2MSKm;
     double DistBS2MSNorm;           // normalized distance between MS and BS
 							
 	double ElevAngCos, Hdot, Ddot, Ddotdot, PathLossDiff;
@@ -130,13 +126,13 @@ eric_pathloss_on_point (const Parameters    *params,
 									/*POPRAVJNEO (4.2.2010)*/	
 	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
 
+    //
     // Path Loss due to Hata model
-    DiffX = (BSxIndex-ix); DiffY = (BSyIndex-iy);
+    //
     // ZoMS = tx_params->m_dem[ix][iy];
     ZoTransMS = tx_params->m_dem[ix][iy]+AntHeightMS;  // ZoMS
     Zeff = ZoTransBS - ZoTransMS;		// ??
-    DistBS2MSKm = sqrt(DiffX*DiffX + DiffY*DiffY)*scale/1000; //sqrt(DiffX*DiffX+DiffY*DiffY+Zeff*Zeff)*scale/1000;			
-    DistBS2MSNorm = sqrt(DiffX*DiffX+DiffY*DiffY);
+    DistBS2MSNorm = (DistBS2MSKm * 1000) / scale;
 
     //height correction due to earth sphere
     Zeff = Zeff + (DistBS2MSKm*DistBS2MSKm)/((6370 * 8000) / 3);
@@ -148,12 +144,11 @@ eric_pathloss_on_point (const Parameters    *params,
     
     *log10Zeff = log10 (fabs (Zeff));
 
-    //*log10DistBS2MSKm=log10(sqrt(DistBS2MSKm*DistBS2MSKm + Zeff/1000 * Zeff/1000));
-    *log10DistBS2MSKm = log10(DistBS2MSKm);			
-
-    PathLossTmp = A0 + A1 * (*log10DistBS2MSKm); 
+    double log10DistBS2MSKm = log10(DistBS2MSKm);			
+    
+    PathLossTmp = A0 + A1 * (log10DistBS2MSKm); 
     PathLossTmp = PathLossTmp + A2 * (*log10Zeff);
-    PathLossTmp = PathLossTmp + A3 * (*log10DistBS2MSKm) * (*log10Zeff);
+    PathLossTmp = PathLossTmp + A3 * (log10DistBS2MSKm) * (*log10Zeff);
     PathLossTmp = PathLossTmp - PathLossAntHeightMS + PathLossFreq;
 
     //
@@ -284,7 +279,7 @@ eric_pathloss_on_point (const Parameters    *params,
             printf ("%d|%d|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f|%20.10f\n",
                     ix,
                     iy,
-                    *log10DistBS2MSKm,
+                    log10DistBS2MSKm,
                     fabs (Zeff),
                     *log10Zeff,
                     *nlos,
@@ -478,7 +473,6 @@ eric_pathloss_on_cpu (Parameters    *params,
 	int     DiffX, DiffY;
     double  nlos;
 	double  log10Zeff;
-	double  log10DistBS2MSKm;
     double  DistBS2MSKm;	// distance between MS and BS in km
 
 #ifdef _PERFORMANCE_METRICS_
@@ -507,8 +501,8 @@ eric_pathloss_on_cpu (Parameters    *params,
                                         tx_params,
                                         ix,
                                         iy,
+                                        DistBS2MSKm,
                                         &log10Zeff,
-                                        &log10DistBS2MSKm,
                                         &nlos);
             }
         }
@@ -545,7 +539,7 @@ parameter_fine_tuning (Parameters    *params,
 	double radi        = params->radius;			    // calculation radius around transmiter
 
     double nlos;
-	double log10Zeff;
+	double log10Ha;
 	double log10DistBS2MSKm;
 	double PathLossFreq = 0;	                        // path loss due to carrier frequency
 	int ix; int iy;	
@@ -556,11 +550,11 @@ parameter_fine_tuning (Parameters    *params,
     //
     // define and initialize matrices for solving the linear system
     // of equations that will return the best-fiting parameters
-    // for the prediction model
+    // for the prediction model (a0 and a1 only)
     //
     //  A x = b
     //
-    const int Dim = 4;
+    const int Dim = 2;
     gsl_matrix *A = gsl_matrix_alloc (Dim, Dim);
     gsl_vector *b = gsl_vector_alloc (Dim);
     double A_data [Dim] [Dim];
@@ -581,6 +575,12 @@ parameter_fine_tuning (Parameters    *params,
 	PathLossAntHeightMS = 3.2*pow(log10(11.75*AntHeightMS),2);
 
     //
+    // these parameters (a2 and a3) are linear combination of the other two (a0 and a1)
+    //
+    tx_params->eric_params[2] = -12.0;
+    tx_params->eric_params[3] = 0.1;
+
+    //
     // reset the counter of valid field measurements
     //
     tx_params->field_meas_count = 0;
@@ -588,6 +588,10 @@ parameter_fine_tuning (Parameters    *params,
 #ifdef _PERFORMANCE_METRICS_
     measure_time ("E/// parameter fine tuning on CPU");
 #endif
+    //
+    // DEBUG
+    //
+    printf ("## pwr\trcv\tlog10Ha\tpl_Ha\tpl_freq\tclut\tnlos\tlog10D\tpl_ant\n");
 	for (ix = 0; ix < xN; ix++)
 	{
 		for (iy = 0; iy < yN; iy++)
@@ -613,57 +617,64 @@ parameter_fine_tuning (Parameters    *params,
                 //
                 if (! isnan (tx_params->m_field_meas[ix][iy]))
                 {
-                    if ((tx_params->m_radio_zone[ix][iy] & _RADIO_ZONE_MAIN_BEAM_ON_) > 0)
-                    {
-                        eric_pathloss_on_point (params,
-                                                tx_params,
-                                                ix,
-                                                iy,
-                                                &log10Zeff,
-                                                &log10DistBS2MSKm,
-                                                &nlos);
-                        //
-                        // valid field measurement and prediction within the user-defined radio zone
-                        //
-                        tx_params->field_meas_count ++;
+                    eric_pathloss_on_point (params,
+                                            tx_params,
+                                            ix,
+                                            iy,
+                                            DistBS2MSKm,
+                                            &log10Ha,
+                                            &nlos);
+                    log10DistBS2MSKm = log10 (DistBS2MSKm);
 
-                        //
-                        // matrix-element accumulation
-                        //
-                        A_data[0][1] += log10DistBS2MSKm;
-                        A_data[0][2] += log10Zeff;
-                        A_data[0][3] += log10DistBS2MSKm * log10Zeff;
+                    //
+                    // constant part of the Hata Open Area formula
+                    //
+                    double HOA_k = tx_params->eric_params[2] * log10Ha +
+                                   tx_params->eric_params[3] * log10DistBS2MSKm * log10Ha -
+                                   PathLossAntHeightMS +
+                                   PathLossFreq;
+                    //
+                    // valid field measurement and prediction within the user-defined radio zone
+                    //
+                    tx_params->field_meas_count ++;
 
-                        A_data[1][0] += log10DistBS2MSKm;
-                        A_data[1][1] += log10DistBS2MSKm * log10DistBS2MSKm;
-                        A_data[1][2] += log10DistBS2MSKm * log10Zeff;
-                        A_data[1][3] += log10DistBS2MSKm * log10DistBS2MSKm * log10Zeff;
+                    //
+                    // A matrix - element accumulation
+                    //
+                    A_data[0][1] += log10DistBS2MSKm;
 
-                        A_data[2][0] += log10Zeff;
-                        A_data[2][1] += log10Zeff * log10DistBS2MSKm;
-                        A_data[2][2] += log10Zeff * log10Zeff;
-                        A_data[2][3] += log10Zeff * log10Zeff * log10DistBS2MSKm;
+                    A_data[1][0] += log10DistBS2MSKm;
+                    A_data[1][1] += log10DistBS2MSKm * log10DistBS2MSKm;
 
-                        A_data[3][0] += log10Zeff * log10DistBS2MSKm;
-                        A_data[3][1] += log10DistBS2MSKm * (log10Zeff * log10DistBS2MSKm);
-                        A_data[3][2] += log10Zeff * (log10Zeff * log10DistBS2MSKm);
-                        A_data[3][3] += (log10Zeff * log10DistBS2MSKm) * (log10Zeff * log10DistBS2MSKm);
+                    //
+                    // b matrix - element accumulation
+                    //
+                    int clutter_category = (int) tx_params->m_clut[ix][iy];
 
-                        int clutter_category = (int) tx_params->m_clut[ix][iy];
-
-                        b_data[0] += tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
-                                  - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
-                                  - tx_params->m_field_meas[ix][iy];
-                        b_data[1] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
-                                  - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
-                                  - tx_params->m_field_meas[ix][iy]) * log10DistBS2MSKm;
-                        b_data[2] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos 
-                                  - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
-                                  - tx_params->m_field_meas[ix][iy]) * log10Zeff;
-                        b_data[3] += (tx_params->tx_power - params->clutter_loss[clutter_category] - nlos
-                                  - tx_params->m_antenna_loss[ix][iy] - (-PathLossAntHeightMS+PathLossFreq) 
-                                  - tx_params->m_field_meas[ix][iy]) * (log10Zeff * log10DistBS2MSKm);
-                    }
+                    b_data[0] += tx_params->tx_power - 
+                                 tx_params->m_field_meas[ix][iy] -
+                                 HOA_k -
+                                 params->clutter_loss[clutter_category] - 
+                                 tx_params->m_antenna_loss[ix][iy] -
+                                 nlos;
+                    b_data[1] += (tx_params->tx_power - 
+                                 tx_params->m_field_meas[ix][iy] -
+                                 HOA_k -
+                                 params->clutter_loss[clutter_category] - 
+                                 tx_params->m_antenna_loss[ix][iy] -
+                                 nlos) * log10DistBS2MSKm;
+                    //
+                    // DEBUG
+                    //
+                    printf ("#%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\t%.5f\n", tx_params->tx_power,
+                                                                                       tx_params->m_field_meas[ix][iy],
+                                                                                       log10Ha,
+                                                                                       PathLossAntHeightMS,
+                                                                                       PathLossFreq,
+                                                                                       params->clutter_loss[clutter_category],
+                                                                                       nlos,
+                                                                                       log10DistBS2MSKm,
+                                                                                       tx_params->m_antenna_loss[ix][iy]);
                 }
             }
 		}
@@ -691,7 +702,6 @@ parameter_fine_tuning (Parameters    *params,
             gsl_matrix_set (A, ix, iy, A_data[ix][iy]);
         gsl_vector_set (b, ix, b_data[ix]);
     }
-
 	//
 	// if the matrix is singular (i.e. its determinant is 0), the system is not solvable
 	//
@@ -731,24 +741,26 @@ parameter_fine_tuning (Parameters    *params,
 				 "*** INFO: found optimal values for E/// (residual is %g)\n", 
 				 residual_norm);
 		for (ix = 0; ix < Dim; ix ++)
-			tx_params->eric_params[ix] = gsl_vector_get (x, ix);
+            if (! isnan (gsl_vector_get (x, ix)))
+			    tx_params->eric_params[ix] = gsl_vector_get (x, ix);
 	}
 	else
 	{
 		fprintf (stderr,
-				 "*** WARNING: Linear system for transmitter %s is not solvable. Using default values.\n",
-				 tx_params->tx_name);
-		tx_params->eric_params[0] = 38.0;
-		tx_params->eric_params[1] = 32.0;
-		tx_params->eric_params[2] = -12.0;
-		tx_params->eric_params[3] = 0.1;
+				 "*** WARNING: Linear system for transmitter [%s] is not solvable. Using [%.2f, %.2f, %.2f, %.2f]\n",
+				 tx_params->tx_name,
+                 tx_params->eric_params[0],
+                 tx_params->eric_params[1],
+                 tx_params->eric_params[2],
+                 tx_params->eric_params[3]);
 	}
+
 	//
 	// display the parameter values for E///
 	//
-	for (ix = 0; ix < Dim; ix ++)
+	for (ix = 0; ix < 4; ix ++)
 		fprintf (stdout,
-				 "\tA%d\t%g\n",
+				 "\tA%d\t%.3f\n",
 				 ix,
 				 tx_params->eric_params[ix]);
 	

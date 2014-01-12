@@ -14,17 +14,22 @@
 
 /**
  * Optimizes the parameters of the prediction model to fit field measurements
- * within different radio zones.
+ * within different radio zones using a deterministic (analytical) approach.
+ * It also optimizes the clutter-category losses using the differential 
+ * evolution (DE) metaheuristic algorithm.
+ * Optimization happens locally, i.e. within the current worker process.
  *
  * params       a structure holding configuration parameters which are 
  *              common to all transmitters;
  * tx_params    a structure holding transmitter-specific configuration 
  *              parameters;
+ * clut_opt     whether to optimize the clutter losses or the E/// parameters.-
  *
  */
 void 
 optimize_on_worker (Parameters    *params,
-                    Tx_parameters *tx_params);
+                    Tx_parameters *tx_params,
+                    const char     clut_opt);
 
 /**
  * Optimizes the parameters of the prediction model to fit field measurements

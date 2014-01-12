@@ -206,8 +206,7 @@ receive_tx_results (Parameters *params,
                 if ((!isnan (rcv_signal)) && (rcv_signal != params->fcell_null_value))
                     fprintf (stdout, "%.2f|%.2f|%.5f\n", east_coord,
                                                          north_coord,
-                                                         rcv_signal);
-                */
+                                                         rcv_signal);*/
             }
         }
     }
@@ -247,6 +246,14 @@ init_coverage_for_tx (FILE          *ini_file,
                             tx_section);
     if (errno < 0)
         G_fatal_error ("Can't parse INI memory buffer\n");
+
+    //
+    // round the Tx coordinates to the map resolution
+    //
+    tx_params->tx_north_coord = (int) (tx_params->tx_north_coord / params->map_ns_res);
+    tx_params->tx_north_coord *= (int) params->map_ns_res;
+    tx_params->tx_east_coord = (int) (tx_params->tx_east_coord / params->map_ew_res);
+    tx_params->tx_east_coord *= (int) params->map_ew_res;
 
     //
     // calculate the subregion (within the area) where this transmitter is 
@@ -626,15 +633,26 @@ optimize_mpi (Parameters *params,
 
             default:
                 fprintf (stderr, 
-                         "WARNING Unknown message from %d. worker\n", 
+                         "*** WARNING: Unknown message from worker with rank [%d]\n", 
                          worker_rank);
         }   
     }
-    fprintf (stdout,
-             "*** INFO: All transmitter data sent. Starting optimization ...\n");
-    optimize_on_master (params,
-                        params->tx_params,
-                        worker_comm);
+    //
+    // optimize locally on the workers or together, evaluating on the master?
+    //
+    if (params->use_master_opt)
+    {
+        fprintf (stdout,
+                 "*** INFO: All transmitter data sent. Starting master optimization ...\n");
+        optimize_on_master (params,
+                            params->tx_params,
+                            worker_comm);
+    }
+    else if (params->use_opt)
+    {
+        fprintf (stdout,
+                 "*** INFO: All transmitter data sent. Starting local optimization on the workers ...\n");
+    }
 }
 
 
@@ -978,7 +996,7 @@ init_mpi (int argc,
     //
     // do we have to start coverage or optimization calculation?
     //
-    if (params->use_master_opt)
+    if (params->use_opt)
         optimize_mpi (params,
                       nworkers,
                       &worker_comm);
