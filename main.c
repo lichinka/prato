@@ -133,7 +133,7 @@ int main (int argc, char **argv)
     master_opt->type = TYPE_INTEGER;
     master_opt->required = NO;
     master_opt->answer = "0";
-    master_opt->label = "Optimize the clutter-category losses globally, i.e. workers calculate only the objective function, for the given number of generations. Implies -t.";
+    master_opt->label = "Optimize the clutter-category losses globally, i.e. workers calculate only the objective function, for the given number of generations. Implies -m.";
 
     //
     // ... and parse them
@@ -175,13 +175,17 @@ int main (int argc, char **argv)
                  "*** INFO: GPU hardware will be used on the workers, if available\n");
     }
     if (params->use_master_opt)
+    {
         params->use_opt = params->use_master_opt;
-
-    if (params->use_opt)
+        use_mpi->answer = 1;
+        fprintf (stdout, 
+                 "*** INFO: Master-optimization mode enabled\n");
+    }
+    else if (params->use_opt)
     {
         use_mpi->answer = 1;
         fprintf (stdout, 
-                 "*** INFO: Optimization mode enabled\n");
+                 "*** INFO: Worker-optimization mode enabled\n");
     }
 
     //
