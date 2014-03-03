@@ -126,7 +126,7 @@ int main (int argc, char **argv)
     worker_opt->type = TYPE_INTEGER;
     worker_opt->required = NO;
     worker_opt->answer = "0";
-    worker_opt->label = "Optimize the clutter-category losses locally, i.e. per worker, for the given number of generations. Implies -m.";
+    worker_opt->label = "Optimize the radio-propagation parameters locally, i.e., per worker, for the given number of generations. Implies -m.";
 
     master_opt = G_define_option ( );
     master_opt->key = "p";

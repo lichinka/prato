@@ -7,4 +7,5 @@ r.coverage
 *.o
 *.so
 *.pyc
+*.ini
 .*.swp

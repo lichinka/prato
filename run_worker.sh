@@ -3,7 +3,7 @@
 REDIR=$1
 RUN_DIR="${HOME}/etc/dr/tun_par/prato/src"
 #CMD="valgrind --leak-check=yes ${RUN_DIR}/worker/worker"
-CMD="${RUN_DIR}/worker/worker"
+CMD="nice -n19 ${RUN_DIR}/worker/worker"
 PSQL_SERVER=k1
 PSQL_USER=grassuser
 PSQL_DB=grass
@@ -32,7 +32,7 @@ else
             ${CMD} > /tmp/worker.${WID}.log 2>&1
         else
             echo "Usage: $0 [-] [-db] [-rast]"
-            echo "Starts a worker process, writing its results to stdout."
+            echo "Starts a worker process, redirecting its results."
             echo
             echo " -		redirects output to stdout"
             echo " -db		redirects output to the database server"
